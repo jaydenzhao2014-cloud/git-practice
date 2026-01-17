@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Shooter Arena</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* LOBBY SCREEN */
+        #lobby {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .lobby-title {
+            font-size: 64px;
+            font-weight: bold;
+            text-shadow: 0 0 20px #00ff88, 0 0 40px #00ff88;
+            color: #00ff88;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .money-display {
+            font-size: 32px;
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffd700;
+        }
+
+        .lobby-buttons {
+            display: flex;
+            gap: 30px;
+        }
+
+        .btn {
+            padding: 20px 50px;
+            font-size: 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .btn-match {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a5a);
+            color: white;
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.5);
+        }
+
+        .btn-match:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.7);
+        }
+
+        .btn-shop {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            box-shadow: 0 5px 20px rgba(78, 205, 196, 0.5);
+        }
+
+        .btn-shop:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.7);
+        }
+
+        .owned-guns {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .owned-guns h3 {
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+
+        .gun-list {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .gun-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        /* SHOP SCREEN */
+        #shop {
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .shop-header {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .shop-title {
+            font-size: 48px;
+            color: #4ecdc4;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .shop-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .shop-item:hover {
+            border-color: #4ecdc4;
+            transform: scale(1.02);
+        }
+
+        .shop-item.owned {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .gun-image {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        .gun-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .gun-stats {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+
+        .gun-price {
+            font-size: 20px;
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+
+        .btn-buy {
+            padding: 10px 30px;
+            background: #ffd700;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-buy:hover {
+            background: #ffed4a;
+        }
+
+        .btn-buy:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .btn-back {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        /* MODE SELECT SCREEN */
+        #modeSelect {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .mode-title {
+            font-size: 48px;
+            color: #ff6b6b;
+        }
+
+        .mode-buttons {
+            display: flex;
+            gap: 30px;
+        }
+
+        .btn-mode {
+            padding: 40px 60px;
+            font-size: 32px;
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-mode:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 40px rgba(245, 87, 108, 0.5);
+        }
+
+        /* GAME SCREEN */
+        #game {
+            flex-direction: column;
+        }
+
+        .game-hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 15px 30px;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .team-score {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .team-blue { color: #4ecdc4; }
+        .team-red { color: #ff6b6b; }
+
+        .gun-slots {
+            display: flex;
+            gap: 10px;
+        }
+
+        .gun-slot {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid #444;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .gun-slot.active {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.2);
+        }
+
+        .gun-slot .key {
+            font-size: 10px;
+            color: #888;
+        }
+
+        .gun-slot .icon {
+            font-size: 24px;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* VICTORY SCREEN */
+        #victory {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+        }
+
+        .victory-text {
+            font-size: 72px;
+            font-weight: bold;
+            animation: rainbow 2s linear infinite;
+        }
+
+        @keyframes rainbow {
+            0% { color: #ff6b6b; }
+            25% { color: #ffd700; }
+            50% { color: #00ff88; }
+            75% { color: #4ecdc4; }
+            100% { color: #ff6b6b; }
+        }
+
+        .defeat-text {
+            font-size: 72px;
+            font-weight: bold;
+            color: #ff4444;
+            text-shadow: 0 0 20px #ff0000;
+        }
+
+        .reward-text {
+            font-size: 36px;
+            color: #ffd700;
+        }
+
+        .dancer {
+            font-size: 120px;
+            animation: dance 0.5s infinite;
+        }
+
+        @keyframes dance {
+            0%, 100% { transform: rotate(-10deg) translateY(0); }
+            25% { transform: rotate(10deg) translateY(-20px); }
+            50% { transform: rotate(-10deg) translateY(0); }
+            75% { transform: rotate(10deg) translateY(-20px); }
+        }
+
+        .controls-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOBBY SCREEN -->
+    <div id="lobby" class="screen active">
+        <h1 class="lobby-title">SHOOTER ARENA</h1>
+        <div class="money-display">$<span id="moneyDisplay">100</span></div>
+        <div class="lobby-buttons">
+            <button class="btn btn-match" onclick="showModeSelect()">MATCH</button>
+            <button class="btn btn-shop" onclick="showShop()">SHOP</button>
+        </div>
+        <div class="owned-guns">
+            <h3>Your Arsenal:</h3>
+            <div class="gun-list" id="ownedGunsList"></div>
+        </div>
+    </div>
+
+    <!-- SHOP SCREEN -->
+    <div id="shop" class="screen">
+        <div class="shop-header">
+            <h1 class="shop-title">GUN SHOP</h1>
+            <div class="money-display">$<span id="shopMoneyDisplay">100</span></div>
+            <button class="btn btn-back" onclick="showLobby()">BACK</button>
+        </div>
+        <div class="shop-grid" id="shopGrid"></div>
+    </div>
+
+    <!-- MODE SELECT SCREEN -->
+    <div id="modeSelect" class="screen">
+        <h1 class="mode-title">SELECT MODE</h1>
+        <div class="mode-buttons">
+            <button class="btn-mode" onclick="startGame(1)">1v1</button>
+            <button class="btn-mode" onclick="startGame(2)">2v2</button>
+            <button class="btn-mode" onclick="startGame(3)">3v3</button>
+        </div>
+        <button class="btn btn-back" onclick="showLobby()">BACK</button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game" class="screen">
+        <div class="game-hud">
+            <div class="team-score team-blue">BLUE: <span id="blueScore">0</span></div>
+            <div class="gun-slots" id="gunSlots"></div>
+            <div class="team-score team-red">RED: <span id="redScore">0</span></div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div class="controls-hint">WASD to move | 1-4 to switch guns | Click to shoot | Kill enemies to win!</div>
+    </div>
+
+    <!-- VICTORY SCREEN -->
+    <div id="victory" class="screen">
+        <div class="dancer" id="dancerEmoji"></div>
+        <h1 id="resultText" class="victory-text">VICTORY!</h1>
+        <div id="rewardText" class="reward-text"></div>
+        <button class="btn btn-match" onclick="showLobby()">BACK TO LOBBY</button>
+    </div>
+
+    <script>
+        // Game State
+        let money = 100;
+        let ownedGuns = ['pistol'];
+        let selectedGuns = ['pistol', null, null, null];
+        let currentGunIndex = 0;
+        let gameMode = 1;
+
+        // Gun Data
+        const guns = {
+            pistol: { name: 'Pistol', icon: '🔫', price: 0, damage: 15, fireRate: 400, bulletSpeed: 12, color: '#888' },
+            smg: { name: 'SMG', icon: '🔫', price: 30, damage: 10, fireRate: 100, bulletSpeed: 14, color: '#4ecdc4' },
+            shotgun: { name: 'Shotgun', icon: '🔫', price: 50, damage: 8, fireRate: 800, bulletSpeed: 10, spread: 5, color: '#ff6b6b' },
+            rifle: { name: 'Rifle', icon: '🎯', price: 75, damage: 35, fireRate: 600, bulletSpeed: 18, color: '#ffd700' },
+            sniper: { name: 'Sniper', icon: '🎯', price: 100, damage: 80, fireRate: 1200, bulletSpeed: 25, color: '#9b59b6' },
+            minigun: { name: 'Minigun', icon: '🔥', price: 150, damage: 8, fireRate: 50, bulletSpeed: 15, color: '#e74c3c' },
+            launcher: { name: 'Launcher', icon: '💥', price: 200, damage: 100, fireRate: 1500, bulletSpeed: 8, explosive: true, color: '#e67e22' },
+            laser: { name: 'Laser Gun', icon: '⚡', price: 250, damage: 25, fireRate: 80, bulletSpeed: 30, color: '#00ff88' }
+        };
+
+        // Canvas and Game Variables
+        let canvas, ctx;
+        let gameRunning = false;
+        let players = [];
+        let bullets = [];
+        let platforms = [];
+        let blueKills = 0;
+        let redKills = 0;
+        const KILLS_TO_WIN = 10;
+
+        // Update displays
+        function updateMoneyDisplay() {
+            document.getElementById('moneyDisplay').textContent = money;
+            document.getElementById('shopMoneyDisplay').textContent = money;
+        }
+
+        function updateOwnedGunsList() {
+            const list = document.getElementById('ownedGunsList');
+            list.innerHTML = ownedGuns.map(g => `<span class="gun-badge">${guns[g].icon} ${guns[g].name}</span>`).join('');
+        }
+
+        function updateShop() {
+            const grid = document.getElementById('shopGrid');
+            grid.innerHTML = '';
+            for (const [key, gun] of Object.entries(guns)) {
+                const owned = ownedGuns.includes(key);
+                const canAfford = money >= gun.price;
+                grid.innerHTML += `
+                    <div class="shop-item ${owned ? 'owned' : ''}">
+                        <div class="gun-image">${gun.icon}</div>
+                        <div class="gun-name">${gun.name}</div>
+                        <div class="gun-stats">DMG: ${gun.damage} | Rate: ${Math.round(1000/gun.fireRate)}/s</div>
+                        <div class="gun-price">${gun.price === 0 ? 'FREE' : '$' + gun.price}</div>
+                        <button class="btn-buy" ${owned || !canAfford ? 'disabled' : ''} onclick="buyGun('${key}')">
+                            ${owned ? 'OWNED' : (canAfford ? 'BUY' : 'NEED $' + (gun.price - money))}
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function buyGun(gunKey) {
+            if (money >= guns[gunKey].price && !ownedGuns.includes(gunKey)) {
+                money -= guns[gunKey].price;
+                ownedGuns.push(gunKey);
+                // Auto-equip to next empty slot
+                for (let i = 0; i < 4; i++) {
+                    if (!selectedGuns[i]) {
+                        selectedGuns[i] = gunKey;
+                        break;
+                    }
+                }
+                updateMoneyDisplay();
+                updateShop();
+                updateOwnedGunsList();
+            }
+        }
+
+        // Screen Navigation
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function showLobby() {
+            gameRunning = false;
+            showScreen('lobby');
+            updateMoneyDisplay();
+            updateOwnedGunsList();
+        }
+
+        function showShop() {
+            showScreen('shop');
+            updateShop();
+        }
+
+        function showModeSelect() {
+            showScreen('modeSelect');
+        }
+
+        function updateGunSlots() {
+            const slots = document.getElementById('gunSlots');
+            slots.innerHTML = '';
+            for (let i = 0; i < 4; i++) {
+                const gun = selectedGuns[i] ? guns[selectedGuns[i]] : null;
+                slots.innerHTML += `
+                    <div class="gun-slot ${i === currentGunIndex ? 'active' : ''}">
+                        <span class="key">${i + 1}</span>
+                        <span class="icon">${gun ? gun.icon : '-'}</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Game Logic
+        function startGame(mode) {
+            gameMode = mode;
+            showScreen('game');
+
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // Reset game state
+            players = [];
+            bullets = [];
+            blueKills = 0;
+            redKills = 0;
+            currentGunIndex = 0;
+            gameRunning = true;
+
+            // Create platforms
+            createPlatforms();
+
+            // Create player (you)
+            const player = createPlayer(100, 100, 'blue', true);
+            players.push(player);
+
+            // Create blue team AI
+            for (let i = 1; i < mode; i++) {
+                players.push(createPlayer(150 + i * 100, 100, 'blue', false));
+            }
+
+            // Create red team AI
+            for (let i = 0; i < mode; i++) {
+                players.push(createPlayer(canvas.width - 150 - i * 100, 100, 'red', false));
+            }
+
+            updateGunSlots();
+            document.getElementById('blueScore').textContent = '0';
+            document.getElementById('redScore').textContent = '0';
+
+            // Start game loop
+            requestAnimationFrame(gameLoop);
+        }
+
+        function createPlatforms() {
+            platforms = [];
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // Ground
+            platforms.push({ x: 0, y: h - 50, width: w, height: 50 });
+
+            // Random platforms
+            platforms.push({ x: 100, y: h - 200, width: 200, height: 20 });
+            platforms.push({ x: w - 300, y: h - 200, width: 200, height: 20 });
+            platforms.push({ x: w/2 - 150, y: h - 300, width: 300, height: 20 });
+            platforms.push({ x: 50, y: h - 400, width: 150, height: 20 });
+            platforms.push({ x: w - 200, y: h - 400, width: 150, height: 20 });
+            platforms.push({ x: w/2 - 100, y: h - 500, width: 200, height: 20 });
+            platforms.push({ x: 200, y: h - 550, width: 120, height: 20 });
+            platforms.push({ x: w - 320, y: h - 550, width: 120, height: 20 });
+        }
+
+        function createPlayer(x, y, team, isHuman) {
+            return {
+                x, y,
+                vx: 0,
+                vy: 0,
+                width: 40,
+                height: 60,
+                team,
+                isHuman,
+                health: 100,
+                maxHealth: 100,
+                gunIndex: 0,
+                lastShot: 0,
+                facingRight: team === 'blue',
+                onGround: false,
+                respawnTimer: 0,
+                alive: true,
+                // AI properties
+                targetEnemy: null,
+                aiDecisionTimer: 0,
+                aiJumpTimer: 0,
+                aiMoveDir: 0
+            };
+        }
+
+        // Input handling
+        const keys = {};
+        let mouseX = 0, mouseY = 0;
+        let mouseDown = false;
+
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+            // Gun switching
+            if (e.key >= '1' && e.key <= '4') {
+                const idx = parseInt(e.key) - 1;
+                if (selectedGuns[idx]) {
+                    currentGunIndex = idx;
+                    updateGunSlots();
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        document.addEventListener('mousedown', () => mouseDown = true);
+        document.addEventListener('mouseup', () => mouseDown = false);
+
+        function gameLoop(timestamp) {
+            if (!gameRunning) return;
+
+            // Clear
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw background
+            drawBackground();
+
+            // Draw platforms
+            ctx.fillStyle = '#2d3436';
+            platforms.forEach(p => {
+                ctx.fillRect(p.x, p.y, p.width, p.height);
+                ctx.strokeStyle = '#636e72';
+                ctx.strokeRect(p.x, p.y, p.width, p.height);
+            });
+
+            // Update and draw players
+            players.forEach(player => {
+                if (player.alive) {
+                    if (player.isHuman) {
+                        updateHumanPlayer(player, timestamp);
+                    } else {
+                        updateAIPlayer(player, timestamp);
+                    }
+                    updatePlayerPhysics(player);
+                    drawPlayer(player);
+                } else {
+                    player.respawnTimer -= 16;
+                    if (player.respawnTimer <= 0) {
+                        respawnPlayer(player);
+                    }
+                }
+            });
+
+            // Update and draw bullets
+            updateBullets();
+            drawBullets();
+
+            // Check win condition
+            if (blueKills >= KILLS_TO_WIN || redKills >= KILLS_TO_WIN) {
+                endGame(blueKills >= KILLS_TO_WIN);
+                return;
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function drawBackground() {
+            // Stars
+            ctx.fillStyle = '#ffffff';
+            for (let i = 0; i < 50; i++) {
+                const x = (i * 137) % canvas.width;
+                const y = (i * 89) % (canvas.height - 200);
+                ctx.beginPath();
+                ctx.arc(x, y, 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function updateHumanPlayer(player, timestamp) {
+            // Movement
+            if (keys['a']) player.vx = -5;
+            else if (keys['d']) player.vx = 5;
+            else player.vx = 0;
+
+            // Jump
+            if ((keys['w'] || keys[' ']) && player.onGround) {
+                player.vy = -15;
+                player.onGround = false;
+            }
+
+            // Facing direction
+            player.facingRight = mouseX > player.x + player.width / 2;
+
+            // Shooting
+            const currentGun = guns[selectedGuns[currentGunIndex]];
+            if (mouseDown && currentGun && timestamp - player.lastShot > currentGun.fireRate) {
+                shoot(player, currentGun, mouseX, mouseY);
+                player.lastShot = timestamp;
+            }
+        }
+
+        function updateAIPlayer(player, timestamp) {
+            player.aiDecisionTimer -= 16;
+
+            if (player.aiDecisionTimer <= 0) {
+                player.aiDecisionTimer = 200 + Math.random() * 300;
+
+                // Find closest enemy
+                let closestEnemy = null;
+                let closestDist = Infinity;
+                players.forEach(p => {
+                    if (p.team !== player.team && p.alive) {
+                        const dist = Math.hypot(p.x - player.x, p.y - player.y);
+                        if (dist < closestDist) {
+                            closestDist = dist;
+                            closestEnemy = p;
+                        }
+                    }
+                });
+                player.targetEnemy = closestEnemy;
+
+                // Decide movement
+                if (closestEnemy) {
+                    if (closestEnemy.x < player.x - 100) player.aiMoveDir = -1;
+                    else if (closestEnemy.x > player.x + 100) player.aiMoveDir = 1;
+                    else player.aiMoveDir = Math.random() > 0.5 ? 1 : -1;
+                } else {
+                    player.aiMoveDir = Math.random() > 0.5 ? 1 : -1;
+                }
+            }
+
+            // Apply movement
+            player.vx = player.aiMoveDir * 4;
+            player.facingRight = player.vx > 0;
+
+            // Random jumping
+            player.aiJumpTimer -= 16;
+            if (player.aiJumpTimer <= 0 && player.onGround) {
+                if (Math.random() > 0.7) {
+                    player.vy = -15;
+                    player.onGround = false;
+                }
+                player.aiJumpTimer = 500 + Math.random() * 1000;
+            }
+
+            // Shooting
+            if (player.targetEnemy) {
+                player.facingRight = player.targetEnemy.x > player.x;
+                const aiGun = guns[ownedGuns[Math.floor(Math.random() * ownedGuns.length)]] || guns.pistol;
+                if (timestamp - player.lastShot > aiGun.fireRate + Math.random() * 200) {
+                    const targetX = player.targetEnemy.x + player.targetEnemy.width/2 + (Math.random() - 0.5) * 50;
+                    const targetY = player.targetEnemy.y + player.targetEnemy.height/2 + (Math.random() - 0.5) * 50;
+                    shoot(player, aiGun, targetX, targetY);
+                    player.lastShot = timestamp;
+                }
+            }
+        }
+
+        function updatePlayerPhysics(player) {
+            // Gravity
+            player.vy += 0.6;
+
+            // Apply velocity
+            player.x += player.vx;
+            player.y += player.vy;
+
+            // Platform collision
+            player.onGround = false;
+            platforms.forEach(p => {
+                if (player.x + player.width > p.x &&
+                    player.x < p.x + p.width &&
+                    player.y + player.height > p.y &&
+                    player.y + player.height < p.y + p.height + 20 &&
+                    player.vy > 0) {
+                    player.y = p.y - player.height;
+                    player.vy = 0;
+                    player.onGround = true;
+                }
+            });
+
+            // Screen bounds
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+            if (player.y > canvas.height) {
+                player.health = 0;
+                checkPlayerDeath(player);
+            }
+        }
+
+        function drawPlayer(player) {
+            const cx = player.x + player.width / 2;
+            const cy = player.y + player.height / 2;
+
+            // Body
+            ctx.fillStyle = player.team === 'blue' ? '#4ecdc4' : '#ff6b6b';
+            ctx.fillRect(player.x + 5, player.y + 20, 30, 40);
+
+            // Head
+            ctx.beginPath();
+            ctx.arc(cx, player.y + 12, 15, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Gun
+            const gunLength = 25;
+            const gunY = player.y + 35;
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            if (player.facingRight) {
+                ctx.moveTo(cx, gunY);
+                ctx.lineTo(cx + gunLength, gunY);
+            } else {
+                ctx.moveTo(cx, gunY);
+                ctx.lineTo(cx - gunLength, gunY);
+            }
+            ctx.stroke();
+
+            // Health bar
+            const healthWidth = 40;
+            const healthHeight = 5;
+            ctx.fillStyle = '#333';
+            ctx.fillRect(player.x, player.y - 15, healthWidth, healthHeight);
+            ctx.fillStyle = player.health > 30 ? '#00ff88' : '#ff4444';
+            ctx.fillRect(player.x, player.y - 15, healthWidth * (player.health / player.maxHealth), healthHeight);
+
+            // Player indicator
+            if (player.isHuman) {
+                ctx.fillStyle = '#ffd700';
+                ctx.font = '12px Arial';
+                ctx.fillText('YOU', player.x + 8, player.y - 20);
+            }
+        }
+
+        function shoot(player, gun, targetX, targetY) {
+            const startX = player.x + player.width / 2 + (player.facingRight ? 25 : -25);
+            const startY = player.y + 35;
+
+            const angle = Math.atan2(targetY - startY, targetX - startX);
+
+            const spreadCount = gun.spread || 1;
+            for (let i = 0; i < spreadCount; i++) {
+                const spreadAngle = angle + (gun.spread ? (Math.random() - 0.5) * 0.5 : 0);
+                bullets.push({
+                    x: startX,
+                    y: startY,
+                    vx: Math.cos(spreadAngle) * gun.bulletSpeed,
+                    vy: Math.sin(spreadAngle) * gun.bulletSpeed,
+                    damage: gun.damage,
+                    team: player.team,
+                    color: gun.color,
+                    explosive: gun.explosive,
+                    size: gun.explosive ? 8 : 4
+                });
+            }
+        }
+
+        function updateBullets() {
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const bullet = bullets[i];
+                bullet.x += bullet.vx;
+                bullet.y += bullet.vy;
+
+                // Remove if off screen
+                if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
+                    bullets.splice(i, 1);
+                    continue;
+                }
+
+                // Platform collision
+                let hitPlatform = false;
+                platforms.forEach(p => {
+                    if (bullet.x > p.x && bullet.x < p.x + p.width &&
+                        bullet.y > p.y && bullet.y < p.y + p.height) {
+                        hitPlatform = true;
+                    }
+                });
+                if (hitPlatform) {
+                    if (bullet.explosive) {
+                        // Explosion damage
+                        players.forEach(player => {
+                            const dist = Math.hypot(player.x + player.width/2 - bullet.x, player.y + player.height/2 - bullet.y);
+                            if (dist < 80 && player.team !== bullet.team && player.alive) {
+                                player.health -= bullet.damage * (1 - dist/80);
+                                checkPlayerDeath(player);
+                            }
+                        });
+                    }
+                    bullets.splice(i, 1);
+                    continue;
+                }
+
+                // Player collision
+                for (const player of players) {
+                    if (player.team !== bullet.team && player.alive &&
+                        bullet.x > player.x && bullet.x < player.x + player.width &&
+                        bullet.y > player.y && bullet.y < player.y + player.height) {
+
+                        if (bullet.explosive) {
+                            // Explosion
+                            players.forEach(p => {
+                                const dist = Math.hypot(p.x + p.width/2 - bullet.x, p.y + p.height/2 - bullet.y);
+                                if (dist < 80 && p.team !== bullet.team && p.alive) {
+                                    p.health -= bullet.damage * (1 - dist/80);
+                                    checkPlayerDeath(p);
+                                }
+                            });
+                        } else {
+                            player.health -= bullet.damage;
+                            checkPlayerDeath(player);
+                        }
+                        bullets.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+        }
+
+        function checkPlayerDeath(player) {
+            if (player.health <= 0 && player.alive) {
+                player.alive = false;
+                player.respawnTimer = 3000;
+
+                if (player.team === 'blue') {
+                    redKills++;
+                    document.getElementById('redScore').textContent = redKills;
+                } else {
+                    blueKills++;
+                    document.getElementById('blueScore').textContent = blueKills;
+                }
+            }
+        }
+
+        function respawnPlayer(player) {
+            player.alive = true;
+            player.health = player.maxHealth;
+            if (player.team === 'blue') {
+                player.x = 100 + Math.random() * 200;
+            } else {
+                player.x = canvas.width - 300 + Math.random() * 200;
+            }
+            player.y = 100;
+            player.vx = 0;
+            player.vy = 0;
+        }
+
+        function drawBullets() {
+            bullets.forEach(bullet => {
+                ctx.fillStyle = bullet.color;
+                ctx.beginPath();
+                ctx.arc(bullet.x, bullet.y, bullet.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Trail
+                ctx.strokeStyle = bullet.color;
+                ctx.globalAlpha = 0.3;
+                ctx.beginPath();
+                ctx.moveTo(bullet.x, bullet.y);
+                ctx.lineTo(bullet.x - bullet.vx * 2, bullet.y - bullet.vy * 2);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            });
+        }
+
+        function endGame(playerWon) {
+            gameRunning = false;
+            showScreen('victory');
+
+            const resultText = document.getElementById('resultText');
+            const rewardText = document.getElementById('rewardText');
+            const dancer = document.getElementById('dancerEmoji');
+
+            if (playerWon) {
+                resultText.className = 'victory-text';
+                resultText.textContent = 'VICTORY!';
+                rewardText.textContent = '+$20 Reward!';
+                dancer.textContent = '🕺';
+                dancer.style.display = 'block';
+                money += 20;
+            } else {
+                resultText.className = 'defeat-text';
+                resultText.textContent = 'DEFEAT';
+                rewardText.textContent = 'Better luck next time!';
+                dancer.style.display = 'none';
+            }
+        }
+
+        // Initialize
+        updateMoneyDisplay();
+        updateOwnedGunsList();
+    </script>
+</body>
+</html>
