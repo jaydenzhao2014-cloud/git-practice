@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2D Shooter Arena</title>
+    <title>RIVALS</title>
     <style>
         * {
             margin: 0;
@@ -38,11 +38,44 @@
         }
 
         .lobby-title {
-            font-size: 64px;
+            font-size: 100px;
             font-weight: bold;
-            text-shadow: 0 0 20px #00ff88, 0 0 40px #00ff88;
-            color: #00ff88;
-            animation: pulse 2s infinite;
+            text-shadow: 0 0 20px #ff4444, 0 0 40px #ff4444, 0 0 60px #ff0000;
+            color: #ff4444;
+            animation: titleGlow 2s infinite;
+            letter-spacing: 15px;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+        }
+
+        .rivals-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rivals-icon {
+            font-size: 80px;
+            display: flex;
+            gap: 30px;
+        }
+
+        .rivals-tagline {
+            font-size: 18px;
+            color: #888;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% {
+                transform: scale(1);
+                text-shadow: 0 0 20px #ff4444, 0 0 40px #ff4444, 0 0 60px #ff0000;
+            }
+            50% {
+                transform: scale(1.02);
+                text-shadow: 0 0 30px #ff6666, 0 0 60px #ff4444, 0 0 80px #ff0000, 0 0 100px #ff0000;
+            }
         }
 
         @keyframes pulse {
@@ -92,6 +125,17 @@
         .btn-shop:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(78, 205, 196, 0.7);
+        }
+
+        .btn-skins {
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+            color: white;
+            box-shadow: 0 5px 20px rgba(155, 89, 182, 0.5);
+        }
+
+        .btn-skins:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(155, 89, 182, 0.7);
         }
 
         .owned-guns {
@@ -163,6 +207,44 @@
         .shop-item.owned {
             border-color: #00ff88;
             background: rgba(0, 255, 136, 0.1);
+        }
+
+        .shop-item.selected {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .skin-preview {
+            width: 80px;
+            height: 120px;
+            margin: 0 auto 10px;
+            position: relative;
+        }
+
+        .shop-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 10px 30px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid #444;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: #4ecdc4;
+            border-color: #4ecdc4;
+        }
+
+        .tab-btn:hover {
+            border-color: #4ecdc4;
         }
 
         .gun-image {
@@ -375,11 +457,19 @@
 <body>
     <!-- LOBBY SCREEN -->
     <div id="lobby" class="screen active">
-        <h1 class="lobby-title">SHOOTER ARENA</h1>
+        <div class="rivals-logo">
+            <div class="rivals-icon">
+                <span>&#9876;</span>
+                <span>&#9876;</span>
+            </div>
+            <h1 class="lobby-title">RIVALS</h1>
+            <div class="rivals-tagline">Fight for glory</div>
+        </div>
         <div class="money-display">$<span id="moneyDisplay">100</span></div>
         <div class="lobby-buttons">
             <button class="btn btn-match" onclick="showModeSelect()">MATCH</button>
-            <button class="btn btn-shop" onclick="showShop()">SHOP</button>
+            <button class="btn btn-shop" onclick="showShop('guns')">GUNS</button>
+            <button class="btn btn-skins" onclick="showShop('skins')">SKINS</button>
         </div>
         <div class="owned-guns">
             <h3>Your Arsenal:</h3>
@@ -390,9 +480,13 @@
     <!-- SHOP SCREEN -->
     <div id="shop" class="screen">
         <div class="shop-header">
-            <h1 class="shop-title">GUN SHOP</h1>
+            <h1 class="shop-title" id="shopTitle">GUN SHOP</h1>
             <div class="money-display">$<span id="shopMoneyDisplay">100</span></div>
             <button class="btn btn-back" onclick="showLobby()">BACK</button>
+        </div>
+        <div class="shop-tabs">
+            <button class="tab-btn active" id="tabGuns" onclick="switchShopTab('guns')">GUNS</button>
+            <button class="tab-btn" id="tabSkins" onclick="switchShopTab('skins')">SKINS</button>
         </div>
         <div class="shop-grid" id="shopGrid"></div>
     </div>
@@ -434,17 +528,34 @@
         let selectedGuns = ['pistol', null, null, null];
         let currentGunIndex = 0;
         let gameMode = 1;
+        let currentShopTab = 'guns';
+        let selectedSkin = 'default';
+        let ownedSkins = ['default'];
 
-        // Gun Data
+        // Skin Data
+        const skins = {
+            default: { name: 'Default', price: 0, bodyColor: '#4ecdc4', headColor: '#4ecdc4', outlineColor: '#2d9c94' },
+            shadow: { name: 'Shadow', price: 25, bodyColor: '#2c3e50', headColor: '#34495e', outlineColor: '#1a252f' },
+            flame: { name: 'Flame', price: 40, bodyColor: '#e74c3c', headColor: '#c0392b', outlineColor: '#922b21' },
+            gold: { name: 'Gold', price: 60, bodyColor: '#f1c40f', headColor: '#f39c12', outlineColor: '#d68910' },
+            neon: { name: 'Neon Pink', price: 50, bodyColor: '#ff00ff', headColor: '#ff66ff', outlineColor: '#cc00cc' },
+            ice: { name: 'Ice', price: 45, bodyColor: '#00d4ff', headColor: '#66e0ff', outlineColor: '#00a3cc' },
+            toxic: { name: 'Toxic', price: 55, bodyColor: '#39ff14', headColor: '#7fff00', outlineColor: '#2db811' },
+            galaxy: { name: 'Galaxy', price: 80, bodyColor: '#9b59b6', headColor: '#8e44ad', outlineColor: '#6c3483' },
+            lava: { name: 'Lava', price: 70, bodyColor: '#ff4500', headColor: '#ff6347', outlineColor: '#cc3700' },
+            diamond: { name: 'Diamond', price: 100, bodyColor: '#b9f2ff', headColor: '#e0ffff', outlineColor: '#87ceeb' }
+        };
+
+        // Gun Data with gun shapes
         const guns = {
-            pistol: { name: 'Pistol', icon: '🔫', price: 0, damage: 15, fireRate: 400, bulletSpeed: 12, color: '#888' },
-            smg: { name: 'SMG', icon: '🔫', price: 30, damage: 10, fireRate: 100, bulletSpeed: 14, color: '#4ecdc4' },
-            shotgun: { name: 'Shotgun', icon: '🔫', price: 50, damage: 8, fireRate: 800, bulletSpeed: 10, spread: 5, color: '#ff6b6b' },
-            rifle: { name: 'Rifle', icon: '🎯', price: 75, damage: 35, fireRate: 600, bulletSpeed: 18, color: '#ffd700' },
-            sniper: { name: 'Sniper', icon: '🎯', price: 100, damage: 80, fireRate: 1200, bulletSpeed: 25, color: '#9b59b6' },
-            minigun: { name: 'Minigun', icon: '🔥', price: 150, damage: 8, fireRate: 50, bulletSpeed: 15, color: '#e74c3c' },
-            launcher: { name: 'Launcher', icon: '💥', price: 200, damage: 100, fireRate: 1500, bulletSpeed: 8, explosive: true, color: '#e67e22' },
-            laser: { name: 'Laser Gun', icon: '⚡', price: 250, damage: 25, fireRate: 80, bulletSpeed: 30, color: '#00ff88' }
+            pistol: { name: 'Pistol', icon: '🔫', price: 0, damage: 15, fireRate: 400, bulletSpeed: 12, color: '#888', gunLength: 20, gunWidth: 6 },
+            smg: { name: 'SMG', icon: '🔫', price: 30, damage: 10, fireRate: 100, bulletSpeed: 14, color: '#4ecdc4', gunLength: 28, gunWidth: 5 },
+            shotgun: { name: 'Shotgun', icon: '🔫', price: 50, damage: 8, fireRate: 800, bulletSpeed: 10, spread: 5, color: '#ff6b6b', gunLength: 32, gunWidth: 7 },
+            rifle: { name: 'Rifle', icon: '🎯', price: 75, damage: 35, fireRate: 600, bulletSpeed: 18, color: '#ffd700', gunLength: 35, gunWidth: 5 },
+            sniper: { name: 'Sniper', icon: '🎯', price: 100, damage: 80, fireRate: 1200, bulletSpeed: 25, color: '#9b59b6', gunLength: 45, gunWidth: 4 },
+            minigun: { name: 'Minigun', icon: '🔥', price: 150, damage: 8, fireRate: 50, bulletSpeed: 15, color: '#e74c3c', gunLength: 38, gunWidth: 10 },
+            launcher: { name: 'Launcher', icon: '💥', price: 200, damage: 100, fireRate: 1500, bulletSpeed: 8, explosive: true, color: '#e67e22', gunLength: 35, gunWidth: 12 },
+            laser: { name: 'Laser Gun', icon: '⚡', price: 250, damage: 25, fireRate: 80, bulletSpeed: 30, color: '#00ff88', gunLength: 30, gunWidth: 6 }
         };
 
         // Canvas and Game Variables
@@ -469,6 +580,14 @@
         }
 
         function updateShop() {
+            if (currentShopTab === 'guns') {
+                updateGunShop();
+            } else {
+                updateSkinShop();
+            }
+        }
+
+        function updateGunShop() {
             const grid = document.getElementById('shopGrid');
             grid.innerHTML = '';
             for (const [key, gun] of Object.entries(guns)) {
@@ -488,6 +607,83 @@
             }
         }
 
+        function updateSkinShop() {
+            const grid = document.getElementById('shopGrid');
+            grid.innerHTML = '';
+            for (const [key, skin] of Object.entries(skins)) {
+                const owned = ownedSkins.includes(key);
+                const isSelected = selectedSkin === key;
+                const canAfford = money >= skin.price;
+                grid.innerHTML += `
+                    <div class="shop-item ${owned ? 'owned' : ''} ${isSelected ? 'selected' : ''}">
+                        <div class="skin-preview">
+                            <canvas id="skinPreview_${key}" width="80" height="120"></canvas>
+                        </div>
+                        <div class="gun-name">${skin.name}</div>
+                        <div class="gun-price">${skin.price === 0 ? 'FREE' : '$' + skin.price}</div>
+                        <button class="btn-buy" ${!owned && !canAfford ? 'disabled' : ''} onclick="${owned ? `selectSkin('${key}')` : `buySkin('${key}')`}">
+                            ${isSelected ? 'EQUIPPED' : (owned ? 'EQUIP' : (canAfford ? 'BUY' : 'NEED $' + (skin.price - money)))}
+                        </button>
+                    </div>
+                `;
+            }
+            // Draw skin previews after DOM update
+            setTimeout(() => {
+                for (const [key, skin] of Object.entries(skins)) {
+                    drawSkinPreview(key, skin);
+                }
+            }, 10);
+        }
+
+        function drawSkinPreview(key, skin) {
+            const canvas = document.getElementById(`skinPreview_${key}`);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, 80, 120);
+
+            const cx = 40;
+            const cy = 60;
+
+            // Body
+            ctx.fillStyle = skin.bodyColor;
+            ctx.strokeStyle = skin.outlineColor;
+            ctx.lineWidth = 2;
+            ctx.fillRect(cx - 12, cy - 10, 24, 35);
+            ctx.strokeRect(cx - 12, cy - 10, 24, 35);
+
+            // Head
+            ctx.beginPath();
+            ctx.arc(cx, cy - 22, 12, 0, Math.PI * 2);
+            ctx.fillStyle = skin.headColor;
+            ctx.fill();
+            ctx.stroke();
+
+            // Legs
+            ctx.fillStyle = skin.bodyColor;
+            ctx.fillRect(cx - 10, cy + 25, 8, 20);
+            ctx.fillRect(cx + 2, cy + 25, 8, 20);
+            ctx.strokeRect(cx - 10, cy + 25, 8, 20);
+            ctx.strokeRect(cx + 2, cy + 25, 8, 20);
+
+            // Arm holding gun
+            ctx.fillRect(cx + 12, cy - 5, 18, 6);
+            ctx.strokeRect(cx + 12, cy - 5, 18, 6);
+
+            // Gun
+            ctx.fillStyle = '#555';
+            ctx.fillRect(cx + 28, cy - 8, 20, 10);
+            ctx.strokeStyle = '#333';
+            ctx.strokeRect(cx + 28, cy - 8, 20, 10);
+        }
+
+        function switchShopTab(tab) {
+            currentShopTab = tab;
+            document.getElementById('tabGuns').classList.toggle('active', tab === 'guns');
+            document.getElementById('tabSkins').classList.toggle('active', tab === 'skins');
+            document.getElementById('shopTitle').textContent = tab === 'guns' ? 'GUN SHOP' : 'SKIN SHOP';
+            updateShop();
+        }
+
         function buyGun(gunKey) {
             if (money >= guns[gunKey].price && !ownedGuns.includes(gunKey)) {
                 money -= guns[gunKey].price;
@@ -505,6 +701,23 @@
             }
         }
 
+        function buySkin(skinKey) {
+            if (money >= skins[skinKey].price && !ownedSkins.includes(skinKey)) {
+                money -= skins[skinKey].price;
+                ownedSkins.push(skinKey);
+                selectedSkin = skinKey;
+                updateMoneyDisplay();
+                updateShop();
+            }
+        }
+
+        function selectSkin(skinKey) {
+            if (ownedSkins.includes(skinKey)) {
+                selectedSkin = skinKey;
+                updateShop();
+            }
+        }
+
         // Screen Navigation
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -518,9 +731,9 @@
             updateOwnedGunsList();
         }
 
-        function showShop() {
+        function showShop(tab = 'guns') {
             showScreen('shop');
-            updateShop();
+            switchShopTab(tab);
         }
 
         function showModeSelect() {
@@ -604,6 +817,24 @@
         }
 
         function createPlayer(x, y, team, isHuman) {
+            // Get skin for player
+            let playerSkin;
+            if (isHuman) {
+                playerSkin = skins[selectedSkin];
+            } else if (team === 'blue') {
+                // Blue team AI gets random blue-ish skin
+                const blueAISkins = ['default', 'ice', 'diamond'];
+                playerSkin = skins[blueAISkins[Math.floor(Math.random() * blueAISkins.length)]];
+            } else {
+                // Red team gets red-ish skins
+                const redSkins = ['flame', 'lava', 'shadow'];
+                playerSkin = skins[redSkins[Math.floor(Math.random() * redSkins.length)]];
+            }
+
+            // AI gets random gun from available guns
+            const aiGunKeys = Object.keys(guns);
+            const aiGun = aiGunKeys[Math.floor(Math.random() * aiGunKeys.length)];
+
             return {
                 x, y,
                 vx: 0,
@@ -620,6 +851,9 @@
                 onGround: false,
                 respawnTimer: 0,
                 alive: true,
+                skin: playerSkin,
+                currentGun: isHuman ? selectedGuns[0] : aiGun,
+                gunAngle: 0,
                 // AI properties
                 targetEnemy: null,
                 aiDecisionTimer: 0,
@@ -733,6 +967,16 @@
             // Facing direction
             player.facingRight = mouseX > player.x + player.width / 2;
 
+            // Update current gun
+            player.currentGun = selectedGuns[currentGunIndex];
+
+            // Calculate gun angle based on mouse position
+            const armX = player.x + player.width / 2;
+            const armY = player.y + 28;
+            const angle = Math.atan2(mouseY - armY, mouseX - armX);
+            // Clamp angle to reasonable range
+            player.gunAngle = Math.max(-0.8, Math.min(0.8, angle));
+
             // Shooting
             const currentGun = guns[selectedGuns[currentGunIndex]];
             if (mouseDown && currentGun && timestamp - player.lastShot > currentGun.fireRate) {
@@ -788,13 +1032,24 @@
             // Shooting
             if (player.targetEnemy) {
                 player.facingRight = player.targetEnemy.x > player.x;
-                const aiGun = guns[ownedGuns[Math.floor(Math.random() * ownedGuns.length)]] || guns.pistol;
+                const aiGun = guns[player.currentGun] || guns.pistol;
+
+                // Calculate gun angle towards target
+                const armX = player.x + player.width / 2;
+                const armY = player.y + 28;
+                const targetX = player.targetEnemy.x + player.targetEnemy.width/2;
+                const targetY = player.targetEnemy.y + player.targetEnemy.height/2;
+                const angle = Math.atan2(targetY - armY, targetX - armX);
+                player.gunAngle = Math.max(-0.8, Math.min(0.8, angle));
+
                 if (timestamp - player.lastShot > aiGun.fireRate + Math.random() * 200) {
-                    const targetX = player.targetEnemy.x + player.targetEnemy.width/2 + (Math.random() - 0.5) * 50;
-                    const targetY = player.targetEnemy.y + player.targetEnemy.height/2 + (Math.random() - 0.5) * 50;
-                    shoot(player, aiGun, targetX, targetY);
+                    const shootTargetX = targetX + (Math.random() - 0.5) * 50;
+                    const shootTargetY = targetY + (Math.random() - 0.5) * 50;
+                    shoot(player, aiGun, shootTargetX, shootTargetY);
                     player.lastShot = timestamp;
                 }
+            } else {
+                player.gunAngle = 0;
             }
         }
 
@@ -831,31 +1086,113 @@
 
         function drawPlayer(player) {
             const cx = player.x + player.width / 2;
-            const cy = player.y + player.height / 2;
+            const skin = player.skin;
+            const gun = guns[player.currentGun] || guns.pistol;
+
+            // Calculate gun angle for aiming
+            const armX = cx;
+            const armY = player.y + 28;
+            const dir = player.facingRight ? 1 : -1;
+
+            // Legs
+            ctx.fillStyle = skin.bodyColor;
+            ctx.strokeStyle = skin.outlineColor;
+            ctx.lineWidth = 2;
+            ctx.fillRect(player.x + 8, player.y + 42, 10, 18);
+            ctx.fillRect(player.x + 22, player.y + 42, 10, 18);
+            ctx.strokeRect(player.x + 8, player.y + 42, 10, 18);
+            ctx.strokeRect(player.x + 22, player.y + 42, 10, 18);
 
             // Body
-            ctx.fillStyle = player.team === 'blue' ? '#4ecdc4' : '#ff6b6b';
-            ctx.fillRect(player.x + 5, player.y + 20, 30, 40);
+            ctx.fillStyle = skin.bodyColor;
+            ctx.fillRect(player.x + 5, player.y + 18, 30, 26);
+            ctx.strokeRect(player.x + 5, player.y + 18, 30, 26);
+
+            // Back arm (behind body)
+            ctx.fillStyle = skin.bodyColor;
+            const backArmX = player.facingRight ? player.x + 2 : player.x + 28;
+            ctx.fillRect(backArmX, player.y + 20, 8, 18);
+            ctx.strokeRect(backArmX, player.y + 20, 8, 18);
 
             // Head
             ctx.beginPath();
-            ctx.arc(cx, player.y + 12, 15, 0, Math.PI * 2);
+            ctx.arc(cx, player.y + 10, 12, 0, Math.PI * 2);
+            ctx.fillStyle = skin.headColor;
+            ctx.fill();
+            ctx.strokeStyle = skin.outlineColor;
+            ctx.stroke();
+
+            // Eyes
+            ctx.fillStyle = '#fff';
+            const eyeOffset = player.facingRight ? 3 : -3;
+            ctx.beginPath();
+            ctx.arc(cx + eyeOffset - 3, player.y + 8, 3, 0, Math.PI * 2);
+            ctx.arc(cx + eyeOffset + 3, player.y + 8, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(cx + eyeOffset - 3 + (player.facingRight ? 1 : -1), player.y + 8, 1.5, 0, Math.PI * 2);
+            ctx.arc(cx + eyeOffset + 3 + (player.facingRight ? 1 : -1), player.y + 8, 1.5, 0, Math.PI * 2);
             ctx.fill();
 
-            // Gun
-            const gunLength = 25;
-            const gunY = player.y + 35;
-            ctx.strokeStyle = '#888';
-            ctx.lineWidth = 4;
+            // Front arm holding gun
+            ctx.save();
+            ctx.translate(armX, armY);
+
+            const gunAngle = player.gunAngle || 0;
+            ctx.rotate(gunAngle * dir);
+
+            // Arm
+            ctx.fillStyle = skin.bodyColor;
+            ctx.strokeStyle = skin.outlineColor;
+            ctx.fillRect(0, -4, 20 * dir, 8);
+
+            // Hand
             ctx.beginPath();
-            if (player.facingRight) {
-                ctx.moveTo(cx, gunY);
-                ctx.lineTo(cx + gunLength, gunY);
-            } else {
-                ctx.moveTo(cx, gunY);
-                ctx.lineTo(cx - gunLength, gunY);
-            }
+            ctx.arc(18 * dir, 0, 5, 0, Math.PI * 2);
+            ctx.fill();
             ctx.stroke();
+
+            // Gun body
+            const gunLength = gun.gunLength || 25;
+            const gunWidth = gun.gunWidth || 6;
+            ctx.fillStyle = '#444';
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 1;
+
+            // Gun handle
+            ctx.fillRect(12 * dir, -2, 8, 12);
+
+            // Gun barrel
+            ctx.fillStyle = gun.color;
+            ctx.fillRect(18 * dir, -gunWidth/2, gunLength * dir, gunWidth);
+            ctx.strokeRect(18 * dir, -gunWidth/2, gunLength * dir, gunWidth);
+
+            // Gun details (scope for sniper, etc)
+            if (gun.name === 'Sniper') {
+                ctx.fillStyle = '#222';
+                ctx.fillRect(25 * dir, -gunWidth/2 - 4, 8, 4);
+            } else if (gun.name === 'Shotgun') {
+                ctx.fillStyle = '#333';
+                ctx.fillRect((18 + gunLength - 5) * dir, -gunWidth/2 - 2, 5, gunWidth + 4);
+            } else if (gun.name === 'Minigun') {
+                // Multiple barrels
+                ctx.strokeStyle = '#222';
+                for (let i = -2; i <= 2; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(30 * dir, i * 2);
+                    ctx.lineTo((18 + gunLength) * dir, i * 2);
+                    ctx.stroke();
+                }
+            } else if (gun.name === 'Launcher') {
+                // Rocket tube
+                ctx.fillStyle = '#333';
+                ctx.beginPath();
+                ctx.arc((18 + gunLength) * dir, 0, gunWidth/2 + 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
 
             // Health bar
             const healthWidth = 40;
@@ -868,16 +1205,23 @@
             // Player indicator
             if (player.isHuman) {
                 ctx.fillStyle = '#ffd700';
-                ctx.font = '12px Arial';
+                ctx.font = 'bold 12px Arial';
                 ctx.fillText('YOU', player.x + 8, player.y - 20);
             }
         }
 
         function shoot(player, gun, targetX, targetY) {
-            const startX = player.x + player.width / 2 + (player.facingRight ? 25 : -25);
-            const startY = player.y + 35;
+            const gunLength = gun.gunLength || 25;
+            const armX = player.x + player.width / 2;
+            const armY = player.y + 28;
+            const dir = player.facingRight ? 1 : -1;
 
-            const angle = Math.atan2(targetY - startY, targetX - startX);
+            // Calculate bullet start position at end of gun barrel
+            const gunAngle = player.gunAngle || 0;
+            const startX = armX + Math.cos(gunAngle) * (18 + gunLength) * dir;
+            const startY = armY + Math.sin(gunAngle * dir) * (18 + gunLength);
+
+            const angle = Math.atan2(targetY - armY, targetX - armX);
 
             const spreadCount = gun.spread || 1;
             for (let i = 0; i < spreadCount; i++) {
