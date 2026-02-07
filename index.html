@@ -966,11 +966,181 @@
             font-size: 14px;
             color: #aaa;
         }
+
+        /* AUTH SCREEN */
+        #auth {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .auth-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            border: 2px solid #4ecdc4;
+            min-width: 400px;
+        }
+
+        .auth-title {
+            font-size: 36px;
+            color: #4ecdc4;
+            margin-bottom: 10px;
+        }
+
+        .auth-subtitle {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 30px;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 18px;
+            border: 2px solid #444;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            margin-bottom: 20px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .auth-input:focus {
+            border-color: #4ecdc4;
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .auth-input::placeholder {
+            color: #666;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-auth {
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-login {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            box-shadow: 0 5px 20px rgba(78, 205, 196, 0.5);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.7);
+        }
+
+        .btn-signup {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a5a);
+            color: white;
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.5);
+        }
+
+        .btn-signup:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.7);
+        }
+
+        .auth-error {
+            color: #ff4444;
+            font-size: 14px;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+
+        .auth-success {
+            color: #00ff88;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .auth-switch {
+            margin-top: 20px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .auth-switch a {
+            color: #4ecdc4;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .auth-switch a:hover {
+            color: #6ee7df;
+        }
+
+        .logged-in-as {
+            font-size: 14px;
+            color: #4ecdc4;
+            margin-bottom: 10px;
+        }
+
+        .btn-logout {
+            background: linear-gradient(45deg, #666, #444);
+            color: white;
+            padding: 8px 20px;
+            font-size: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(45deg, #888, #666);
+        }
     </style>
 </head>
 <body>
+    <!-- AUTH SCREEN -->
+    <div id="auth" class="screen active">
+        <div class="rivals-logo">
+            <div class="rivals-icon">
+                <span>&#9876;</span>
+                <span>&#9876;</span>
+            </div>
+            <h1 class="lobby-title">RIVALS</h1>
+            <div class="rivals-tagline">Fight for glory</div>
+        </div>
+        <div class="auth-container">
+            <h2 class="auth-title" id="authTitle">Welcome Back!</h2>
+            <p class="auth-subtitle" id="authSubtitle">Enter your email to continue</p>
+            <input type="email" class="auth-input" id="emailInput" placeholder="Enter your email...">
+            <div class="auth-error" id="authError"></div>
+            <div class="auth-buttons">
+                <button class="btn-auth btn-login" onclick="handleLogin()">LOGIN</button>
+                <button class="btn-auth btn-signup" onclick="handleSignup()">SIGN UP</button>
+            </div>
+            <div class="auth-switch" id="authSwitch">
+                New player? <a onclick="switchToSignup()">Create an account</a>
+            </div>
+        </div>
+    </div>
+
     <!-- LOBBY SCREEN -->
-    <div id="lobby" class="screen active">
+    <div id="lobby" class="screen">
+        <div class="logged-in-as">
+            Logged in as: <span id="userEmail">-</span>
+            <button class="btn-logout" onclick="handleLogout()">LOGOUT</button>
+        </div>
         <div class="rivals-logo">
             <div class="rivals-icon">
                 <span>&#9876;</span>
@@ -1089,7 +1259,10 @@
     </div>
 
     <script>
-        // Game State
+        // Account System
+        let currentUser = null;
+
+        // Game State (will be loaded from account)
         let money = 100;
         let ownedGuns = ['pistol', 'grenade'];
         let selectedGuns = ['pistol', 'grenade', null, null];
@@ -1098,6 +1271,177 @@
         let currentShopTab = 'guns';
         let selectedSkin = 'default';
         let ownedSkins = ['default'];
+
+        // Account Functions
+        function getAccounts() {
+            const accounts = localStorage.getItem('rivals_accounts');
+            return accounts ? JSON.parse(accounts) : {};
+        }
+
+        function saveAccounts(accounts) {
+            localStorage.setItem('rivals_accounts', JSON.stringify(accounts));
+        }
+
+        function saveCurrentUserData() {
+            if (!currentUser) return;
+            const accounts = getAccounts();
+            accounts[currentUser] = {
+                email: currentUser,
+                money: money,
+                ownedGuns: ownedGuns,
+                selectedGuns: selectedGuns,
+                selectedSkin: selectedSkin,
+                ownedSkins: ownedSkins,
+                playerArmor: playerArmor,
+                armorProtection: armorProtection
+            };
+            saveAccounts(accounts);
+        }
+
+        function loadUserData(email) {
+            const accounts = getAccounts();
+            if (accounts[email]) {
+                const data = accounts[email];
+                money = data.money || 100;
+                ownedGuns = data.ownedGuns || ['pistol', 'grenade'];
+                selectedGuns = data.selectedGuns || ['pistol', 'grenade', null, null];
+                selectedSkin = data.selectedSkin || 'default';
+                ownedSkins = data.ownedSkins || ['default'];
+                playerArmor = data.playerArmor || null;
+                armorProtection = data.armorProtection || 0;
+                return true;
+            }
+            return false;
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('emailInput').value.trim().toLowerCase();
+            const errorEl = document.getElementById('authError');
+
+            if (!email) {
+                errorEl.textContent = 'Please enter your email!';
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                errorEl.textContent = 'Please enter a valid email!';
+                return;
+            }
+
+            const accounts = getAccounts();
+            if (!accounts[email]) {
+                errorEl.textContent = 'Account not found! Click SIGN UP to create one.';
+                return;
+            }
+
+            // Login successful
+            currentUser = email;
+            localStorage.setItem('rivals_current_user', email);
+            loadUserData(email);
+
+            document.getElementById('userEmail').textContent = email;
+            showScreen('lobby');
+            updateMoneyDisplay();
+            updateOwnedGunsList();
+            updateArmorDisplay();
+            updateVIPDisplay();
+        }
+
+        function handleSignup() {
+            const email = document.getElementById('emailInput').value.trim().toLowerCase();
+            const errorEl = document.getElementById('authError');
+
+            if (!email) {
+                errorEl.textContent = 'Please enter your email!';
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                errorEl.textContent = 'Please enter a valid email!';
+                return;
+            }
+
+            const accounts = getAccounts();
+            if (accounts[email]) {
+                errorEl.textContent = 'Account already exists! Click LOGIN instead.';
+                return;
+            }
+
+            // Create new account with default values
+            accounts[email] = {
+                email: email,
+                money: 100,
+                ownedGuns: ['pistol', 'grenade'],
+                selectedGuns: ['pistol', 'grenade', null, null],
+                selectedSkin: 'default',
+                ownedSkins: ['default'],
+                playerArmor: null,
+                armorProtection: 0
+            };
+            saveAccounts(accounts);
+
+            // Auto login after signup
+            currentUser = email;
+            localStorage.setItem('rivals_current_user', email);
+            loadUserData(email);
+
+            document.getElementById('userEmail').textContent = email;
+            showScreen('lobby');
+            updateMoneyDisplay();
+            updateOwnedGunsList();
+            updateArmorDisplay();
+            updateVIPDisplay();
+        }
+
+        function handleLogout() {
+            saveCurrentUserData();
+            currentUser = null;
+            localStorage.removeItem('rivals_current_user');
+
+            // Reset to defaults
+            money = 100;
+            ownedGuns = ['pistol', 'grenade'];
+            selectedGuns = ['pistol', 'grenade', null, null];
+            selectedSkin = 'default';
+            ownedSkins = ['default'];
+            playerArmor = null;
+            armorProtection = 0;
+
+            document.getElementById('emailInput').value = '';
+            document.getElementById('authError').textContent = '';
+            showScreen('auth');
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function switchToSignup() {
+            document.getElementById('authTitle').textContent = 'Create Account';
+            document.getElementById('authSubtitle').textContent = 'Enter your email to get started';
+            document.getElementById('authSwitch').innerHTML = 'Already have an account? <a onclick="switchToLogin()">Login here</a>';
+        }
+
+        function switchToLogin() {
+            document.getElementById('authTitle').textContent = 'Welcome Back!';
+            document.getElementById('authSubtitle').textContent = 'Enter your email to continue';
+            document.getElementById('authSwitch').innerHTML = 'New player? <a onclick="switchToSignup()">Create an account</a>';
+        }
+
+        function checkAutoLogin() {
+            const savedUser = localStorage.getItem('rivals_current_user');
+            if (savedUser) {
+                const accounts = getAccounts();
+                if (accounts[savedUser]) {
+                    currentUser = savedUser;
+                    loadUserData(savedUser);
+                    document.getElementById('userEmail').textContent = savedUser;
+                    showScreen('lobby');
+                    return true;
+                }
+            }
+            return false;
+        }
 
         // Armor System
         let playerArmor = null; // null, 'basic', or 'diamond'
@@ -1300,6 +1644,7 @@
                 updateMoneyDisplay();
                 updateShop();
                 updateArmorDisplay();
+                saveCurrentUserData();
             }
         }
 
@@ -1431,6 +1776,7 @@
                 updateMoneyDisplay();
                 updateShop();
                 updateOwnedGunsList();
+                saveCurrentUserData();
             }
         }
 
@@ -1441,6 +1787,7 @@
                 selectedSkin = skinKey;
                 updateMoneyDisplay();
                 updateShop();
+                saveCurrentUserData();
             }
         }
 
@@ -1448,6 +1795,7 @@
             if (ownedSkins.includes(skinKey)) {
                 selectedSkin = skinKey;
                 updateShop();
+                saveCurrentUserData();
             }
         }
 
@@ -3225,6 +3573,7 @@
                 rewardText.textContent = 'Better luck next time!';
                 dancer.style.display = 'none';
             }
+            saveCurrentUserData();
         }
 
         // Spinner Wheel Functions
@@ -3394,6 +3743,7 @@
 
             document.getElementById('spinResult').textContent = resultText;
             updateSpinButton();
+            saveCurrentUserData();
         }
 
         // VIP System
@@ -3415,6 +3765,7 @@
                     clearInterval(vipInterval);
                     vipInterval = null;
                     updateVIPDisplay();
+                    saveCurrentUserData(); // Save when VIP ends
                 }
             }, 1000);
         }
@@ -4221,10 +4572,28 @@
         });
 
         // Initialize
-        updateMoneyDisplay();
-        updateOwnedGunsList();
-        updateArmorDisplay();
-        updateVIPDisplay();
+        if (checkAutoLogin()) {
+            // User was auto-logged in
+            updateMoneyDisplay();
+            updateOwnedGunsList();
+            updateArmorDisplay();
+            updateVIPDisplay();
+        }
+        // If not auto-logged in, auth screen is already shown
+
+        // Save data periodically and on important actions
+        setInterval(() => {
+            if (currentUser) {
+                saveCurrentUserData();
+            }
+        }, 5000); // Save every 5 seconds
+
+        // Save before leaving page
+        window.addEventListener('beforeunload', () => {
+            if (currentUser) {
+                saveCurrentUserData();
+            }
+        });
     </script>
 </body>
 </html>
