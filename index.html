@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RIVALS</title>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -1107,6 +1108,185 @@
         .btn-logout:hover {
             background: linear-gradient(45deg, #888, #666);
         }
+
+        /* MULTIPLAYER LOBBY */
+        #multiplayerLobby {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 40px;
+        }
+
+        .mp-title {
+            font-size: 48px;
+            color: #ff6b6b;
+            text-shadow: 0 0 20px #ff6b6b;
+        }
+
+        .room-code-display {
+            font-size: 64px;
+            font-weight: bold;
+            color: #ffd700;
+            letter-spacing: 15px;
+            text-shadow: 0 0 20px #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 15px 40px;
+            border-radius: 15px;
+            border: 3px solid #ffd700;
+            cursor: pointer;
+            user-select: all;
+        }
+
+        .room-code-label {
+            font-size: 16px;
+            color: #888;
+        }
+
+        .mp-teams {
+            display: flex;
+            gap: 40px;
+            margin: 20px 0;
+        }
+
+        .mp-team-col {
+            min-width: 250px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #444;
+        }
+
+        .mp-team-col.blue { border-color: #4ecdc4; }
+        .mp-team-col.red { border-color: #ff6b6b; }
+
+        .mp-team-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .mp-team-title.blue { color: #4ecdc4; }
+        .mp-team-title.red { color: #ff6b6b; }
+
+        .mp-player-slot {
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mp-player-slot.filled { background: rgba(255,255,255,0.1); }
+        .mp-player-slot.you { border: 1px solid #ffd700; }
+        .mp-player-slot.empty { color: #555; font-style: italic; }
+
+        .mp-player-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff88;
+        }
+
+        .mp-status {
+            font-size: 18px;
+            color: #4ecdc4;
+            min-height: 30px;
+        }
+
+        .mp-join-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .mp-join-input {
+            padding: 15px 25px;
+            font-size: 28px;
+            letter-spacing: 10px;
+            text-transform: uppercase;
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #ffd700;
+            width: 220px;
+            text-align: center;
+            outline: none;
+        }
+
+        .mp-join-input:focus {
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .mp-join-input::placeholder {
+            color: #555;
+            letter-spacing: 5px;
+            font-size: 18px;
+        }
+
+        .btn-mp {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a5a);
+            color: white;
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.5);
+        }
+
+        .btn-mp:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.7);
+        }
+
+        .btn-create {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            box-shadow: 0 5px 20px rgba(78, 205, 196, 0.5);
+        }
+
+        .btn-create:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.7);
+        }
+
+        .btn-start-mp {
+            background: linear-gradient(45deg, #ffd700, #ffaa00);
+            color: #1a1a2e;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.5);
+            font-size: 28px;
+            padding: 20px 60px;
+        }
+
+        .btn-start-mp:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.7);
+        }
+
+        .btn-start-mp:disabled {
+            background: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .mp-error {
+            color: #ff4444;
+            font-size: 14px;
+            min-height: 20px;
+        }
+
+        .mp-choice-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .mp-connecting {
+            color: #ffd700;
+            font-size: 20px;
+            animation: pulse 1s infinite;
+        }
     </style>
 </head>
 <body>
@@ -1185,12 +1365,54 @@
     <!-- MODE SELECT SCREEN -->
     <div id="modeSelect" class="screen">
         <h1 class="mode-title">SELECT MODE</h1>
+        <p style="color: #888; margin-bottom: 10px;">Singleplayer (vs AI)</p>
         <div class="mode-buttons">
             <button class="btn-mode" onclick="selectMode(1)">1v1</button>
             <button class="btn-mode" onclick="selectMode(2)">2v2</button>
             <button class="btn-mode" onclick="selectMode(3)">3v3</button>
         </div>
+        <p style="color: #888; margin-top: 20px; margin-bottom: 10px;">Multiplayer (Online)</p>
+        <div class="mp-choice-buttons">
+            <button class="btn btn-create" onclick="showCreateRoom()">CREATE ROOM</button>
+            <button class="btn btn-mp" onclick="showJoinRoom()">JOIN ROOM</button>
+        </div>
         <button class="btn btn-back" onclick="showLobby()">BACK</button>
+    </div>
+
+    <!-- MULTIPLAYER LOBBY SCREEN -->
+    <div id="multiplayerLobby" class="screen">
+        <h1 class="mp-title">MULTIPLAYER LOBBY</h1>
+        <div class="room-code-label">ROOM CODE (share with friends):</div>
+        <div class="room-code-display" id="roomCodeDisplay">----</div>
+        <div class="mp-status" id="mpStatus">Waiting for players...</div>
+        <div class="mp-error" id="mpError"></div>
+        <div class="mp-teams">
+            <div class="mp-team-col blue">
+                <div class="mp-team-title blue">BLUE TEAM</div>
+                <div id="blueTeamSlots"></div>
+            </div>
+            <div class="mp-team-col red">
+                <div class="mp-team-title red">RED TEAM</div>
+                <div id="redTeamSlots"></div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 15px;">
+            <button class="btn btn-start-mp" id="startMpBtn" onclick="hostStartGame()" disabled>START GAME</button>
+            <button class="btn btn-back" onclick="leaveMpLobby()">LEAVE</button>
+        </div>
+    </div>
+
+    <!-- JOIN ROOM SCREEN -->
+    <div id="joinRoomScreen" class="screen">
+        <h1 class="mp-title">JOIN ROOM</h1>
+        <p style="color: #888;">Enter the room code from your friend:</p>
+        <div class="mp-join-container">
+            <input type="text" class="mp-join-input" id="joinCodeInput" placeholder="CODE" maxlength="4" autocomplete="off">
+            <button class="btn btn-create" onclick="joinRoom()">JOIN</button>
+        </div>
+        <div class="mp-error" id="joinError"></div>
+        <div class="mp-connecting" id="joinConnecting" style="display:none;">Connecting...</div>
+        <button class="btn btn-back" onclick="showModeSelect()">BACK</button>
     </div>
 
     <!-- MAP VOTING SCREEN -->
@@ -1441,6 +1663,1053 @@
                 }
             }
             return false;
+        }
+
+        // ========== MULTIPLAYER SYSTEM ==========
+        let peer = null;
+        let connections = {};       // peerId -> DataConnection
+        let isHost = false;
+        let isMultiplayer = false;
+        let roomCode = '';
+        let lobbyPlayers = [];      // {peerId, name, team, isHost, skin}
+        let myPeerId = '';
+        let hostConnection = null;  // Client's connection to host
+        let remoteInputs = {};      // peerId -> {keys, mouseX, mouseY, mouseDown, gunIndex}
+        let lastStateBroadcast = 0;
+        let clientGameState = null; // Latest state received from host
+        let mpGameMode = 3;         // Multiplayer always uses team sizes up to 3v3
+        let playerPeerMap = {};     // Maps player index in players[] to peerId
+
+        function generateRoomCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 4; i++) {
+                code += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return code;
+        }
+
+        function showCreateRoom() {
+            roomCode = generateRoomCode();
+            isHost = true;
+            isMultiplayer = true;
+            lobbyPlayers = [];
+
+            document.getElementById('mpError').textContent = '';
+            document.getElementById('mpStatus').textContent = 'Creating room...';
+            document.getElementById('roomCodeDisplay').textContent = roomCode;
+            document.getElementById('startMpBtn').style.display = '';
+            showScreen('multiplayerLobby');
+
+            // Create PeerJS peer with room code as ID
+            const peerId = 'RIVALS-' + roomCode;
+            peer = new Peer(peerId);
+
+            peer.on('open', (id) => {
+                myPeerId = id;
+                // Add host to lobby
+                lobbyPlayers.push({
+                    peerId: id,
+                    name: currentUser || 'Host',
+                    team: 'blue',
+                    isHost: true,
+                    skin: selectedSkin
+                });
+                updateMpLobbyDisplay();
+                document.getElementById('mpStatus').textContent = 'Waiting for players...';
+            });
+
+            peer.on('connection', (conn) => {
+                onPlayerConnect(conn);
+            });
+
+            peer.on('error', (err) => {
+                console.error('PeerJS error:', err);
+                if (err.type === 'unavailable-id') {
+                    // Room code already taken, try again
+                    peer.destroy();
+                    roomCode = generateRoomCode();
+                    document.getElementById('roomCodeDisplay').textContent = roomCode;
+                    peer = new Peer('RIVALS-' + roomCode);
+                    peer.on('open', (id) => {
+                        myPeerId = id;
+                        lobbyPlayers = [{
+                            peerId: id,
+                            name: currentUser || 'Host',
+                            team: 'blue',
+                            isHost: true,
+                            skin: selectedSkin
+                        }];
+                        updateMpLobbyDisplay();
+                        document.getElementById('mpStatus').textContent = 'Waiting for players...';
+                    });
+                    peer.on('connection', (conn) => { onPlayerConnect(conn); });
+                } else {
+                    document.getElementById('mpError').textContent = 'Connection error: ' + err.type;
+                }
+            });
+        }
+
+        function showJoinRoom() {
+            document.getElementById('joinError').textContent = '';
+            document.getElementById('joinConnecting').style.display = 'none';
+            document.getElementById('joinCodeInput').value = '';
+            showScreen('joinRoomScreen');
+        }
+
+        function joinRoom() {
+            const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+            if (code.length !== 4) {
+                document.getElementById('joinError').textContent = 'Enter a 4-character room code!';
+                return;
+            }
+
+            document.getElementById('joinError').textContent = '';
+            document.getElementById('joinConnecting').style.display = 'block';
+
+            isHost = false;
+            isMultiplayer = true;
+            roomCode = code;
+
+            // Create our own peer
+            peer = new Peer();
+
+            peer.on('open', (id) => {
+                myPeerId = id;
+                // Connect to host
+                const conn = peer.connect('RIVALS-' + code, { reliable: true });
+
+                conn.on('open', () => {
+                    hostConnection = conn;
+                    // Send join info
+                    conn.send({
+                        type: 'join',
+                        name: currentUser || 'Player',
+                        skin: selectedSkin,
+                        ownedGuns: ownedGuns,
+                        selectedGuns: selectedGuns
+                    });
+
+                    // Listen for host messages
+                    conn.on('data', (data) => {
+                        handleHostMessage(data);
+                    });
+
+                    conn.on('close', () => {
+                        handleHostDisconnect();
+                    });
+                });
+
+                conn.on('error', (err) => {
+                    document.getElementById('joinConnecting').style.display = 'none';
+                    document.getElementById('joinError').textContent = 'Could not connect! Check the room code.';
+                });
+            });
+
+            peer.on('error', (err) => {
+                document.getElementById('joinConnecting').style.display = 'none';
+                document.getElementById('joinError').textContent = 'Connection failed: ' + err.type;
+            });
+
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                if (!hostConnection) {
+                    document.getElementById('joinConnecting').style.display = 'none';
+                    document.getElementById('joinError').textContent = 'Connection timed out. Check the room code.';
+                    if (peer) { peer.destroy(); peer = null; }
+                }
+            }, 10000);
+        }
+
+        // Host: handle incoming player connection
+        function onPlayerConnect(conn) {
+            conn.on('open', () => {
+                conn.on('data', (data) => {
+                    if (data.type === 'join') {
+                        if (lobbyPlayers.length >= 6) {
+                            conn.send({ type: 'error', message: 'Room is full!' });
+                            conn.close();
+                            return;
+                        }
+
+                        // Assign to team with fewer players
+                        const blueCount = lobbyPlayers.filter(p => p.team === 'blue').length;
+                        const redCount = lobbyPlayers.filter(p => p.team === 'red').length;
+                        const team = blueCount <= redCount ? 'blue' : 'red';
+
+                        const playerInfo = {
+                            peerId: conn.peer,
+                            name: data.name || 'Player',
+                            team: team,
+                            isHost: false,
+                            skin: data.skin || 'default',
+                            ownedGuns: data.ownedGuns || ['pistol', 'grenade'],
+                            selectedGuns: data.selectedGuns || ['pistol', 'grenade', null, null]
+                        };
+
+                        lobbyPlayers.push(playerInfo);
+                        connections[conn.peer] = conn;
+
+                        updateMpLobbyDisplay();
+                        broadcastLobbyUpdate();
+
+                        // Handle client input during game
+                        conn.on('data', (msg) => {
+                            if (msg.type === 'input') {
+                                remoteInputs[conn.peer] = msg;
+                            } else if (msg.type === 'map-vote') {
+                                handleRemoteVote(conn.peer, msg.mapKey);
+                            }
+                        });
+                    }
+                });
+
+                conn.on('close', () => {
+                    handlePlayerDisconnect(conn.peer);
+                });
+            });
+        }
+
+        // Host: broadcast lobby state to all clients
+        function broadcastLobbyUpdate() {
+            const data = { type: 'lobby-update', players: lobbyPlayers, roomCode: roomCode };
+            Object.values(connections).forEach(conn => {
+                try { conn.send(data); } catch(e) {}
+            });
+        }
+
+        // Host: broadcast to all clients
+        function broadcastToClients(data) {
+            Object.values(connections).forEach(conn => {
+                try { conn.send(data); } catch(e) {}
+            });
+        }
+
+        // Client: handle messages from host
+        function handleHostMessage(data) {
+            switch (data.type) {
+                case 'lobby-update':
+                    lobbyPlayers = data.players;
+                    roomCode = data.roomCode;
+                    document.getElementById('roomCodeDisplay').textContent = roomCode;
+                    document.getElementById('startMpBtn').style.display = 'none';
+                    showScreen('multiplayerLobby');
+                    document.getElementById('joinConnecting').style.display = 'none';
+                    updateMpLobbyDisplay();
+                    document.getElementById('mpStatus').textContent = `${lobbyPlayers.length}/6 players`;
+                    break;
+
+                case 'game-start':
+                    startMultiplayerClient(data);
+                    break;
+
+                case 'game-state':
+                    clientGameState = data;
+                    break;
+
+                case 'game-over':
+                    handleMpGameOver(data);
+                    break;
+
+                case 'vote-start':
+                    startClientMapVoting(data);
+                    break;
+
+                case 'vote-state':
+                    updateClientVoteDisplay(data);
+                    break;
+
+                case 'error':
+                    document.getElementById('joinError').textContent = data.message;
+                    break;
+            }
+        }
+
+        // Host: handle player disconnect
+        function handlePlayerDisconnect(peerId) {
+            lobbyPlayers = lobbyPlayers.filter(p => p.peerId !== peerId);
+            delete connections[peerId];
+            delete remoteInputs[peerId];
+
+            if (gameRunning && isHost) {
+                // Replace disconnected player with AI during game
+                players.forEach(p => {
+                    if (p.peerId === peerId) {
+                        p.isHuman = false;
+                        p.isRemote = false;
+                        p.name = p.name + ' (DC)';
+                    }
+                });
+                updateLeaderboard();
+            }
+
+            updateMpLobbyDisplay();
+            broadcastLobbyUpdate();
+        }
+
+        // Client: handle host disconnect
+        function handleHostDisconnect() {
+            gameRunning = false;
+            isMultiplayer = false;
+            alert('Host disconnected! Returning to lobby.');
+            cleanupMultiplayer();
+            showLobby();
+        }
+
+        // Update multiplayer lobby display
+        function updateMpLobbyDisplay() {
+            const blueSlots = document.getElementById('blueTeamSlots');
+            const redSlots = document.getElementById('redTeamSlots');
+
+            const bluePlayers = lobbyPlayers.filter(p => p.team === 'blue');
+            const redPlayers = lobbyPlayers.filter(p => p.team === 'red');
+
+            function renderSlots(container, teamPlayers, maxSlots) {
+                let html = '';
+                for (let i = 0; i < maxSlots; i++) {
+                    if (i < teamPlayers.length) {
+                        const p = teamPlayers[i];
+                        const isYou = p.peerId === myPeerId;
+                        html += `<div class="mp-player-slot filled ${isYou ? 'you' : ''}">
+                            <div class="mp-player-dot"></div>
+                            ${p.name}${p.isHost ? ' (Host)' : ''}${isYou ? ' (You)' : ''}
+                        </div>`;
+                    } else {
+                        html += `<div class="mp-player-slot empty">Waiting...</div>`;
+                    }
+                }
+                container.innerHTML = html;
+            }
+
+            renderSlots(blueSlots, bluePlayers, 3);
+            renderSlots(redSlots, redPlayers, 3);
+
+            // Update status
+            document.getElementById('mpStatus').textContent = `${lobbyPlayers.length}/6 players`;
+
+            // Enable start button if host and at least 2 players
+            const startBtn = document.getElementById('startMpBtn');
+            if (isHost) {
+                startBtn.disabled = lobbyPlayers.length < 2;
+            }
+        }
+
+        // Host: start the multiplayer game
+        function hostStartGame() {
+            if (!isHost || lobbyPlayers.length < 2) return;
+
+            // Determine game mode based on max team size
+            const blueCount = lobbyPlayers.filter(p => p.team === 'blue').length;
+            const redCount = lobbyPlayers.filter(p => p.team === 'red').length;
+            mpGameMode = Math.max(blueCount, redCount, 1);
+            // Ensure at least 1v1, and cap at 3v3
+            mpGameMode = Math.min(Math.max(mpGameMode, 1), 3);
+
+            // Start map voting for multiplayer
+            broadcastToClients({
+                type: 'vote-start',
+                maps: Object.keys(maps),
+                duration: 10
+            });
+
+            showMpMapVoting();
+        }
+
+        // Map voting for multiplayer
+        let mpVoteData = {};
+
+        function showMpMapVoting() {
+            showScreen('mapVote');
+            playerVote = null;
+            mapVotes = {};
+            voteTimeLeft = 10;
+            mpVoteData = {};
+
+            Object.keys(maps).forEach(key => {
+                mapVotes[key] = [];
+                mpVoteData[key] = 0;
+            });
+
+            renderMapCards();
+            startMpVoteTimer();
+        }
+
+        function startMpVoteTimer() {
+            if (voteTimer) clearInterval(voteTimer);
+            voteTimeLeft = 10;
+            document.getElementById('voteTimer').textContent = voteTimeLeft;
+
+            voteTimer = setInterval(() => {
+                voteTimeLeft--;
+                document.getElementById('voteTimer').textContent = voteTimeLeft;
+
+                if (isHost) {
+                    broadcastToClients({
+                        type: 'vote-state',
+                        mapVotes: mapVotes,
+                        timeLeft: voteTimeLeft
+                    });
+                }
+
+                if (voteTimeLeft <= 0) {
+                    clearInterval(voteTimer);
+                    if (isHost) {
+                        endMpVoting();
+                    }
+                }
+            }, 1000);
+        }
+
+        function handleRemoteVote(peerId, mapKey) {
+            if (!isHost) return;
+            const player = lobbyPlayers.find(p => p.peerId === peerId);
+            if (!player) return;
+
+            // Remove previous vote
+            Object.keys(mapVotes).forEach(key => {
+                mapVotes[key] = mapVotes[key].filter(v => v.peerId !== peerId);
+            });
+
+            mapVotes[mapKey].push({ team: player.team, isPlayer: false, peerId: peerId });
+            updateMapVoteDisplay();
+        }
+
+        function endMpVoting() {
+            if (!playerVote) {
+                playerVote = Object.keys(maps)[Math.floor(Math.random() * Object.keys(maps).length)];
+                mapVotes[playerVote].push({ team: 'blue', isPlayer: true });
+            }
+
+            // Count votes
+            let maxVotes = 0;
+            let winningMaps = [];
+            Object.entries(mapVotes).forEach(([key, votes]) => {
+                if (votes.length > maxVotes) {
+                    maxVotes = votes.length;
+                    winningMaps = [key];
+                } else if (votes.length === maxVotes) {
+                    winningMaps.push(key);
+                }
+            });
+
+            currentMap = winningMaps[Math.floor(Math.random() * winningMaps.length)];
+
+            document.querySelectorAll('.map-card').forEach(card => card.classList.remove('winner'));
+            document.getElementById(`mapCard_${currentMap}`).classList.add('winner');
+
+            // Tell clients what map won and start game
+            setTimeout(() => {
+                const playerAssignments = lobbyPlayers.map((p, i) => ({
+                    peerId: p.peerId,
+                    name: p.name,
+                    team: p.team,
+                    skin: p.skin,
+                    index: i,
+                    selectedGuns: p.selectedGuns || ['pistol', 'grenade', null, null]
+                }));
+
+                broadcastToClients({
+                    type: 'game-start',
+                    map: currentMap,
+                    mode: mpGameMode,
+                    playerAssignments: playerAssignments
+                });
+
+                startMultiplayerHost(playerAssignments);
+            }, 2000);
+        }
+
+        // Client: start map voting
+        function startClientMapVoting(data) {
+            showScreen('mapVote');
+            playerVote = null;
+            mapVotes = {};
+            voteTimeLeft = data.duration || 10;
+
+            Object.keys(maps).forEach(key => {
+                mapVotes[key] = [];
+            });
+
+            renderMapCards();
+
+            // Client just renders, timer updates come from host
+            document.getElementById('voteTimer').textContent = voteTimeLeft;
+        }
+
+        function updateClientVoteDisplay(data) {
+            mapVotes = data.mapVotes;
+            voteTimeLeft = data.timeLeft;
+            document.getElementById('voteTimer').textContent = voteTimeLeft;
+            updateMapVoteDisplay();
+        }
+
+        // Host: start the actual multiplayer game
+        function startMultiplayerHost(playerAssignments) {
+            gameMode = mpGameMode;
+            showScreen('game');
+
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            players = [];
+            bullets = [];
+            blueKills = 0;
+            redKills = 0;
+            currentGunIndex = 0;
+            gameRunning = true;
+            aiNameIndex = 0;
+            playerPeerMap = {};
+
+            createPlatforms();
+
+            // Create players from assignments
+            playerAssignments.forEach((assignment, i) => {
+                const isMe = assignment.peerId === myPeerId;
+                const spawnX = assignment.team === 'blue' ? 100 + i * 80 : canvas.width - 100 - i * 80;
+                const player = createPlayer(spawnX, 100, assignment.team, isMe);
+                player.name = assignment.name;
+                player.isRemote = !isMe && true;
+                player.peerId = assignment.peerId;
+                if (assignment.skin && skins[assignment.skin]) {
+                    player.skin = skins[assignment.skin];
+                }
+                if (isMe) {
+                    player.isHuman = true;
+                    player.isRemote = false;
+                } else {
+                    player.isHuman = false; // Will be updated by remote input
+                    player.isRemote = true;
+                }
+                // Set their selected guns if provided
+                if (assignment.selectedGuns) {
+                    player.selectedGuns = assignment.selectedGuns;
+                    player.currentGun = assignment.selectedGuns[0] || 'pistol';
+                }
+                players.push(player);
+                playerPeerMap[i] = assignment.peerId;
+            });
+
+            // Fill remaining slots with AI
+            const blueReal = playerAssignments.filter(p => p.team === 'blue').length;
+            const redReal = playerAssignments.filter(p => p.team === 'red').length;
+            for (let i = blueReal; i < mpGameMode; i++) {
+                const ai = createPlayer(150 + players.length * 80, 100, 'blue', false);
+                players.push(ai);
+            }
+            for (let i = redReal; i < mpGameMode; i++) {
+                const ai = createPlayer(canvas.width - 150 - players.length * 80, 100, 'red', false);
+                players.push(ai);
+            }
+
+            updateGunSlots();
+            updateLeaderboard();
+            document.getElementById('blueScore').textContent = '0';
+            document.getElementById('redScore').textContent = '0';
+
+            requestAnimationFrame(mpHostGameLoop);
+        }
+
+        // Client: start game from host's signal
+        function startMultiplayerClient(data) {
+            currentMap = data.map;
+            gameMode = data.mode;
+            mpGameMode = data.mode;
+            showScreen('game');
+
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            players = [];
+            bullets = [];
+            blueKills = 0;
+            redKills = 0;
+            currentGunIndex = 0;
+            gameRunning = true;
+            playerPeerMap = {};
+
+            createPlatforms();
+
+            // Create placeholder players from assignments
+            data.playerAssignments.forEach((assignment, i) => {
+                const isMe = assignment.peerId === myPeerId;
+                const spawnX = assignment.team === 'blue' ? 100 + i * 80 : canvas.width - 100 - i * 80;
+                const player = createPlayer(spawnX, 100, assignment.team, isMe);
+                player.name = assignment.name;
+                player.peerId = assignment.peerId;
+                if (assignment.skin && skins[assignment.skin]) {
+                    player.skin = skins[assignment.skin];
+                }
+                if (isMe) {
+                    player.isHuman = true;
+                }
+                players.push(player);
+                playerPeerMap[i] = assignment.peerId;
+            });
+
+            updateGunSlots();
+            updateLeaderboard();
+            document.getElementById('blueScore').textContent = '0';
+            document.getElementById('redScore').textContent = '0';
+
+            // Start client render loop
+            requestAnimationFrame(mpClientGameLoop);
+        }
+
+        // Host game loop: runs simulation + broadcasts state
+        function mpHostGameLoop(timestamp) {
+            if (!gameRunning) return;
+
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawBackground();
+
+            const map = maps[currentMap];
+            platforms.forEach(p => {
+                if (p.isLava) return;
+                ctx.fillStyle = map.platformColor;
+                ctx.fillRect(p.x, p.y, p.width, p.height);
+                if (map.neonGlow) {
+                    ctx.shadowColor = map.platformColor;
+                    ctx.shadowBlur = 15;
+                    ctx.strokeStyle = '#00ffff';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(p.x, p.y, p.width, p.height);
+                    ctx.shadowBlur = 0;
+                } else {
+                    ctx.strokeStyle = '#636e72';
+                    ctx.strokeRect(p.x, p.y, p.width, p.height);
+                }
+            });
+
+            walls.forEach(wall => {
+                ctx.fillStyle = map.bounceWalls ? '#666' : '#444';
+                ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+                if (map.bounceWalls) {
+                    ctx.strokeStyle = '#ffff00';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(wall.x, wall.y, wall.width, wall.height);
+                }
+            });
+
+            // Update players
+            players.forEach(player => {
+                if (player.alive) {
+                    if (player.isHuman) {
+                        updateHumanPlayer(player, timestamp);
+                    } else if (player.isRemote) {
+                        updateRemotePlayer(player, timestamp);
+                    } else {
+                        updateAIPlayer(player, timestamp);
+                    }
+                    updatePlayerPhysics(player);
+                    drawPlayer(player);
+                } else {
+                    player.respawnTimer -= 16;
+                    if (player.respawnTimer <= 0) {
+                        respawnPlayer(player);
+                    }
+                }
+            });
+
+            updateBullets();
+            drawBullets();
+            drawHeadshotIndicators();
+
+            if (isScoped) drawScopeOverlay();
+
+            if (whiteFlashTimer > 0) {
+                const flashAlpha = whiteFlashTimer > 30 ? 1 : whiteFlashTimer / 30;
+                ctx.fillStyle = `rgba(255, 255, 255, ${flashAlpha})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                if (whiteFlashTimer > 40) {
+                    ctx.fillStyle = '#ff0000';
+                    ctx.font = 'bold 72px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('☢️ NUKE! ☢️', canvas.width / 2, canvas.height / 2);
+                }
+                whiteFlashTimer--;
+            }
+
+            // Draw ammo for human player
+            const humanPlayer = players.find(p => p.isHuman);
+            if (humanPlayer) {
+                drawAmmoDisplay(humanPlayer);
+            }
+
+            updateLeaderboard();
+
+            // Broadcast state at 20Hz
+            if (timestamp - lastStateBroadcast > 50) {
+                lastStateBroadcast = timestamp;
+                broadcastGameState();
+            }
+
+            if (blueKills >= KILLS_TO_WIN || redKills >= KILLS_TO_WIN) {
+                const blueWon = blueKills >= KILLS_TO_WIN;
+                broadcastToClients({ type: 'game-over', blueWon: blueWon });
+                endMpGame(blueWon);
+                return;
+            }
+
+            requestAnimationFrame(mpHostGameLoop);
+        }
+
+        // Update remote player from network input
+        function updateRemotePlayer(player, timestamp) {
+            const input = remoteInputs[player.peerId];
+            if (!input) {
+                // No input yet, treat as idle
+                player.vx = 0;
+                return;
+            }
+
+            // Movement
+            if (input.keys && input.keys['a']) player.vx = -5;
+            else if (input.keys && input.keys['d']) player.vx = 5;
+            else player.vx = 0;
+
+            // Jump
+            if (input.keys && (input.keys['w'] || input.keys[' ']) && player.onGround) {
+                player.vy = -15;
+                player.onGround = false;
+            }
+
+            // Facing direction based on remote mouse
+            const relativeMouseX = input.mouseX || 0;
+            player.facingRight = relativeMouseX > 0.5; // Normalized: 0-1
+
+            // Gun switching
+            if (input.gunIndex !== undefined && player.selectedGuns) {
+                const gunKey = player.selectedGuns[input.gunIndex];
+                if (gunKey) player.currentGun = gunKey;
+            }
+
+            // Gun angle from remote
+            if (input.gunAngle !== undefined) {
+                player.gunAngle = input.gunAngle;
+            }
+
+            // Reload
+            updateReload(player);
+
+            // Shooting
+            const currentGunKey = player.currentGun;
+            const currentGun = guns[currentGunKey];
+            if (input.mouseDown && currentGun && timestamp - player.lastShot > currentGun.fireRate) {
+                if (canShoot(player, currentGunKey)) {
+                    // Calculate target from angle
+                    const armX = player.x + player.width / 2;
+                    const armY = player.y + 28;
+                    const targetX = armX + Math.cos(player.gunAngle) * 500;
+                    const targetY = armY + Math.sin(player.gunAngle) * 500;
+                    shoot(player, currentGun, targetX, targetY);
+                    consumeAmmo(player, currentGunKey);
+                    player.lastShot = timestamp;
+                } else if (!player.reloading) {
+                    startReload(player, currentGunKey);
+                }
+            }
+
+            // Auto-reload when not shooting
+            if (!input.mouseDown && player.ammo[currentGunKey] < currentGun?.magSize && !player.reloading) {
+                startReload(player, currentGunKey);
+            }
+        }
+
+        // Broadcast game state from host to clients
+        function broadcastGameState() {
+            const statePlayers = players.map(p => ({
+                x: p.x,
+                y: p.y,
+                vx: p.vx,
+                vy: p.vy,
+                health: p.health,
+                alive: p.alive,
+                facingRight: p.facingRight,
+                gunAngle: p.gunAngle,
+                currentGun: p.currentGun,
+                name: p.name,
+                team: p.team,
+                peerId: p.peerId,
+                kills: p.kills,
+                reloading: p.reloading ? true : false,
+                respawnTimer: p.respawnTimer
+            }));
+
+            const stateBullets = bullets.map(b => ({
+                x: b.x,
+                y: b.y,
+                vx: b.vx,
+                vy: b.vy,
+                color: b.color,
+                size: b.size,
+                isGrenade: b.isGrenade,
+                isSuperGrenade: b.isSuperGrenade,
+                team: b.team
+            }));
+
+            broadcastToClients({
+                type: 'game-state',
+                players: statePlayers,
+                bullets: stateBullets,
+                blueKills: blueKills,
+                redKills: redKills,
+                whiteFlash: whiteFlashTimer
+            });
+        }
+
+        // Client game loop: renders state from host + sends input
+        function mpClientGameLoop(timestamp) {
+            if (!gameRunning) return;
+
+            // Send input to host
+            if (hostConnection) {
+                const humanPlayer = players.find(p => p.isHuman);
+                const armX = humanPlayer ? humanPlayer.x + humanPlayer.width / 2 : 0;
+                const armY = humanPlayer ? humanPlayer.y + 28 : 0;
+                const gunAngle = Math.atan2(mouseY - armY, mouseX - armX);
+
+                hostConnection.send({
+                    type: 'input',
+                    keys: { a: !!keys['a'], d: !!keys['d'], w: !!keys['w'], ' ': !!keys[' '], r: !!keys['r'] },
+                    mouseX: mouseX / window.innerWidth, // Normalized
+                    mouseY: mouseY / window.innerHeight,
+                    mouseDown: mouseDown,
+                    gunIndex: currentGunIndex,
+                    gunAngle: gunAngle
+                });
+            }
+
+            // Apply latest game state from host
+            if (clientGameState) {
+                // Update players from state
+                if (clientGameState.players) {
+                    clientGameState.players.forEach((sp, i) => {
+                        if (i < players.length) {
+                            const p = players[i];
+                            // Don't snap local player position (feels laggy), but update others
+                            if (!p.isHuman) {
+                                p.x = sp.x;
+                                p.y = sp.y;
+                                p.vx = sp.vx;
+                                p.vy = sp.vy;
+                            }
+                            p.health = sp.health;
+                            p.alive = sp.alive;
+                            p.facingRight = sp.facingRight;
+                            p.gunAngle = sp.gunAngle;
+                            p.currentGun = sp.currentGun;
+                            p.name = sp.name;
+                            p.kills = sp.kills;
+                            p.respawnTimer = sp.respawnTimer;
+                        }
+                    });
+                }
+
+                // Update bullets
+                if (clientGameState.bullets) {
+                    bullets = clientGameState.bullets;
+                }
+
+                blueKills = clientGameState.blueKills || 0;
+                redKills = clientGameState.redKills || 0;
+                whiteFlashTimer = clientGameState.whiteFlash || 0;
+
+                document.getElementById('blueScore').textContent = blueKills;
+                document.getElementById('redScore').textContent = redKills;
+            }
+
+            // Render
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawBackground();
+
+            const map = maps[currentMap];
+            platforms.forEach(p => {
+                if (p.isLava) return;
+                ctx.fillStyle = map.platformColor;
+                ctx.fillRect(p.x, p.y, p.width, p.height);
+                if (map.neonGlow) {
+                    ctx.shadowColor = map.platformColor;
+                    ctx.shadowBlur = 15;
+                    ctx.strokeStyle = '#00ffff';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(p.x, p.y, p.width, p.height);
+                    ctx.shadowBlur = 0;
+                } else {
+                    ctx.strokeStyle = '#636e72';
+                    ctx.strokeRect(p.x, p.y, p.width, p.height);
+                }
+            });
+
+            walls.forEach(wall => {
+                ctx.fillStyle = map.bounceWalls ? '#666' : '#444';
+                ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+                if (map.bounceWalls) {
+                    ctx.strokeStyle = '#ffff00';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(wall.x, wall.y, wall.width, wall.height);
+                }
+            });
+
+            // Move local player locally for responsiveness
+            const humanPlayer = players.find(p => p.isHuman);
+            if (humanPlayer && humanPlayer.alive) {
+                // Local movement prediction
+                if (keys['a']) humanPlayer.vx = -5;
+                else if (keys['d']) humanPlayer.vx = 5;
+                else humanPlayer.vx = 0;
+                if ((keys['w'] || keys[' ']) && humanPlayer.onGround) {
+                    humanPlayer.vy = -15;
+                    humanPlayer.onGround = false;
+                }
+                humanPlayer.facingRight = mouseX > humanPlayer.x + humanPlayer.width / 2;
+                humanPlayer.currentGun = selectedGuns[currentGunIndex];
+                const armX = humanPlayer.x + humanPlayer.width / 2;
+                const armY = humanPlayer.y + 28;
+                humanPlayer.gunAngle = Math.atan2(mouseY - armY, mouseX - armX);
+                updatePlayerPhysics(humanPlayer);
+            }
+
+            // Draw all players
+            players.forEach(player => {
+                if (player.alive) {
+                    drawPlayer(player);
+                }
+            });
+
+            // Draw bullets
+            drawBullets();
+
+            if (isScoped) drawScopeOverlay();
+
+            if (whiteFlashTimer > 0) {
+                const flashAlpha = whiteFlashTimer > 30 ? 1 : whiteFlashTimer / 30;
+                ctx.fillStyle = `rgba(255, 255, 255, ${flashAlpha})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // Draw ammo
+            if (humanPlayer) {
+                drawAmmoDisplay(humanPlayer);
+            }
+
+            updateLeaderboard();
+
+            requestAnimationFrame(mpClientGameLoop);
+        }
+
+        // Shared ammo display function (extracted from gameLoop)
+        function drawAmmoDisplay(humanPlayer) {
+            const currentGunKey = humanPlayer.isHuman ? selectedGuns[currentGunIndex] : humanPlayer.currentGun;
+            const currentGun = guns[currentGunKey];
+            if (!currentGun) return;
+
+            const ammoX = canvas.width / 2;
+            const ammoY = canvas.height - 100;
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.fillRect(ammoX - 100, ammoY - 25, 200, 80);
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(ammoX - 100, ammoY - 25, 200, 80);
+
+            if (currentGun.infiniteAmmo) {
+                ctx.fillStyle = '#00ffff';
+                ctx.font = 'bold 36px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('∞', ammoX, ammoY + 15);
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText('INFINITE AMMO', ammoX, ammoY + 38);
+            } else if (humanPlayer.reloading === currentGunKey) {
+                const reloadProgress = 1 - (humanPlayer.reloadEndTime - Date.now()) / currentGun.reloadTime;
+                ctx.fillStyle = '#ffaa00';
+                ctx.font = 'bold 22px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('RELOADING...', ammoX, ammoY + 5);
+                ctx.fillStyle = '#333';
+                ctx.fillRect(ammoX - 70, ammoY + 15, 140, 14);
+                ctx.fillStyle = '#ffaa00';
+                ctx.fillRect(ammoX - 70, ammoY + 15, 140 * Math.min(1, reloadProgress), 14);
+                ctx.strokeStyle = '#ffaa00';
+                ctx.strokeRect(ammoX - 70, ammoY + 15, 140, 14);
+            } else {
+                const ammo = humanPlayer.ammo[currentGunKey];
+                const maxAmmo = currentGun.magSize;
+                ctx.font = 'bold 14px Arial';
+                ctx.fillStyle = '#888';
+                ctx.textAlign = 'center';
+                ctx.fillText(currentGun.name.toUpperCase(), ammoX, ammoY - 5);
+                ctx.fillStyle = ammo === 0 ? '#ff4444' : (ammo <= maxAmmo * 0.3 ? '#ffaa00' : '#ffffff');
+                ctx.font = 'bold 36px Arial';
+                ctx.fillText(`${ammo} / ${maxAmmo}`, ammoX, ammoY + 30);
+                if (ammo < maxAmmo) {
+                    ctx.font = 'bold 12px Arial';
+                    ctx.fillStyle = ammo === 0 ? '#ff6666' : '#66ff66';
+                    ctx.fillText('[R] RELOAD', ammoX, ammoY + 48);
+                }
+            }
+        }
+
+        // Handle multiplayer game over
+        function endMpGame(blueWon) {
+            gameRunning = false;
+
+            // Find which team the local player is on
+            const myPlayer = lobbyPlayers.find(p => p.peerId === myPeerId);
+            const myTeam = myPlayer ? myPlayer.team : 'blue';
+            const playerWon = (myTeam === 'blue' && blueWon) || (myTeam === 'red' && !blueWon);
+
+            showScreen('victory');
+
+            const resultText = document.getElementById('resultText');
+            const rewardText = document.getElementById('rewardText');
+            const dancer = document.getElementById('dancerEmoji');
+
+            if (playerWon) {
+                resultText.className = 'victory-text';
+                resultText.textContent = 'VICTORY!';
+                rewardText.textContent = '+$20 Reward!';
+                dancer.textContent = '🕺';
+                dancer.style.display = 'block';
+                money += 20;
+            } else {
+                resultText.className = 'defeat-text';
+                resultText.textContent = 'DEFEAT';
+                rewardText.textContent = 'Better luck next time!';
+                dancer.style.display = 'none';
+            }
+
+            saveCurrentUserData();
+            cleanupMultiplayer();
+        }
+
+        function handleMpGameOver(data) {
+            endMpGame(data.blueWon);
+        }
+
+        function leaveMpLobby() {
+            cleanupMultiplayer();
+            showModeSelect();
+        }
+
+        function cleanupMultiplayer() {
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+            hostConnection = null;
+            connections = {};
+            remoteInputs = {};
+            isMultiplayer = false;
+            isHost = false;
+            lobbyPlayers = [];
+            clientGameState = null;
+            playerPeerMap = {};
         }
 
         // Armor System
@@ -1990,6 +3259,11 @@
             // Update card selection
             document.querySelectorAll('.map-card').forEach(card => card.classList.remove('selected'));
             document.getElementById(`mapCard_${mapKey}`).classList.add('selected');
+
+            // Multiplayer: send vote to host
+            if (isMultiplayer && !isHost && hostConnection) {
+                hostConnection.send({ type: 'map-vote', mapKey: mapKey });
+            }
         }
 
         function updateMapVoteDisplay() {
