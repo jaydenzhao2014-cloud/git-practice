@@ -2491,8 +2491,20 @@
                     clientGameState.players.forEach((sp, i) => {
                         if (i < players.length) {
                             const p = players[i];
-                            // Don't snap local player position (feels laggy), but update others
-                            if (!p.isHuman) {
+                            if (p.isHuman) {
+                                // Smoothly correct local player toward host position
+                                // This prevents drift while keeping movement responsive
+                                const dx = sp.x - p.x;
+                                const dy = sp.y - p.y;
+                                const correctionStrength = 0.3;
+                                if (Math.abs(dx) > 2) p.x += dx * correctionStrength;
+                                if (Math.abs(dy) > 2) p.y += dy * correctionStrength;
+                                // Snap if too far off (e.g. after respawn)
+                                if (Math.abs(dx) > 100 || Math.abs(dy) > 100) {
+                                    p.x = sp.x;
+                                    p.y = sp.y;
+                                }
+                            } else {
                                 p.x = sp.x;
                                 p.y = sp.y;
                                 p.vx = sp.vx;
@@ -2500,8 +2512,8 @@
                             }
                             p.health = sp.health;
                             p.alive = sp.alive;
-                            p.facingRight = sp.facingRight;
-                            p.gunAngle = sp.gunAngle;
+                            if (!p.isHuman) p.facingRight = sp.facingRight;
+                            if (!p.isHuman) p.gunAngle = sp.gunAngle;
                             p.currentGun = sp.currentGun;
                             p.name = sp.name;
                             p.kills = sp.kills;
