@@ -1301,7 +1301,7 @@
             <div class="rivals-tagline">Fight for glory</div>
         </div>
         <div class="auth-container">
-            <h2 class="auth-title" id="authTitle">Welcome Back!</h2>
+            <h2 class="auth-title" id="authTitle">Welcome Back player!</h2>
             <p class="auth-subtitle" id="authSubtitle">Enter your email to continue</p>
             <input type="email" class="auth-input" id="emailInput" placeholder="Enter your email...">
             <div class="auth-error" id="authError"></div>
@@ -1666,6 +1666,8 @@
         }
 
         // ========== MULTIPLAYER SYSTEM ==========
+        const GAME_WIDTH = 1920;    // Fixed game world size for multiplayer sync
+        const GAME_HEIGHT = 1080;
         let peer = null;
         let connections = {};       // peerId -> DataConnection
         let isHost = false;
@@ -1679,6 +1681,31 @@
         let clientGameState = null; // Latest state received from host
         let mpGameMode = 3;         // Multiplayer always uses team sizes up to 3v3
         let playerPeerMap = {};     // Maps player index in players[] to peerId
+        let frameDt = 1;            // Delta time normalized to 60fps (1.0 = 16.67ms)
+        let lastFrameTime = 0;     // Timestamp of last frame
+        let cachedHumanPlayer = null; // Cached reference to local human player
+        // Interpolation state for client
+        let prevClientGameState = null;
+        let clientStateTimestamp = 0;
+        let prevClientStateTimestamp = 0;
+        // Input throttling
+        let lastInputSend = 0;
+        // Leaderboard optimization
+        let lastLeaderboardKills = '';
+
+        // Get mouse coordinates scaled to canvas space (for multiplayer fixed resolution)
+        function getGameMouseX() {
+            if (isMultiplayer && canvas && canvas.clientWidth > 0) {
+                return mouseX * (canvas.width / canvas.clientWidth);
+            }
+            return mouseX;
+        }
+        function getGameMouseY() {
+            if (isMultiplayer && canvas && canvas.clientHeight > 0) {
+                return mouseY * (canvas.height / canvas.clientHeight);
+            }
+            return mouseY;
+        }
 
         function generateRoomCode() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -1904,7 +1931,10 @@
                     break;
 
                 case 'game-state':
+                    prevClientGameState = clientGameState;
+                    prevClientStateTimestamp = clientStateTimestamp;
                     clientGameState = data;
+                    clientStateTimestamp = performance.now();
                     break;
 
                 case 'game-over':
@@ -2112,7 +2142,9 @@
                     type: 'game-start',
                     map: currentMap,
                     mode: mpGameMode,
-                    playerAssignments: playerAssignments
+                    playerAssignments: playerAssignments,
+                    gameWidth: GAME_WIDTH,
+                    gameHeight: GAME_HEIGHT
                 });
 
                 startMultiplayerHost(playerAssignments);
@@ -2150,8 +2182,8 @@
 
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = GAME_WIDTH;
+            canvas.height = GAME_HEIGHT;
 
             players = [];
             bullets = [];
@@ -2161,6 +2193,8 @@
             gameRunning = true;
             aiNameIndex = 0;
             playerPeerMap = {};
+            lastFrameTime = 0;
+            lastLeaderboardKills = '';
 
             createPlatforms();
 
@@ -2179,10 +2213,9 @@
                     player.isHuman = true;
                     player.isRemote = false;
                 } else {
-                    player.isHuman = false; // Will be updated by remote input
+                    player.isHuman = false;
                     player.isRemote = true;
                 }
-                // Set their selected guns if provided
                 if (assignment.selectedGuns) {
                     player.selectedGuns = assignment.selectedGuns;
                     player.currentGun = assignment.selectedGuns[0] || 'pistol';
@@ -2203,6 +2236,7 @@
                 players.push(ai);
             }
 
+            cachedHumanPlayer = players.find(p => p.isHuman);
             updateGunSlots();
             updateLeaderboard();
             document.getElementById('blueScore').textContent = '0';
@@ -2220,8 +2254,9 @@
 
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            // Use host's game world dimensions for consistent platforms/physics
+            canvas.width = data.gameWidth || GAME_WIDTH;
+            canvas.height = data.gameHeight || GAME_HEIGHT;
 
             players = [];
             bullets = [];
@@ -2230,6 +2265,12 @@
             currentGunIndex = 0;
             gameRunning = true;
             playerPeerMap = {};
+            lastFrameTime = 0;
+            lastLeaderboardKills = '';
+            prevClientGameState = null;
+            clientStateTimestamp = 0;
+            prevClientStateTimestamp = 0;
+            lastInputSend = 0;
 
             createPlatforms();
 
@@ -2250,6 +2291,7 @@
                 playerPeerMap[i] = assignment.peerId;
             });
 
+            cachedHumanPlayer = players.find(p => p.isHuman);
             updateGunSlots();
             updateLeaderboard();
             document.getElementById('blueScore').textContent = '0';
@@ -2262,6 +2304,11 @@
         // Host game loop: runs simulation + broadcasts state
         function mpHostGameLoop(timestamp) {
             if (!gameRunning) return;
+
+            // Delta time (normalized to 60fps: 1.0 = one 16.67ms frame)
+            if (!lastFrameTime) lastFrameTime = timestamp;
+            frameDt = Math.min((timestamp - lastFrameTime) / 16.667, 3);
+            lastFrameTime = timestamp;
 
             ctx.fillStyle = '#1a1a2e';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -2308,7 +2355,7 @@
                     updatePlayerPhysics(player);
                     drawPlayer(player);
                 } else {
-                    player.respawnTimer -= 16;
+                    player.respawnTimer -= 16.667 * frameDt;
                     if (player.respawnTimer <= 0) {
                         respawnPlayer(player);
                     }
@@ -2335,9 +2382,8 @@
             }
 
             // Draw ammo for human player
-            const humanPlayer = players.find(p => p.isHuman);
-            if (humanPlayer) {
-                drawAmmoDisplay(humanPlayer);
+            if (cachedHumanPlayer) {
+                drawAmmoDisplay(cachedHumanPlayer);
             }
 
             updateLeaderboard();
@@ -2388,9 +2434,9 @@
                 if (gunKey) player.currentGun = gunKey;
             }
 
-            // Gun angle from remote
+            // Gun angle from remote (clamped same as host player)
             if (input.gunAngle !== undefined) {
-                player.gunAngle = input.gunAngle;
+                player.gunAngle = Math.max(-0.8, Math.min(0.8, input.gunAngle));
             }
 
             // Reload
@@ -2422,29 +2468,32 @@
 
         // Broadcast game state from host to clients
         function broadcastGameState() {
-            const statePlayers = players.map(p => ({
-                x: p.x,
-                y: p.y,
-                vx: p.vx,
-                vy: p.vy,
-                health: p.health,
-                alive: p.alive,
-                facingRight: p.facingRight,
-                gunAngle: p.gunAngle,
-                currentGun: p.currentGun,
-                name: p.name,
-                team: p.team,
-                peerId: p.peerId,
-                kills: p.kills,
-                reloading: p.reloading ? true : false,
-                respawnTimer: p.respawnTimer
-            }));
+            // Optimized: removed static fields (name, team, peerId), rounded numbers
+            const statePlayers = players.map(p => {
+                if (!p.alive) {
+                    return { alive: false, kills: p.kills, respawnTimer: Math.round(p.respawnTimer) };
+                }
+                return {
+                    x: Math.round(p.x),
+                    y: Math.round(p.y),
+                    vx: +(p.vx.toFixed(1)),
+                    vy: +(p.vy.toFixed(1)),
+                    health: p.health,
+                    alive: true,
+                    facingRight: p.facingRight,
+                    gunAngle: +(p.gunAngle.toFixed(2)),
+                    currentGun: p.currentGun,
+                    kills: p.kills,
+                    reloading: p.reloading ? true : false,
+                    respawnTimer: Math.round(p.respawnTimer)
+                };
+            });
 
             const stateBullets = bullets.map(b => ({
-                x: b.x,
-                y: b.y,
-                vx: b.vx,
-                vy: b.vy,
+                x: Math.round(b.x),
+                y: Math.round(b.y),
+                vx: +(b.vx.toFixed(1)),
+                vy: +(b.vy.toFixed(1)),
                 color: b.color,
                 size: b.size,
                 isGrenade: b.isGrenade,
@@ -2452,31 +2501,43 @@
                 team: b.team
             }));
 
-            broadcastToClients({
+            const state = {
                 type: 'game-state',
                 players: statePlayers,
                 bullets: stateBullets,
                 blueKills: blueKills,
                 redKills: redKills,
                 whiteFlash: whiteFlashTimer
-            });
+            };
+
+            broadcastToClients(state);
         }
 
         // Client game loop: renders state from host + sends input
         function mpClientGameLoop(timestamp) {
             if (!gameRunning) return;
 
-            // Send input to host
-            if (hostConnection) {
-                const humanPlayer = players.find(p => p.isHuman);
-                const armX = humanPlayer ? humanPlayer.x + humanPlayer.width / 2 : 0;
-                const armY = humanPlayer ? humanPlayer.y + 28 : 0;
-                const gunAngle = Math.atan2(mouseY - armY, mouseX - armX);
+            // Delta time (normalized to 60fps)
+            if (!lastFrameTime) lastFrameTime = timestamp;
+            frameDt = Math.min((timestamp - lastFrameTime) / 16.667, 3);
+            lastFrameTime = timestamp;
+
+            // Scaled mouse coords for canvas space
+            const gmx = getGameMouseX();
+            const gmy = getGameMouseY();
+
+            // Send input to host (throttled to ~60Hz)
+            if (hostConnection && timestamp - lastInputSend > 16) {
+                lastInputSend = timestamp;
+                const hp = cachedHumanPlayer;
+                const armX = hp ? hp.x + hp.width / 2 : 0;
+                const armY = hp ? hp.y + 28 : 0;
+                const gunAngle = Math.atan2(gmy - armY, gmx - armX);
 
                 hostConnection.send({
                     type: 'input',
                     keys: { a: !!keys['a'], d: !!keys['d'], w: !!keys['w'], ' ': !!keys[' '], r: !!keys['r'] },
-                    mouseX: mouseX / window.innerWidth, // Normalized
+                    mouseX: mouseX / window.innerWidth,
                     mouseY: mouseY / window.innerHeight,
                     mouseDown: mouseDown,
                     gunIndex: currentGunIndex,
@@ -2484,47 +2545,66 @@
                 });
             }
 
-            // Apply latest game state from host
+            // Apply latest game state from host with interpolation
             if (clientGameState) {
-                // Update players from state
+                // Calculate interpolation factor for remote players
+                const now = performance.now();
+                const elapsed = now - clientStateTimestamp;
+                const interval = (clientStateTimestamp - prevClientStateTimestamp) || 50;
+                const interpT = Math.min(elapsed / interval, 2);
+
                 if (clientGameState.players) {
                     clientGameState.players.forEach((sp, i) => {
                         if (i < players.length) {
                             const p = players[i];
                             if (p.isHuman) {
                                 // Smoothly correct local player toward host position
-                                // This prevents drift while keeping movement responsive
-                                const dx = sp.x - p.x;
-                                const dy = sp.y - p.y;
-                                const correctionStrength = 0.3;
-                                if (Math.abs(dx) > 2) p.x += dx * correctionStrength;
-                                if (Math.abs(dy) > 2) p.y += dy * correctionStrength;
-                                // Snap if too far off (e.g. after respawn)
-                                if (Math.abs(dx) > 100 || Math.abs(dy) > 100) {
-                                    p.x = sp.x;
-                                    p.y = sp.y;
+                                // Frame-rate independent correction: ~30% per 16.67ms
+                                if (sp.alive !== false) {
+                                    const dx = sp.x - p.x;
+                                    const dy = sp.y - p.y;
+                                    const correctionStrength = 1 - Math.pow(0.7, frameDt);
+                                    if (Math.abs(dx) > 5) p.x += dx * correctionStrength;
+                                    if (Math.abs(dy) > 5) p.y += dy * correctionStrength;
+                                    if (Math.abs(dx) > 100 || Math.abs(dy) > 100) {
+                                        p.x = sp.x;
+                                        p.y = sp.y;
+                                    }
                                 }
                             } else {
-                                p.x = sp.x;
-                                p.y = sp.y;
-                                p.vx = sp.vx;
-                                p.vy = sp.vy;
+                                // Interpolate remote players between prev and current state
+                                const pp = prevClientGameState && prevClientGameState.players ? prevClientGameState.players[i] : null;
+                                if (pp && pp.alive !== false && sp.alive !== false && interpT <= 1.5) {
+                                    p.x = pp.x + (sp.x - pp.x) * interpT;
+                                    p.y = pp.y + (sp.y - pp.y) * interpT;
+                                } else {
+                                    p.x = sp.x || 0;
+                                    p.y = sp.y || 0;
+                                }
+                                p.vx = sp.vx || 0;
+                                p.vy = sp.vy || 0;
                             }
                             p.health = sp.health;
                             p.alive = sp.alive;
-                            if (!p.isHuman) p.facingRight = sp.facingRight;
-                            if (!p.isHuman) p.gunAngle = sp.gunAngle;
+                            if (!p.isHuman) {
+                                p.facingRight = sp.facingRight;
+                                p.gunAngle = sp.gunAngle;
+                            }
                             p.currentGun = sp.currentGun;
-                            p.name = sp.name;
                             p.kills = sp.kills;
                             p.respawnTimer = sp.respawnTimer;
                         }
                     });
                 }
 
-                // Update bullets
+                // Update bullets with local prediction (advance by time since state arrived)
                 if (clientGameState.bullets) {
-                    bullets = clientGameState.bullets;
+                    const bulletDt = elapsed / 16.667;
+                    bullets = clientGameState.bullets.map(b => ({
+                        ...b,
+                        x: b.x + (b.vx || 0) * bulletDt,
+                        y: b.y + (b.vy || 0) * bulletDt
+                    }));
                 }
 
                 blueKills = clientGameState.blueKills || 0;
@@ -2569,22 +2649,21 @@
             });
 
             // Move local player locally for responsiveness
-            const humanPlayer = players.find(p => p.isHuman);
-            if (humanPlayer && humanPlayer.alive) {
-                // Local movement prediction
-                if (keys['a']) humanPlayer.vx = -5;
-                else if (keys['d']) humanPlayer.vx = 5;
-                else humanPlayer.vx = 0;
-                if ((keys['w'] || keys[' ']) && humanPlayer.onGround) {
-                    humanPlayer.vy = -15;
-                    humanPlayer.onGround = false;
+            const hp = cachedHumanPlayer;
+            if (hp && hp.alive) {
+                if (keys['a']) hp.vx = -5;
+                else if (keys['d']) hp.vx = 5;
+                else hp.vx = 0;
+                if ((keys['w'] || keys[' ']) && hp.onGround) {
+                    hp.vy = -15;
+                    hp.onGround = false;
                 }
-                humanPlayer.facingRight = mouseX > humanPlayer.x + humanPlayer.width / 2;
-                humanPlayer.currentGun = selectedGuns[currentGunIndex];
-                const armX = humanPlayer.x + humanPlayer.width / 2;
-                const armY = humanPlayer.y + 28;
-                humanPlayer.gunAngle = Math.atan2(mouseY - armY, mouseX - armX);
-                updatePlayerPhysics(humanPlayer);
+                hp.facingRight = gmx > hp.x + hp.width / 2;
+                hp.currentGun = selectedGuns[currentGunIndex];
+                const armX = hp.x + hp.width / 2;
+                const armY = hp.y + 28;
+                hp.gunAngle = Math.atan2(gmy - armY, gmx - armX);
+                updatePlayerPhysics(hp);
             }
 
             // Draw all players
@@ -2594,7 +2673,6 @@
                 }
             });
 
-            // Draw bullets
             drawBullets();
 
             if (isScoped) drawScopeOverlay();
@@ -2605,9 +2683,8 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
-            // Draw ammo
-            if (humanPlayer) {
-                drawAmmoDisplay(humanPlayer);
+            if (hp) {
+                drawAmmoDisplay(hp);
             }
 
             updateLeaderboard();
@@ -3370,7 +3447,9 @@
             redKills = 0;
             currentGunIndex = 0;
             gameRunning = true;
-            aiNameIndex = 0; // Reset AI names
+            aiNameIndex = 0;
+            lastFrameTime = 0;
+            lastLeaderboardKills = '';
 
             // Create platforms
             createPlatforms();
@@ -3585,6 +3664,11 @@
             const entries = document.getElementById('leaderboardEntries');
             if (!entries) return;
 
+            // Skip DOM rebuild if kills haven't changed
+            const killsKey = players.map(p => p.kills).join(',');
+            if (killsKey === lastLeaderboardKills) return;
+            lastLeaderboardKills = killsKey;
+
             // Sort players by kills (descending)
             const sortedPlayers = [...players].sort((a, b) => b.kills - a.kills);
 
@@ -3681,6 +3765,11 @@
         function gameLoop(timestamp) {
             if (!gameRunning) return;
 
+            // Delta time (normalized to 60fps)
+            if (!lastFrameTime) lastFrameTime = timestamp;
+            frameDt = Math.min((timestamp - lastFrameTime) / 16.667, 3);
+            lastFrameTime = timestamp;
+
             // Clear
             ctx.fillStyle = '#1a1a2e';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -3735,7 +3824,7 @@
                     updatePlayerPhysics(player);
                     drawPlayer(player);
                 } else {
-                    player.respawnTimer -= 16;
+                    player.respawnTimer -= 16.667 * frameDt;
                     if (player.respawnTimer <= 0) {
                         respawnPlayer(player);
                     }
@@ -3846,8 +3935,8 @@
 
         // Scope overlay for Super Sniper - follows cursor
         function drawScopeOverlay() {
-            const centerX = mouseX; // Follow cursor
-            const centerY = mouseY; // Follow cursor
+            const centerX = getGameMouseX();
+            const centerY = getGameMouseY();
             const scopeRadius = 120;
 
             // Dark vignette around scope
@@ -4056,8 +4145,12 @@
                 player.onGround = false;
             }
 
+            // Use scaled mouse for multiplayer (canvas != screen size)
+            const gmx = getGameMouseX();
+            const gmy = getGameMouseY();
+
             // Facing direction
-            player.facingRight = mouseX > player.x + player.width / 2;
+            player.facingRight = gmx > player.x + player.width / 2;
 
             // Update current gun
             player.currentGun = selectedGuns[currentGunIndex];
@@ -4065,8 +4158,7 @@
             // Calculate gun angle based on mouse position
             const armX = player.x + player.width / 2;
             const armY = player.y + 28;
-            const angle = Math.atan2(mouseY - armY, mouseX - armX);
-            // Clamp angle to reasonable range
+            const angle = Math.atan2(gmy - armY, gmx - armX);
             player.gunAngle = Math.max(-0.8, Math.min(0.8, angle));
 
             // Update reload state
@@ -4077,18 +4169,17 @@
             const currentGun = guns[currentGunKey];
             if (mouseDown && currentGun && timestamp - player.lastShot > currentGun.fireRate) {
                 if (canShoot(player, currentGunKey)) {
-                    shoot(player, currentGun, mouseX, mouseY);
+                    shoot(player, currentGun, gmx, gmy);
                     consumeAmmo(player, currentGunKey);
                     player.lastShot = timestamp;
                 } else if (player.ammo[currentGunKey] <= 0 && !player.reloading) {
-                    // Auto-reload if trying to shoot with no ammo
                     startReload(player, currentGunKey);
                 }
             }
         }
 
         function updateAIPlayer(player, timestamp) {
-            player.aiDecisionTimer -= 16;
+            player.aiDecisionTimer -= 16.667 * frameDt;
 
             if (player.aiDecisionTimer <= 0) {
                 player.aiDecisionTimer = 200 + Math.random() * 300;
@@ -4122,7 +4213,7 @@
             player.facingRight = player.vx > 0;
 
             // Random jumping
-            player.aiJumpTimer -= 16;
+            player.aiJumpTimer -= 16.667 * frameDt;
             if (player.aiJumpTimer <= 0 && player.onGround) {
                 if (Math.random() > 0.7) {
                     player.vy = -15;
@@ -4171,14 +4262,15 @@
 
         function updatePlayerPhysics(player) {
             const map = maps[currentMap];
+            const dt = frameDt;
 
-            // Gravity (reduced for space map)
+            // Gravity (reduced for space map), frame-rate independent
             const gravity = map.lowGravity ? 0.25 : 0.6;
-            player.vy += gravity;
+            player.vy += gravity * dt;
 
-            // Apply velocity
-            player.x += player.vx;
-            player.y += player.vy;
+            // Apply velocity, frame-rate independent
+            player.x += player.vx * dt;
+            player.y += player.vy * dt;
 
             // Platform collision
             player.onGround = false;
@@ -4450,12 +4542,12 @@
 
                 // Apply gravity to grenades (arc trajectory)
                 if (bullet.isGrenade) {
-                    bullet.vy += 0.4; // Gravity pulls grenade down
+                    bullet.vy += 0.4 * frameDt;
                 }
 
                 // Super grenade auto-explodes after timer runs out
                 if (bullet.isSuperGrenade && bullet.lifeTime > 0) {
-                    bullet.lifeTime--;
+                    bullet.lifeTime -= frameDt;
                     if (bullet.lifeTime <= 0) {
                         // NUKE EXPLOSION!
                         whiteFlashTimer = 60;
@@ -4470,8 +4562,8 @@
                     }
                 }
 
-                bullet.x += bullet.vx;
-                bullet.y += bullet.vy;
+                bullet.x += bullet.vx * frameDt;
+                bullet.y += bullet.vy * frameDt;
 
                 // Wall bouncing for bunker map
                 if (map.bounceWalls) {
