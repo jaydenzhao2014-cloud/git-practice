@@ -427,6 +427,137 @@
             display: block;
         }
 
+        /* SOCIAL LOBBY */
+        .btn-social {
+            background: linear-gradient(45deg, #ff9800, #ff5722) !important;
+            color: white;
+            box-shadow: 0 5px 20px rgba(255, 152, 0, 0.5);
+        }
+        .btn-social:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 152, 0, 0.7);
+        }
+        #socialLobby {
+            position: relative;
+            flex-direction: column;
+        }
+        #socialCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .social-hud {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 24px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 100%);
+            border-bottom: 2px solid rgba(255,152,0,0.3);
+            z-index: 10;
+        }
+        .social-info { font-size: 26px; color: #ff9800; font-weight: bold; text-shadow: 0 0 10px rgba(255,152,0,0.5); letter-spacing: 2px; }
+        .social-player-count { color: #ccc; font-size: 16px; background: rgba(255,255,255,0.08); padding: 4px 12px; border-radius: 12px; }
+        .social-gun-panel {
+            position: absolute;
+            right: 10px;
+            top: 65px;
+            width: 210px;
+            max-height: 70vh;
+            overflow-y: auto;
+            background: linear-gradient(180deg, rgba(10,10,30,0.9) 0%, rgba(20,20,40,0.85) 100%);
+            border: 1px solid rgba(255,152,0,0.25);
+            border-radius: 12px;
+            padding: 12px;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+        }
+        .social-gun-panel h3 { color: #ff9800; margin: 0 0 10px 0; text-align: center; font-size: 16px; text-shadow: 0 0 8px rgba(255,152,0,0.4); }
+        .social-hint { color: #888; font-size: 12px; text-align: center; margin-top: 8px; }
+        .social-gun-list { display: flex; flex-direction: column; gap: 5px; }
+        .social-gun-item {
+            padding: 6px 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            font-size: 14px;
+            transition: background 0.2s;
+            border: 1px solid transparent;
+        }
+        .social-gun-item:hover { background: rgba(255,255,255,0.2); }
+        .social-gun-item.selected { background: rgba(255, 152, 0, 0.4); border-color: #ff9800; }
+        .social-controls-hint {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.6);
+            font-size: 13px;
+            background: rgba(0,0,0,0.5);
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 10;
+            white-space: nowrap;
+        }
+        .social-trade-panel {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 260px;
+            background: rgba(0,0,0,0.9);
+            border: 2px solid #ff9800;
+            border-radius: 12px;
+            padding: 15px;
+            z-index: 20;
+        }
+        .social-trade-panel h3 { color: #ff9800; margin: 0 0 10px 0; text-align: center; }
+        .social-trade-list { display: flex; flex-direction: column; gap: 6px; }
+        .social-trade-player {
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+        .social-trade-player:hover { background: rgba(255, 152, 0, 0.4); }
+        .social-trade-player .trade-player-gun { color: #aaa; font-size: 12px; }
+        .social-trade-window {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            background: rgba(0,0,0,0.95);
+            border: 2px solid #ff9800;
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 25;
+        }
+        .social-trade-window h3 { color: #ff9800; margin: 0 0 12px 0; text-align: center; }
+        .trade-columns { display: flex; gap: 15px; margin-bottom: 15px; }
+        .trade-col { flex: 1; }
+        .trade-col-title { color: #aaa; font-size: 13px; text-align: center; margin-bottom: 8px; }
+        .trade-gun-list { display: flex; flex-direction: column; gap: 4px; max-height: 300px; overflow-y: auto; }
+        .trade-gun-item {
+            padding: 6px 10px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            font-size: 13px;
+            border: 1px solid transparent;
+        }
+        .trade-gun-item:hover { background: rgba(255,255,255,0.15); }
+        .trade-gun-item.trade-selected { background: rgba(76, 175, 80, 0.4); border-color: #4caf50; }
+        .trade-buttons { display: flex; gap: 10px; justify-content: center; }
+        .trade-buttons .btn { font-size: 14px; padding: 8px 16px; }
+
         /* VICTORY SCREEN */
         #victory {
             flex-direction: column;
@@ -1338,6 +1469,7 @@
             <button class="btn btn-shop" onclick="showShop('guns')">GUNS</button>
             <button class="btn btn-skins" onclick="showShop('skins')">SKINS</button>
             <button class="btn btn-spin-nav" onclick="showSpinner()">SPIN</button>
+            <button class="btn btn-social" onclick="joinSocialLobby()">LOBBY</button>
         </div>
         <div class="owned-guns">
             <h3>Your Arsenal:</h3>
@@ -1427,7 +1559,10 @@
     <div id="game" class="screen">
         <div class="game-hud">
             <div class="team-score team-blue">BLUE: <span id="blueScore">0</span></div>
-            <div class="gun-slots" id="gunSlots"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div class="gun-slots" id="gunSlots"></div>
+                <div id="setCounter" style="font-size:15px;font-weight:bold;color:#fff;letter-spacing:2px;background:rgba(0,0,0,0.5);padding:2px 10px;border-radius:8px;display:none">SET 1 / 10</div>
+            </div>
             <div class="team-score team-red">RED: <span id="redScore">0</span></div>
         </div>
         <div class="leaderboard" id="leaderboard">
@@ -1436,7 +1571,7 @@
         </div>
         <button class="leaderboard-toggle" onclick="toggleLeaderboard()">Show Leaderboard</button>
         <canvas id="gameCanvas"></canvas>
-        <div class="controls-hint">WASD to move | 1-4 to switch guns | Click to shoot | TAB for leaderboard | First to 10 kills wins!</div>
+        <div class="controls-hint">WASD to move | 1-9 to switch guns | Click to shoot | B to build | TAB for leaderboard | Wipe out all enemies to win a set! Most sets out of 10 wins!</div>
     </div>
 
     <!-- VICTORY SCREEN -->
@@ -1478,6 +1613,45 @@
         </div>
         <canvas id="rangeCanvas"></canvas>
         <div class="range-controls-hint">WASD to move | 1-8 to switch guns | Click to shoot | ESC to exit</div>
+    </div>
+
+    <!-- SOCIAL LOBBY -->
+    <div id="socialLobby" class="screen">
+        <div class="social-hud">
+            <div class="social-info">SOCIAL LOBBY</div>
+            <div class="social-player-count" id="socialPlayerCount">Players: 1</div>
+            <button class="btn btn-back" onclick="leaveSocialLobby()">LEAVE</button>
+        </div>
+        <div class="social-gun-panel" id="socialGunPanel">
+            <h3>Your Guns</h3>
+            <div class="social-gun-list" id="socialGunList"></div>
+            <p class="social-hint">Press L to drop | G to trade</p>
+        </div>
+        <div class="social-trade-panel" id="socialTradePanel" style="display:none;">
+            <h3>Trade With</h3>
+            <div class="social-trade-list" id="socialTradeList"></div>
+            <p class="social-hint">Click a player to trade</p>
+            <button class="btn btn-back" onclick="closeSocialTrade()" style="margin-top:8px;font-size:12px;padding:5px 10px;">CANCEL</button>
+        </div>
+        <div class="social-trade-window" id="socialTradeWindow" style="display:none;">
+            <h3 id="tradeTitle">Trading with...</h3>
+            <div class="trade-columns">
+                <div class="trade-col">
+                    <div class="trade-col-title">Your Offer</div>
+                    <div class="trade-gun-list" id="tradeMyGuns"></div>
+                </div>
+                <div class="trade-col">
+                    <div class="trade-col-title">Their Offer</div>
+                    <div class="trade-gun-list" id="tradeTheirGuns"></div>
+                </div>
+            </div>
+            <div class="trade-buttons">
+                <button class="btn btn-create" onclick="confirmTrade()">CONFIRM TRADE</button>
+                <button class="btn btn-back" onclick="cancelTrade()">CANCEL</button>
+            </div>
+        </div>
+        <canvas id="socialCanvas"></canvas>
+        <div class="social-controls-hint">WASD to move | 1-9 select gun | L to drop | G to trade | Walk over items to pick up</div>
     </div>
 
     <script>
@@ -2434,9 +2608,9 @@
                 if (gunKey) player.currentGun = gunKey;
             }
 
-            // Gun angle from remote (clamped same as host player)
+            // Gun angle from remote
             if (input.gunAngle !== undefined) {
-                player.gunAngle = Math.max(-0.8, Math.min(0.8, input.gunAngle));
+                player.gunAngle = input.gunAngle;
             }
 
             // Reload
@@ -2801,6 +2975,1015 @@
             playerPeerMap = {};
         }
 
+        // ========== SOCIAL LOBBY SYSTEM ==========
+        let socialPeer = null;
+        let socialConnections = {};
+        let isSocialHost = false;
+        let isSocialLobby = false;
+        let socialPlayers = {};
+        let mySocialPeerId = '';
+        let socialHostConnection = null;
+        let socialCanvas = null;
+        let socialCtx = null;
+        let socialPlatforms = [];
+        let socialStars = null;
+        let socialDroppedItems = [];
+        let socialItemIdCounter = 0;
+        let socialLoopRunning = false;
+        let socialLastFrameTime = 0;
+        let socialElevatorDir = -1; // -1 = going up, 1 = going down
+        let socialSelectedGunIndex = 0;
+        let socialLastStateBroadcast = 0;
+        let socialLastInputSend = 0;
+
+        const SOCIAL_LOBBY_PEER_ID = 'RIVALS-SOCIAL-LOBBY';
+        const SOCIAL_WIDTH = 1920;
+        const SOCIAL_HEIGHT = 1080;
+
+        // Social lobby AI
+        const socialAINames = ['Wanderer', 'Drifter', 'Nomad', 'Rover', 'Scout', 'Phantom', 'Echo', 'Specter'];
+        const socialAISkins = ['shadow', 'flame', 'gold', 'neon', 'ice', 'toxic', 'galaxy', 'lava'];
+        let socialAIs = []; // { id, x, y, vx, vy, onGround, facingRight, name, skin, skinKey, currentGun, moveDir, moveTimer, jumpTimer, dropTimer, width, height, alive, gunAngle, health, maxHealth }
+
+        // Trade system
+        let tradeOpen = false;
+        let tradeWindowOpen = false;
+        let tradePartner = null; // peerId or AI id
+        let tradePartnerName = '';
+        let tradeMySelected = []; // gun keys I'm offering
+        let tradeTheirSelected = []; // gun keys they're offering (AI auto-selects)
+
+        function joinSocialLobby() {
+            if (socialPeer) return;
+
+            // Try to become host by claiming the fixed peer ID
+            socialPeer = new Peer(SOCIAL_LOBBY_PEER_ID);
+
+            socialPeer.on('open', (id) => {
+                isSocialHost = true;
+                mySocialPeerId = id;
+                initSocialLobbyCanvas();
+                addLocalSocialPlayer();
+                startSocialLobbyLoop();
+            });
+
+            socialPeer.on('connection', (conn) => {
+                onSocialPlayerConnect(conn);
+            });
+
+            socialPeer.on('error', (err) => {
+                if (err.type === 'unavailable-id') {
+                    // Someone else is hosting -- join as client
+                    socialPeer.destroy();
+                    socialPeer = new Peer();
+                    socialPeer.on('open', (id) => {
+                        mySocialPeerId = id;
+                        const conn = socialPeer.connect(SOCIAL_LOBBY_PEER_ID, { reliable: true });
+                        conn.on('open', () => {
+                            socialHostConnection = conn;
+                            isSocialHost = false;
+                            conn.send({
+                                type: 'social-join',
+                                name: currentUser || 'Player',
+                                skin: selectedSkin,
+                                ownedGuns: ownedGuns
+                            });
+                            conn.on('data', handleSocialHostMessage);
+                            conn.on('close', handleSocialHostDisconnect);
+                            initSocialLobbyCanvas();
+                            addLocalSocialPlayer();
+                            startSocialLobbyLoop();
+                        });
+                        conn.on('error', () => {
+                            alert('Could not connect to social lobby.');
+                            cleanupSocialLobby();
+                            showLobby();
+                        });
+                    });
+                } else {
+                    alert('Social lobby error: ' + err.type);
+                    cleanupSocialLobby();
+                    showLobby();
+                }
+            });
+        }
+
+        // Host: handle incoming social player
+        function onSocialPlayerConnect(conn) {
+            conn.on('open', () => {
+                conn.on('data', (data) => handleSocialClientMessage(conn, data));
+                conn.on('close', () => {
+                    delete socialConnections[conn.peer];
+                    delete socialPlayers[conn.peer];
+                    updateSocialPlayerCount();
+                });
+            });
+        }
+
+        function handleSocialClientMessage(conn, data) {
+            switch (data.type) {
+                case 'social-join':
+                    socialConnections[conn.peer] = conn;
+                    socialPlayers[conn.peer] = {
+                        x: 200 + Math.random() * 400,
+                        y: SOCIAL_HEIGHT - 200,
+                        vx: 0, vy: 0,
+                        facingRight: true,
+                        onGround: false,
+                        name: data.name,
+                        skin: skins[data.skin] || skins.default,
+                        skinKey: data.skin || 'default',
+                        currentGun: (data.ownedGuns && data.ownedGuns[0]) || 'pistol',
+                        width: 40, height: 60, alive: true, gunAngle: 0, health: 100, maxHealth: 100
+                    };
+                    // Send current state to new player
+                    conn.send({
+                        type: 'social-init',
+                        players: serializeSocialPlayers(),
+                        items: socialDroppedItems,
+                        itemIdCounter: socialItemIdCounter,
+                        ais: socialAIs.map(ai => ({
+                            id: ai.id, x: Math.round(ai.x), y: Math.round(ai.y),
+                            vx: ai.vx, vy: Math.round(ai.vy * 10) / 10,
+                            facingRight: ai.facingRight, onGround: ai.onGround,
+                            name: ai.name, skinKey: ai.skinKey, currentGun: ai.currentGun
+                        }))
+                    });
+                    updateSocialPlayerCount();
+                    break;
+
+                case 'social-input':
+                    if (socialPlayers[conn.peer]) {
+                        const p = socialPlayers[conn.peer];
+                        p.vx = data.vx || 0;
+                        if (data.jump && p.onGround) {
+                            p.vy = -15;
+                            p.onGround = false;
+                        }
+                        p.facingRight = data.facingRight;
+                        p.currentGun = data.currentGun;
+                    }
+                    break;
+
+                case 'social-drop':
+                    handleSocialDrop(conn.peer, data.gunKey);
+                    break;
+
+                case 'social-pickup':
+                    handleSocialPickup(conn.peer, data.itemId);
+                    break;
+            }
+        }
+
+        // Client: handle host messages
+        function handleSocialHostMessage(data) {
+            switch (data.type) {
+                case 'social-init':
+                    // Load all remote players from host state
+                    for (const [pid, p] of Object.entries(data.players)) {
+                        if (pid !== mySocialPeerId) {
+                            socialPlayers[pid] = {
+                                ...p,
+                                skin: skins[p.skinKey] || skins.default,
+                                width: 40, height: 60, alive: true, gunAngle: 0, health: 100, maxHealth: 100
+                            };
+                        }
+                    }
+                    socialDroppedItems = data.items || [];
+                    socialItemIdCounter = data.itemIdCounter || 0;
+                    // Load AI bots from host
+                    if (data.ais) {
+                        socialAIs = data.ais.map(ai => ({
+                            ...ai,
+                            skin: skins[ai.skinKey] || skins.default,
+                            width: 40, height: 60, alive: true, gunAngle: 0, health: 100, maxHealth: 100, isAI: true
+                        }));
+                    }
+                    updateSocialPlayerCount();
+                    break;
+
+                case 'social-state':
+                    // Update remote players (not ourselves)
+                    for (const [pid, p] of Object.entries(data.players)) {
+                        if (pid === mySocialPeerId) continue;
+                        if (socialPlayers[pid]) {
+                            socialPlayers[pid].x = p.x;
+                            socialPlayers[pid].y = p.y;
+                            socialPlayers[pid].vx = p.vx;
+                            socialPlayers[pid].vy = p.vy;
+                            socialPlayers[pid].facingRight = p.facingRight;
+                            socialPlayers[pid].onGround = p.onGround;
+                            socialPlayers[pid].currentGun = p.currentGun;
+                        } else {
+                            socialPlayers[pid] = {
+                                ...p,
+                                skin: skins[p.skinKey] || skins.default,
+                                width: 40, height: 60, alive: true, gunAngle: 0, health: 100, maxHealth: 100
+                            };
+                        }
+                    }
+                    // Remove players that left
+                    for (const pid of Object.keys(socialPlayers)) {
+                        if (pid !== mySocialPeerId && !data.players[pid]) {
+                            delete socialPlayers[pid];
+                        }
+                    }
+                    socialDroppedItems = data.items || [];
+                    // Update AI bots from host
+                    if (data.ais) {
+                        socialAIs = data.ais.map(ai => ({
+                            ...ai,
+                            skin: skins[ai.skinKey] || skins.default,
+                            width: 40, height: 60, alive: true, gunAngle: 0, health: 100, maxHealth: 100, isAI: true
+                        }));
+                    }
+                    updateSocialPlayerCount();
+                    break;
+
+                case 'social-gun-gained':
+                    if (data.peerId === mySocialPeerId) {
+                        if (!ownedGuns.includes(data.gunKey)) {
+                            ownedGuns.push(data.gunKey);
+                            saveCurrentUserData();
+                            updateSocialGunPanel();
+                        }
+                    }
+                    break;
+            }
+        }
+
+        function handleSocialHostDisconnect() {
+            alert('Lobby host left. Returning to menu.');
+            cleanupSocialLobby();
+            showLobby();
+        }
+
+        function serializeSocialPlayers() {
+            const result = {};
+            for (const [peerId, p] of Object.entries(socialPlayers)) {
+                result[peerId] = {
+                    x: Math.round(p.x), y: Math.round(p.y),
+                    vx: p.vx, vy: Math.round(p.vy * 10) / 10,
+                    facingRight: p.facingRight,
+                    onGround: p.onGround,
+                    name: p.name,
+                    skinKey: p.skinKey || 'default',
+                    currentGun: p.currentGun
+                };
+            }
+            return result;
+        }
+
+        function initSocialLobbyCanvas() {
+            isSocialLobby = true;
+            showScreen('socialLobby');
+            socialCanvas = document.getElementById('socialCanvas');
+            socialCtx = socialCanvas.getContext('2d');
+            socialCanvas.width = SOCIAL_WIDTH;
+            socialCanvas.height = SOCIAL_HEIGHT;
+
+            socialPlatforms = [
+                // Ground
+                { x: 0, y: SOCIAL_HEIGHT - 50, width: SOCIAL_WIDTH, height: 50, type: 'ground' },
+                // Lower platforms
+                { x: 120, y: SOCIAL_HEIGHT - 180, width: 220, height: 18, type: 'wood' },
+                { x: SOCIAL_WIDTH - 340, y: SOCIAL_HEIGHT - 180, width: 220, height: 18, type: 'wood' },
+                { x: SOCIAL_WIDTH / 2 - 100, y: SOCIAL_HEIGHT - 160, width: 200, height: 18, type: 'stone' },
+                // Mid platforms
+                { x: 60, y: SOCIAL_HEIGHT - 330, width: 180, height: 18, type: 'wood' },
+                { x: SOCIAL_WIDTH - 240, y: SOCIAL_HEIGHT - 330, width: 180, height: 18, type: 'wood' },
+                { x: SOCIAL_WIDTH / 2 - 140, y: SOCIAL_HEIGHT - 300, width: 280, height: 18, type: 'stone' },
+                // Upper platforms
+                { x: 250, y: SOCIAL_HEIGHT - 450, width: 160, height: 18, type: 'wood' },
+                { x: SOCIAL_WIDTH - 410, y: SOCIAL_HEIGHT - 450, width: 160, height: 18, type: 'wood' },
+                { x: SOCIAL_WIDTH / 2 - 100, y: SOCIAL_HEIGHT - 520, width: 200, height: 18, type: 'gold' },
+                // Top platform
+                { x: SOCIAL_WIDTH / 2 - 80, y: SOCIAL_HEIGHT - 650, width: 160, height: 18, type: 'gold' },
+                // Small stepping stones
+                { x: 30, y: SOCIAL_HEIGHT - 500, width: 100, height: 14, type: 'stone' },
+                { x: SOCIAL_WIDTH - 130, y: SOCIAL_HEIGHT - 500, width: 100, height: 14, type: 'stone' },
+                // Elevator top destination platform
+                { x: 50, y: SOCIAL_HEIGHT - 900, width: 360, height: 22, type: 'gold' },
+                // Elevator car (moving - must be last entry)
+                { x: 155, y: SOCIAL_HEIGHT - 118, width: 90, height: 18, type: 'elevator' },
+            ];
+
+            socialSelectedGunIndex = 0;
+            socialAIs = [];
+            tradeOpen = false;
+            tradeWindowOpen = false;
+
+            // Spawn AI bots (always spawn -- host controls their movement, clients get updates via state)
+            const aiCount = 3 + Math.floor(Math.random() * 3);
+            const allGunKeys = Object.keys(guns);
+            for (let i = 0; i < aiCount; i++) {
+                const skinKey = socialAISkins[i % socialAISkins.length];
+                const aiGun = allGunKeys[Math.floor(Math.random() * allGunKeys.length)];
+                socialAIs.push({
+                    id: 'ai_' + i,
+                    x: 100 + Math.random() * (SOCIAL_WIDTH - 200),
+                    y: SOCIAL_HEIGHT - 200,
+                    vx: 0, vy: 0,
+                    onGround: false,
+                    facingRight: Math.random() > 0.5,
+                    name: socialAINames[i % socialAINames.length],
+                    skin: skins[skinKey] || skins.default,
+                    skinKey: skinKey,
+                    currentGun: aiGun,
+                    moveDir: Math.random() > 0.5 ? 1 : -1,
+                    moveTimer: 1000 + Math.random() * 2000,
+                    jumpTimer: 2000 + Math.random() * 3000,
+                    dropTimer: 10000 + Math.random() * 20000,
+                    width: 40, height: 60, alive: true, gunAngle: 0, health: 100, maxHealth: 100,
+                    isAI: true
+                });
+            }
+
+            updateSocialGunPanel();
+            updateSocialPlayerCount();
+        }
+
+        function addLocalSocialPlayer() {
+            socialPlayers[mySocialPeerId] = {
+                x: SOCIAL_WIDTH / 2,
+                y: SOCIAL_HEIGHT - 200,
+                vx: 0, vy: 0,
+                facingRight: true,
+                onGround: false,
+                name: currentUser || 'You',
+                skin: skins[selectedSkin] || skins.default,
+                skinKey: selectedSkin,
+                currentGun: ownedGuns[0] || 'pistol',
+                width: 40, height: 60, alive: true, gunAngle: 0, health: 100, maxHealth: 100
+            };
+        }
+
+        // Gun panel UI
+        function updateSocialGunPanel() {
+            const list = document.getElementById('socialGunList');
+            if (!list) return;
+            list.innerHTML = ownedGuns.map((g, i) => {
+                const gun = guns[g];
+                if (!gun) return '';
+                const sel = i === socialSelectedGunIndex ? 'selected' : '';
+                return `<div class="social-gun-item ${sel}" onclick="selectSocialGun(${i})">${gun.icon} ${gun.name}</div>`;
+            }).join('');
+        }
+
+        function selectSocialGun(index) {
+            if (index >= 0 && index < ownedGuns.length) {
+                socialSelectedGunIndex = index;
+                const me = socialPlayers[mySocialPeerId];
+                if (me) me.currentGun = ownedGuns[index];
+                updateSocialGunPanel();
+            }
+        }
+
+        // Drop system
+        function socialDropGun() {
+            const gunKey = ownedGuns[socialSelectedGunIndex];
+            if (!gunKey) return;
+            if (ownedGuns.length <= 1) return; // Keep at least 1 gun
+
+            if (isSocialHost) {
+                handleSocialDrop(mySocialPeerId, gunKey);
+            } else if (socialHostConnection) {
+                socialHostConnection.send({ type: 'social-drop', gunKey: gunKey });
+            }
+
+            // Remove from local inventory
+            ownedGuns = ownedGuns.filter(g => g !== gunKey);
+            selectedGuns = selectedGuns.map(g => g === gunKey ? null : g);
+            socialSelectedGunIndex = Math.min(socialSelectedGunIndex, ownedGuns.length - 1);
+            saveCurrentUserData();
+            updateSocialGunPanel();
+        }
+
+        function handleSocialDrop(peerId, gunKey) {
+            const player = socialPlayers[peerId];
+            if (!player) return;
+            const item = {
+                id: ++socialItemIdCounter,
+                gunKey: gunKey,
+                x: player.x + 20,
+                y: player.y + 40,
+                droppedBy: peerId,
+                dropTime: performance.now()
+            };
+            socialDroppedItems.push(item);
+            broadcastSocialToClients({ type: 'social-state', players: serializeSocialPlayers(), items: socialDroppedItems });
+        }
+
+        // Pickup system (host only)
+        function checkSocialPickups() {
+            if (!isSocialHost) return;
+            const now = performance.now();
+
+            for (let i = socialDroppedItems.length - 1; i >= 0; i--) {
+                const item = socialDroppedItems[i];
+                // 1-second cooldown before dropper can reclaim
+                const canReclaim = (now - (item.dropTime || 0)) > 1000;
+
+                for (const [peerId, player] of Object.entries(socialPlayers)) {
+                    if (Math.abs((player.x + 20) - item.x) < 50 && Math.abs((player.y + 30) - item.y) < 50) {
+                        if (peerId === item.droppedBy && !canReclaim) continue;
+
+                        // Pickup!
+                        socialDroppedItems.splice(i, 1);
+
+                        // Notify the picking-up player
+                        if (peerId === mySocialPeerId) {
+                            if (!ownedGuns.includes(item.gunKey)) {
+                                ownedGuns.push(item.gunKey);
+                                saveCurrentUserData();
+                                updateSocialGunPanel();
+                            }
+                        } else if (socialConnections[peerId]) {
+                            socialConnections[peerId].send({
+                                type: 'social-gun-gained',
+                                peerId: peerId,
+                                gunKey: item.gunKey
+                            });
+                        }
+
+                        // Broadcast updated state
+                        broadcastSocialToClients({ type: 'social-state', players: serializeSocialPlayers(), items: socialDroppedItems });
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Social lobby game loop
+        function startSocialLobbyLoop() {
+            socialLoopRunning = true;
+            socialLastFrameTime = 0;
+            requestAnimationFrame(socialGameLoop);
+        }
+
+        function socialGameLoop(timestamp) {
+            if (!socialLoopRunning) return;
+
+            if (!socialLastFrameTime) socialLastFrameTime = timestamp;
+            frameDt = Math.min((timestamp - socialLastFrameTime) / 16.667, 3);
+            socialLastFrameTime = timestamp;
+
+            // Local player movement
+            const me = socialPlayers[mySocialPeerId];
+            if (me) {
+                if (keys['a']) me.vx = -5;
+                else if (keys['d']) me.vx = 5;
+                else me.vx = 0;
+                if ((keys['w'] || keys[' ']) && me.onGround) {
+                    me.vy = -15;
+                    me.onGround = false;
+                }
+                me.facingRight = me.vx > 0 ? true : (me.vx < 0 ? false : me.facingRight);
+            }
+
+            // Update elevator position
+            const elevatorPlatform = socialPlatforms[socialPlatforms.length - 1];
+            const elevMinY = SOCIAL_HEIGHT - 882;
+            const elevMaxY = SOCIAL_HEIGHT - 118;
+            elevatorPlatform.y += socialElevatorDir * 1.5 * frameDt;
+            if (elevatorPlatform.y <= elevMinY) { elevatorPlatform.y = elevMinY; socialElevatorDir = 1; }
+            if (elevatorPlatform.y >= elevMaxY) { elevatorPlatform.y = elevMaxY; socialElevatorDir = -1; }
+
+            // Physics
+            if (isSocialHost) {
+                for (const player of Object.values(socialPlayers)) {
+                    socialUpdatePhysics(player);
+                }
+                updateSocialAIs();
+                checkSocialPickups();
+
+                // Broadcast at 20Hz
+                if (timestamp - socialLastStateBroadcast > 50) {
+                    socialLastStateBroadcast = timestamp;
+                    broadcastSocialState();
+                }
+            } else {
+                if (me) socialUpdatePhysics(me);
+                updateSocialAIs(); // runs locally if no host connection (solo mode)
+
+                // Send input at ~60Hz
+                if (me && socialHostConnection && timestamp - socialLastInputSend > 16) {
+                    socialLastInputSend = timestamp;
+                    socialHostConnection.send({
+                        type: 'social-input',
+                        vx: me.vx,
+                        jump: (keys['w'] || keys[' ']) && me.onGround,
+                        facingRight: me.facingRight,
+                        currentGun: me.currentGun
+                    });
+                }
+            }
+
+            // Render
+            const c = socialCtx;
+
+            // Gradient sky background
+            const skyGrad = c.createLinearGradient(0, 0, 0, SOCIAL_HEIGHT);
+            skyGrad.addColorStop(0, '#0a0a2e');
+            skyGrad.addColorStop(0.4, '#1a1a3e');
+            skyGrad.addColorStop(0.7, '#1e2a4a');
+            skyGrad.addColorStop(1, '#0d1520');
+            c.fillStyle = skyGrad;
+            c.fillRect(0, 0, SOCIAL_WIDTH, SOCIAL_HEIGHT);
+
+            // Animated stars
+            if (!socialStars) {
+                socialStars = [];
+                for (let i = 0; i < 60; i++) {
+                    socialStars.push({
+                        x: Math.random() * SOCIAL_WIDTH,
+                        y: Math.random() * SOCIAL_HEIGHT * 0.7,
+                        size: 1 + Math.random() * 2,
+                        speed: 0.3 + Math.random() * 0.7
+                    });
+                }
+            }
+            socialStars.forEach(star => {
+                const flicker = 0.5 + 0.5 * Math.sin(timestamp * 0.002 * star.speed + star.x);
+                c.fillStyle = `rgba(255, 255, 255, ${flicker * 0.6})`;
+                c.beginPath();
+                c.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                c.fill();
+            });
+
+            // Background title with glow
+            c.save();
+            c.shadowColor = '#ff9800';
+            c.shadowBlur = 30;
+            c.fillStyle = 'rgba(255, 152, 0, 0.07)';
+            c.font = 'bold 130px Impact';
+            c.textAlign = 'center';
+            c.fillText('RIVALS', SOCIAL_WIDTH / 2, SOCIAL_HEIGHT / 2 - 30);
+            c.shadowBlur = 0;
+            c.fillStyle = 'rgba(255, 152, 0, 0.04)';
+            c.font = 'bold 50px Impact';
+            c.fillText('SOCIAL LOBBY', SOCIAL_WIDTH / 2, SOCIAL_HEIGHT / 2 + 30);
+            c.textAlign = 'left';
+            c.restore();
+
+            // Elevator shaft
+            c.save();
+            c.fillStyle = 'rgba(30,30,50,0.7)';
+            c.fillRect(160, SOCIAL_HEIGHT - 900, 80, 860);
+            // Shaft rails
+            c.strokeStyle = '#555580';
+            c.lineWidth = 4;
+            c.strokeRect(160, SOCIAL_HEIGHT - 900, 80, 860);
+            // Shaft guide lines
+            c.strokeStyle = 'rgba(100,100,160,0.4)';
+            c.lineWidth = 1;
+            c.setLineDash([8, 8]);
+            c.beginPath(); c.moveTo(175, SOCIAL_HEIGHT - 900); c.lineTo(175, SOCIAL_HEIGHT - 50); c.stroke();
+            c.beginPath(); c.moveTo(225, SOCIAL_HEIGHT - 900); c.lineTo(225, SOCIAL_HEIGHT - 50); c.stroke();
+            c.setLineDash([]);
+            c.restore();
+
+            // Platforms with style per type
+            socialPlatforms.forEach(p => {
+                if (p.type === 'ground') {
+                    // Ground: layered dirt/grass look
+                    c.fillStyle = '#3a3a3a';
+                    c.fillRect(p.x, p.y, p.width, p.height);
+                    // Grass top
+                    const grassGrad = c.createLinearGradient(0, p.y, 0, p.y + 8);
+                    grassGrad.addColorStop(0, '#4caf50');
+                    grassGrad.addColorStop(1, '#2e7d32');
+                    c.fillStyle = grassGrad;
+                    c.fillRect(p.x, p.y, p.width, 8);
+                    // Dirt lines
+                    c.strokeStyle = 'rgba(90,60,30,0.3)';
+                    c.lineWidth = 1;
+                    for (let ly = p.y + 15; ly < p.y + p.height; ly += 12) {
+                        c.beginPath();
+                        c.moveTo(p.x, ly);
+                        c.lineTo(p.x + p.width, ly);
+                        c.stroke();
+                    }
+                } else if (p.type === 'wood') {
+                    c.fillStyle = '#8B5E3C';
+                    c.fillRect(p.x, p.y, p.width, p.height);
+                    // Wood grain
+                    c.strokeStyle = 'rgba(101,67,33,0.5)';
+                    c.lineWidth = 1;
+                    for (let lx = p.x + 20; lx < p.x + p.width; lx += 25) {
+                        c.beginPath(); c.moveTo(lx, p.y); c.lineTo(lx, p.y + p.height); c.stroke();
+                    }
+                    c.strokeStyle = '#6d4226';
+                    c.lineWidth = 2;
+                    c.strokeRect(p.x, p.y, p.width, p.height);
+                } else if (p.type === 'stone') {
+                    const stoneGrad = c.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
+                    stoneGrad.addColorStop(0, '#7a7a8a');
+                    stoneGrad.addColorStop(1, '#5a5a6a');
+                    c.fillStyle = stoneGrad;
+                    c.fillRect(p.x, p.y, p.width, p.height);
+                    // Stone cracks
+                    c.strokeStyle = 'rgba(50,50,60,0.4)';
+                    c.lineWidth = 1;
+                    for (let lx = p.x + 30; lx < p.x + p.width; lx += 40) {
+                        c.beginPath(); c.moveTo(lx, p.y); c.lineTo(lx + 5, p.y + p.height); c.stroke();
+                    }
+                    c.strokeStyle = '#4a4a5a';
+                    c.lineWidth = 2;
+                    c.strokeRect(p.x, p.y, p.width, p.height);
+                } else if (p.type === 'gold') {
+                    c.save();
+                    c.shadowColor = '#ffd700';
+                    c.shadowBlur = 12;
+                    const goldGrad = c.createLinearGradient(p.x, p.y, p.x + p.width, p.y + p.height);
+                    goldGrad.addColorStop(0, '#ffd700');
+                    goldGrad.addColorStop(0.5, '#ffec80');
+                    goldGrad.addColorStop(1, '#ffc107');
+                    c.fillStyle = goldGrad;
+                    c.fillRect(p.x, p.y, p.width, p.height);
+                    c.strokeStyle = '#b8860b';
+                    c.lineWidth = 2;
+                    c.strokeRect(p.x, p.y, p.width, p.height);
+                    c.restore();
+                } else if (p.type === 'elevator') {
+                    c.save();
+                    // Elevator car body
+                    const elvGrad = c.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
+                    elvGrad.addColorStop(0, '#78909c');
+                    elvGrad.addColorStop(1, '#455a64');
+                    c.fillStyle = elvGrad;
+                    c.fillRect(p.x, p.y, p.width, p.height);
+                    // Metal panel lines
+                    c.strokeStyle = 'rgba(200,220,240,0.3)';
+                    c.lineWidth = 1;
+                    for (let lx = p.x + 15; lx < p.x + p.width; lx += 15) {
+                        c.beginPath(); c.moveTo(lx, p.y); c.lineTo(lx, p.y + p.height); c.stroke();
+                    }
+                    // Border
+                    c.strokeStyle = '#90a4ae';
+                    c.lineWidth = 2;
+                    c.strokeRect(p.x, p.y, p.width, p.height);
+                    // Direction arrow
+                    c.fillStyle = socialElevatorDir < 0 ? '#80ff80' : '#ff8080';
+                    c.font = 'bold 12px Arial';
+                    c.textAlign = 'center';
+                    c.fillText(socialElevatorDir < 0 ? '▲' : '▼', p.x + p.width / 2, p.y + 13);
+                    c.restore();
+                } else {
+                    c.fillStyle = '#4a4a4a';
+                    c.fillRect(p.x, p.y, p.width, p.height);
+                    c.strokeStyle = '#636e72';
+                    c.strokeRect(p.x, p.y, p.width, p.height);
+                }
+            });
+
+            // Dropped items with floating animation and glow
+            socialDroppedItems.forEach(item => {
+                const gun = guns[item.gunKey];
+                if (!gun) return;
+                const floatY = item.y + Math.sin(timestamp * 0.003 + item.id) * 4;
+                c.save();
+                c.shadowColor = '#ffd700';
+                c.shadowBlur = 15;
+                // Background diamond shape
+                c.fillStyle = 'rgba(255, 215, 0, 0.25)';
+                c.beginPath();
+                c.moveTo(item.x, floatY - 22);
+                c.lineTo(item.x + 22, floatY);
+                c.lineTo(item.x, floatY + 22);
+                c.lineTo(item.x - 22, floatY);
+                c.closePath();
+                c.fill();
+                c.strokeStyle = '#ffd700';
+                c.lineWidth = 2;
+                c.stroke();
+                c.restore();
+                // Gun icon
+                c.fillStyle = '#fff';
+                c.font = '22px Arial';
+                c.textAlign = 'center';
+                c.fillText(gun.icon, item.x, floatY + 7);
+                // Gun name
+                c.font = 'bold 10px Arial';
+                c.fillStyle = '#ffd700';
+                c.fillText(gun.name, item.x, floatY + 30);
+                c.textAlign = 'left';
+            });
+
+            // Draw players (reuse drawPlayer by swapping ctx/canvas)
+            const origCtx = ctx;
+            const origCanvas = canvas;
+            ctx = socialCtx;
+            canvas = socialCanvas;
+            for (const [peerId, player] of Object.entries(socialPlayers)) {
+                if (!player.skin) player.skin = skins.default;
+                drawPlayer(player);
+
+                // Name label above head
+                socialCtx.fillStyle = (peerId === mySocialPeerId) ? '#ff9800' : '#fff';
+                socialCtx.font = 'bold 16px Arial';
+                socialCtx.textAlign = 'center';
+                socialCtx.fillText(player.name, player.x + 20, player.y - 15);
+
+                // Gun name below name
+                const gunData = guns[player.currentGun];
+                if (gunData) {
+                    socialCtx.font = '12px Arial';
+                    socialCtx.fillStyle = '#aaa';
+                    socialCtx.fillText(gunData.icon + ' ' + gunData.name, player.x + 20, player.y - 2);
+                }
+                socialCtx.textAlign = 'left';
+            }
+            // Draw AI bots
+            socialAIs.forEach(ai => {
+                if (!ai.skin) ai.skin = skins[ai.skinKey] || skins.default;
+                drawPlayer(ai);
+                socialCtx.fillStyle = '#88ff88';
+                socialCtx.font = 'bold 16px Arial';
+                socialCtx.textAlign = 'center';
+                socialCtx.fillText(ai.name + ' (Bot)', ai.x + 20, ai.y - 15);
+                const aiGun = guns[ai.currentGun];
+                if (aiGun) {
+                    socialCtx.font = '12px Arial';
+                    socialCtx.fillStyle = '#aaa';
+                    socialCtx.fillText(aiGun.icon + ' ' + aiGun.name, ai.x + 20, ai.y - 2);
+                }
+                socialCtx.textAlign = 'left';
+            });
+            ctx = origCtx;
+            canvas = origCanvas;
+
+            updateSocialPlayerCount();
+            requestAnimationFrame(socialGameLoop);
+        }
+
+        function socialUpdatePhysics(player) {
+            const dt = frameDt;
+            player.vy += 0.6 * dt;
+            player.x += player.vx * dt;
+            player.y += player.vy * dt;
+
+            player.onGround = false;
+            socialPlatforms.forEach(p => {
+                if (player.x + 40 > p.x &&
+                    player.x < p.x + p.width &&
+                    player.y + 60 > p.y &&
+                    player.y + 60 < p.y + p.height + 20 &&
+                    player.vy >= 0) {
+                    player.y = p.y - 60;
+                    player.vy = 0;
+                    player.onGround = true;
+                    // Carry player along with elevator
+                    if (p.type === 'elevator') {
+                        player.y += socialElevatorDir * 1.5 * frameDt;
+                    }
+                }
+            });
+
+            if (player.x < 0) player.x = 0;
+            if (player.x + 40 > SOCIAL_WIDTH) player.x = SOCIAL_WIDTH - 40;
+            if (player.y > SOCIAL_HEIGHT) {
+                player.y = SOCIAL_HEIGHT - 200;
+                player.vy = 0;
+            }
+        }
+
+        function broadcastSocialToClients(data) {
+            Object.values(socialConnections).forEach(conn => {
+                try { conn.send(data); } catch(e) {}
+            });
+        }
+
+        function broadcastSocialState() {
+            broadcastSocialToClients({
+                type: 'social-state',
+                players: serializeSocialPlayers(),
+                items: socialDroppedItems,
+                ais: socialAIs.map(ai => ({
+                    id: ai.id, x: Math.round(ai.x), y: Math.round(ai.y),
+                    vx: ai.vx, vy: Math.round(ai.vy * 10) / 10,
+                    facingRight: ai.facingRight, onGround: ai.onGround,
+                    name: ai.name, skinKey: ai.skinKey, currentGun: ai.currentGun
+                }))
+            });
+        }
+
+        function updateSocialPlayerCount() {
+            const el = document.getElementById('socialPlayerCount');
+            if (el) el.textContent = 'Players: ' + Object.keys(socialPlayers).length + ' | Bots: ' + socialAIs.length;
+        }
+
+        function leaveSocialLobby() {
+            cleanupSocialLobby();
+            showLobby();
+            updateOwnedGunsList();
+        }
+
+        function cleanupSocialLobby() {
+            socialLoopRunning = false;
+            isSocialLobby = false;
+            isSocialHost = false;
+            if (socialPeer) { socialPeer.destroy(); socialPeer = null; }
+            socialConnections = {};
+            socialPlayers = {};
+            socialHostConnection = null;
+            socialDroppedItems = [];
+            socialItemIdCounter = 0;
+            socialAIs = [];
+            tradeOpen = false;
+            tradeWindowOpen = false;
+            tradePartner = null;
+        }
+
+        // Social AI update
+        function updateSocialAIs() {
+            if (!isSocialHost && socialHostConnection) return; // clients get AI state from host
+            const allGunKeys = Object.keys(guns);
+
+            socialAIs.forEach(ai => {
+                // Movement timer
+                ai.moveTimer -= 16.667 * frameDt;
+                if (ai.moveTimer <= 0) {
+                    ai.moveTimer = 1000 + Math.random() * 2000;
+                    ai.moveDir = Math.random() > 0.3 ? (Math.random() > 0.5 ? 1 : -1) : 0;
+                }
+                ai.vx = ai.moveDir * 3;
+                if (ai.vx > 0) ai.facingRight = true;
+                else if (ai.vx < 0) ai.facingRight = false;
+
+                // Jump timer
+                ai.jumpTimer -= 16.667 * frameDt;
+                if (ai.jumpTimer <= 0 && ai.onGround) {
+                    if (Math.random() > 0.5) {
+                        ai.vy = -15;
+                        ai.onGround = false;
+                    }
+                    ai.jumpTimer = 2000 + Math.random() * 3000;
+                }
+
+                // Random drop timer
+                ai.dropTimer -= 16.667 * frameDt;
+                if (ai.dropTimer <= 0) {
+                    ai.dropTimer = 15000 + Math.random() * 25000;
+                    // Drop a random gun
+                    const randomGun = allGunKeys[Math.floor(Math.random() * allGunKeys.length)];
+                    const item = {
+                        id: ++socialItemIdCounter,
+                        gunKey: randomGun,
+                        x: ai.x + 20,
+                        y: ai.y + 40,
+                        droppedBy: ai.id,
+                        dropTime: performance.now()
+                    };
+                    socialDroppedItems.push(item);
+                }
+
+                // Physics
+                socialUpdatePhysics(ai);
+            });
+        }
+
+        // Trade system
+        function openSocialTrade() {
+            if (tradeWindowOpen) return;
+            tradeOpen = true;
+            updateTradePlayerList();
+            document.getElementById('socialTradePanel').style.display = 'block';
+        }
+
+        function closeSocialTrade() {
+            tradeOpen = false;
+            document.getElementById('socialTradePanel').style.display = 'none';
+        }
+
+        function updateTradePlayerList() {
+            const list = document.getElementById('socialTradeList');
+            if (!list) return;
+            let html = '';
+
+            // Add nearby real players
+            const me = socialPlayers[mySocialPeerId];
+            if (me) {
+                for (const [pid, p] of Object.entries(socialPlayers)) {
+                    if (pid === mySocialPeerId) continue;
+                    const dist = Math.abs(p.x - me.x);
+                    if (dist < 300) {
+                        const gunData = guns[p.currentGun];
+                        html += `<div class="social-trade-player" onclick="startTradeWith('${pid}', false)">
+                            ${p.name} <span class="trade-player-gun">${gunData ? gunData.icon + ' ' + gunData.name : ''}</span>
+                        </div>`;
+                    }
+                }
+
+                // Add nearby AIs
+                socialAIs.forEach(ai => {
+                    const dist = Math.abs(ai.x - me.x);
+                    if (dist < 300) {
+                        const gunData = guns[ai.currentGun];
+                        html += `<div class="social-trade-player" onclick="startTradeWith('${ai.id}', true)">
+                            ${ai.name} (Bot) <span class="trade-player-gun">${gunData ? gunData.icon + ' ' + gunData.name : ''}</span>
+                        </div>`;
+                    }
+                });
+            }
+
+            if (!html) {
+                html = '<div style="color:#888;text-align:center;padding:10px;">No one nearby! Walk closer to a player.</div>';
+            }
+            list.innerHTML = html;
+        }
+
+        function startTradeWith(partnerId, isAI) {
+            closeSocialTrade();
+            tradeWindowOpen = true;
+            tradePartner = partnerId;
+            tradeMySelected = [];
+            tradeTheirSelected = [];
+
+            if (isAI) {
+                const ai = socialAIs.find(a => a.id === partnerId);
+                tradePartnerName = ai ? ai.name + ' (Bot)' : 'Bot';
+                // AI offers a random gun
+                const allGunKeys = Object.keys(guns);
+                const aiOffer = allGunKeys[Math.floor(Math.random() * allGunKeys.length)];
+                tradeTheirSelected = [aiOffer];
+            } else {
+                const p = socialPlayers[partnerId];
+                tradePartnerName = p ? p.name : 'Player';
+                // For real players, they auto-offer their held gun
+                tradeTheirSelected = p && p.currentGun ? [p.currentGun] : [];
+            }
+
+            document.getElementById('tradeTitle').textContent = 'Trading with ' + tradePartnerName;
+            updateTradeWindow();
+            document.getElementById('socialTradeWindow').style.display = 'block';
+        }
+
+        function updateTradeWindow() {
+            // My guns
+            const myList = document.getElementById('tradeMyGuns');
+            myList.innerHTML = ownedGuns.map(g => {
+                const gun = guns[g];
+                if (!gun) return '';
+                const sel = tradeMySelected.includes(g) ? 'trade-selected' : '';
+                return `<div class="trade-gun-item ${sel}" onclick="toggleTradeMyGun('${g}')">${gun.icon} ${gun.name}</div>`;
+            }).join('');
+
+            // Their guns
+            const theirList = document.getElementById('tradeTheirGuns');
+            theirList.innerHTML = tradeTheirSelected.map(g => {
+                const gun = guns[g];
+                if (!gun) return '';
+                return `<div class="trade-gun-item trade-selected">${gun.icon} ${gun.name}</div>`;
+            }).join('');
+
+            if (tradeTheirSelected.length === 0) {
+                theirList.innerHTML = '<div style="color:#888;text-align:center;padding:10px;">Waiting for offer...</div>';
+            }
+        }
+
+        function toggleTradeMyGun(gunKey) {
+            if (tradeMySelected.includes(gunKey)) {
+                tradeMySelected = tradeMySelected.filter(g => g !== gunKey);
+            } else {
+                tradeMySelected.push(gunKey);
+            }
+            updateTradeWindow();
+        }
+
+        function confirmTrade() {
+            if (tradeMySelected.length === 0 && tradeTheirSelected.length === 0) return;
+
+            // Remove my offered guns
+            tradeMySelected.forEach(g => {
+                ownedGuns = ownedGuns.filter(og => og !== g);
+                selectedGuns = selectedGuns.map(sg => sg === g ? null : sg);
+            });
+
+            // Add their offered guns
+            tradeTheirSelected.forEach(g => {
+                if (!ownedGuns.includes(g)) {
+                    ownedGuns.push(g);
+                }
+            });
+
+            // Ensure we have at least pistol
+            if (ownedGuns.length === 0) ownedGuns.push('pistol');
+
+            saveCurrentUserData();
+            socialSelectedGunIndex = Math.min(socialSelectedGunIndex, ownedGuns.length - 1);
+            updateSocialGunPanel();
+            cancelTrade();
+        }
+
+        function cancelTrade() {
+            tradeWindowOpen = false;
+            tradePartner = null;
+            tradeMySelected = [];
+            tradeTheirSelected = [];
+            document.getElementById('socialTradeWindow').style.display = 'none';
+        }
+
         // Armor System
         let playerArmor = null; // null, 'basic', or 'diamond'
         let armorProtection = 0; // 9 for basic, 20 for diamond
@@ -2940,6 +4123,14 @@
         let voteTimeLeft = 10;
         let walls = [];
 
+        // Wood block building system
+        let woodBlocks = [];
+        let buildMode = false;
+        const WOOD_BLOCK_WIDTH = 80;
+        const WOOD_BLOCK_HEIGHT = 20;
+        const WOOD_BLOCK_HEALTH = 60;
+        const MAX_WOOD_BLOCKS = 20;
+
         // Canvas and Game Variables
         let canvas, ctx;
         let gameRunning = false;
@@ -2949,6 +4140,10 @@
         let blueKills = 0;
         let redKills = 0;
         const KILLS_TO_WIN = 10;
+        let currentSet = 1;
+        const MAX_SETS = 10;
+        let setBetweenTimer = 0;
+        let setWinnerText = '';
 
         // Super Grenade white flash effect
         let whiteFlashTimer = 0;
@@ -3417,16 +4612,28 @@
         }
 
         function updateGunSlots() {
+            // Sync selectedGuns to match ownedGuns
+            selectedGuns = [...ownedGuns];
+            if (currentGunIndex >= selectedGuns.length) currentGunIndex = 0;
+
             const slots = document.getElementById('gunSlots');
             slots.innerHTML = '';
-            for (let i = 0; i < 4; i++) {
-                const gun = selectedGuns[i] ? guns[selectedGuns[i]] : null;
+            for (let i = 0; i < selectedGuns.length; i++) {
+                const gun = guns[selectedGuns[i]];
                 slots.innerHTML += `
-                    <div class="gun-slot ${i === currentGunIndex ? 'active' : ''}">
+                    <div class="gun-slot ${i === currentGunIndex ? 'active' : ''}" onclick="selectGunSlot(${i})" style="cursor:pointer;">
                         <span class="key">${i + 1}</span>
                         <span class="icon">${gun ? gun.icon : '-'}</span>
                     </div>
                 `;
+            }
+        }
+
+        function selectGunSlot(idx) {
+            if (idx >= 0 && idx < selectedGuns.length && selectedGuns[idx]) {
+                currentGunIndex = idx;
+                updateGunSlots();
+                isScoped = false;
             }
         }
 
@@ -3445,8 +4652,12 @@
             bullets = [];
             blueKills = 0;
             redKills = 0;
+            currentSet = 1;
+            setBetweenTimer = 0;
+            setWinnerText = '';
             currentGunIndex = 0;
             gameRunning = true;
+            buildMode = false;
             aiNameIndex = 0;
             lastFrameTime = 0;
             lastLeaderboardKills = '';
@@ -3472,6 +4683,9 @@
             updateLeaderboard();
             document.getElementById('blueScore').textContent = '0';
             document.getElementById('redScore').textContent = '0';
+            const sc = document.getElementById('setCounter');
+            sc.textContent = 'SET 1 / ' + MAX_SETS;
+            sc.style.display = 'block';
 
             // Start game loop
             requestAnimationFrame(gameLoop);
@@ -3480,6 +4694,7 @@
         function createPlatforms() {
             platforms = [];
             walls = [];
+            woodBlocks = [];
             const w = canvas.width;
             const h = canvas.height;
             const map = maps[currentMap];
@@ -3508,9 +4723,11 @@
                     break;
 
                 case 'skyhigh':
-                    // No ground - floating platforms
-                    platforms.push({ x: 50, y: h - 100, width: 150, height: 25 });
-                    platforms.push({ x: w - 200, y: h - 100, width: 150, height: 25 });
+                    // Ground floor
+                    platforms.push({ x: 0, y: h - 50, width: w, height: 50 });
+                    // Floating platforms
+                    platforms.push({ x: 50, y: h - 150, width: 150, height: 25 });
+                    platforms.push({ x: w - 200, y: h - 150, width: 150, height: 25 });
                     platforms.push({ x: w/2 - 100, y: h - 200, width: 200, height: 25 });
                     platforms.push({ x: 150, y: h - 320, width: 120, height: 25 });
                     platforms.push({ x: w - 270, y: h - 320, width: 120, height: 25 });
@@ -3581,6 +4798,31 @@
                     platforms.push({ x: 100, y: h - 200, width: 200, height: 20 });
                     platforms.push({ x: w - 300, y: h - 200, width: 200, height: 20 });
                     platforms.push({ x: w/2 - 150, y: h - 300, width: 300, height: 20 });
+            }
+        }
+
+        // Wood block functions
+        function placeWoodBlock(x, y) {
+            if (woodBlocks.length >= MAX_WOOD_BLOCKS) return;
+            // Snap to grid
+            const bx = Math.round(x - WOOD_BLOCK_WIDTH / 2);
+            const by = Math.round(y - WOOD_BLOCK_HEIGHT / 2);
+            // Don't place if overlapping existing block
+            for (const b of woodBlocks) {
+                if (bx < b.x + b.width && bx + WOOD_BLOCK_WIDTH > b.x &&
+                    by < b.y + b.height && by + WOOD_BLOCK_HEIGHT > b.y) return;
+            }
+            woodBlocks.push({
+                x: bx, y: by,
+                width: WOOD_BLOCK_WIDTH, height: WOOD_BLOCK_HEIGHT,
+                health: WOOD_BLOCK_HEALTH
+            });
+        }
+
+        function damageWoodBlock(block, damage) {
+            block.health -= damage;
+            if (block.health <= 0) {
+                woodBlocks = woodBlocks.filter(b => b !== block);
             }
         }
 
@@ -3704,13 +4946,17 @@
 
         document.addEventListener('keydown', (e) => {
             keys[e.key.toLowerCase()] = true;
-            // Gun switching
-            if (e.key >= '1' && e.key <= '4') {
+            // Toggle build mode with B
+            if (e.key.toLowerCase() === 'b' && gameRunning && !isSocialLobby) {
+                buildMode = !buildMode;
+            }
+            // Gun switching (supports all owned guns)
+            if (e.key >= '1' && e.key <= '9') {
                 const idx = parseInt(e.key) - 1;
-                if (selectedGuns[idx]) {
+                if (idx < selectedGuns.length && selectedGuns[idx]) {
                     currentGunIndex = idx;
                     updateGunSlots();
-                    isScoped = false; // Exit scope when switching guns
+                    isScoped = false;
                 }
             }
             // Reload with R key
@@ -3719,6 +4965,22 @@
                 if (humanPlayer) {
                     const currentGunKey = selectedGuns[currentGunIndex];
                     startReload(humanPlayer, currentGunKey);
+                }
+            }
+            // Social lobby: Drop gun with L
+            if (e.key.toLowerCase() === 'l' && isSocialLobby) {
+                socialDropGun();
+            }
+            // Social lobby: Trade with G
+            if (e.key.toLowerCase() === 'g' && isSocialLobby) {
+                if (tradeOpen) closeSocialTrade();
+                else openSocialTrade();
+            }
+            // Social lobby: Gun selection with 1-9
+            if (isSocialLobby && e.key >= '1' && e.key <= '9') {
+                const idx = parseInt(e.key) - 1;
+                if (idx < ownedGuns.length) {
+                    selectSocialGun(idx);
                 }
             }
         });
@@ -3733,7 +4995,16 @@
         });
 
         document.addEventListener('mousedown', (e) => {
-            if (e.button === 0) mouseDown = true; // Left click
+            if (e.button === 0) {
+                // Build mode: place wood block instead of shooting
+                if (buildMode && gameRunning) {
+                    const gmx = typeof getGameMouseX === 'function' ? getGameMouseX() : mouseX;
+                    const gmy = typeof getGameMouseY === 'function' ? getGameMouseY() : mouseY;
+                    placeWoodBlock(gmx, gmy);
+                } else {
+                    mouseDown = true;
+                }
+            }
             if (e.button === 2) { // Right click - scope
                 // Check for scope in regular game
                 if (gameRunning) {
@@ -3801,6 +5072,51 @@
                 }
             });
 
+            // Draw wood blocks
+            woodBlocks.forEach(b => {
+                // Wood texture
+                const healthPct = b.health / WOOD_BLOCK_HEALTH;
+                ctx.fillStyle = `rgb(${139 + Math.floor((1 - healthPct) * 80)}, ${90 - Math.floor((1 - healthPct) * 40)}, ${43})`;
+                ctx.fillRect(b.x, b.y, b.width, b.height);
+                // Wood grain lines
+                ctx.strokeStyle = 'rgba(101, 67, 33, 0.6)';
+                ctx.lineWidth = 1;
+                for (let lx = b.x + 15; lx < b.x + b.width; lx += 20) {
+                    ctx.beginPath();
+                    ctx.moveTo(lx, b.y);
+                    ctx.lineTo(lx, b.y + b.height);
+                    ctx.stroke();
+                }
+                ctx.strokeStyle = '#5c3a1e';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(b.x, b.y, b.width, b.height);
+                // Health bar if damaged
+                if (healthPct < 1) {
+                    ctx.fillStyle = 'rgba(255,0,0,0.7)';
+                    ctx.fillRect(b.x, b.y - 5, b.width, 3);
+                    ctx.fillStyle = 'rgba(0,255,0,0.7)';
+                    ctx.fillRect(b.x, b.y - 5, b.width * healthPct, 3);
+                }
+            });
+
+            // Build mode indicator
+            if (buildMode && gameRunning) {
+                const gmx = typeof getGameMouseX === 'function' ? getGameMouseX() : mouseX;
+                const gmy = typeof getGameMouseY === 'function' ? getGameMouseY() : mouseY;
+                ctx.strokeStyle = 'rgba(139, 90, 43, 0.6)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.strokeRect(gmx - WOOD_BLOCK_WIDTH / 2, gmy - WOOD_BLOCK_HEIGHT / 2, WOOD_BLOCK_WIDTH, WOOD_BLOCK_HEIGHT);
+                ctx.setLineDash([]);
+                // Build mode label
+                ctx.fillStyle = '#d4a053';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('BUILD MODE (B) - Click to place', canvas.width / 2, 30);
+                ctx.fillText('Blocks: ' + woodBlocks.length + '/' + MAX_WOOD_BLOCKS, canvas.width / 2, 48);
+                ctx.textAlign = 'left';
+            }
+
             // Draw walls
             walls.forEach(wall => {
                 ctx.fillStyle = map.bounceWalls ? '#666' : '#444';
@@ -3824,10 +5140,7 @@
                     updatePlayerPhysics(player);
                     drawPlayer(player);
                 } else {
-                    player.respawnTimer -= 16.667 * frameDt;
-                    if (player.respawnTimer <= 0) {
-                        respawnPlayer(player);
-                    }
+                    // Dead - waiting for the set to end (no auto-respawn)
                 }
             });
 
@@ -3924,9 +5237,21 @@
                 }
             }
 
-            // Check win condition
-            if (blueKills >= KILLS_TO_WIN || redKills >= KILLS_TO_WIN) {
-                endGame(blueKills >= KILLS_TO_WIN);
+            // Draw overlays for dead player / between sets
+            drawDeadOverlay();
+            drawSetBetweenOverlay();
+
+            // Handle between-set countdown
+            if (setBetweenTimer > 0) {
+                setBetweenTimer -= 16.667 * frameDt;
+                if (setBetweenTimer <= 0) {
+                    if (currentSet >= MAX_SETS) {
+                        endGame(blueKills >= redKills);
+                        return;
+                    }
+                    startNextSet();
+                }
+                requestAnimationFrame(gameLoop);
                 return;
             }
 
@@ -4159,7 +5484,7 @@
             const armX = player.x + player.width / 2;
             const armY = player.y + 28;
             const angle = Math.atan2(gmy - armY, gmx - armX);
-            player.gunAngle = Math.max(-0.8, Math.min(0.8, angle));
+            player.gunAngle = angle;
 
             // Update reload state
             updateReload(player);
@@ -4233,7 +5558,7 @@
                 const targetX = player.targetEnemy.x + player.targetEnemy.width/2;
                 const targetY = player.targetEnemy.y + player.targetEnemy.height/2;
                 const angle = Math.atan2(targetY - armY, targetX - armX);
-                player.gunAngle = Math.max(-0.8, Math.min(0.8, angle));
+                player.gunAngle = angle;
 
                 // Update AI reload state
                 updateReload(player);
@@ -4283,6 +5608,19 @@
                     player.y + player.height < p.y + p.height + 20 &&
                     player.vy > 0) {
                     player.y = p.y - player.height;
+                    player.vy = 0;
+                    player.onGround = true;
+                }
+            });
+
+            // Wood block collision (stand on top + side push)
+            woodBlocks.forEach(b => {
+                if (player.x + player.width > b.x &&
+                    player.x < b.x + b.width &&
+                    player.y + player.height > b.y &&
+                    player.y + player.height < b.y + b.height + 20 &&
+                    player.vy > 0) {
+                    player.y = b.y - player.height;
                     player.vy = 0;
                     player.onGround = true;
                 }
@@ -4459,6 +5797,7 @@
         function startReload(player, gunKey) {
             const gun = guns[gunKey];
             if (!gun || gun.infiniteAmmo) return; // Energy gun doesn't need reload
+            if (gun.isSuperGrenade) return; // Super grenade: one use per game
             if (player.reloading === gunKey) return; // Already reloading this gun
             if (player.ammo[gunKey] >= gun.magSize) return; // Already full
 
@@ -4728,6 +6067,29 @@
                     }
                 }
 
+                // Wood block collision
+                let hitWood = false;
+                for (let w = woodBlocks.length - 1; w >= 0; w--) {
+                    const b = woodBlocks[w];
+                    if (bullet.x > b.x && bullet.x < b.x + b.width &&
+                        bullet.y > b.y && bullet.y < b.y + b.height) {
+                        damageWoodBlock(b, bullet.damage || 15);
+                        if (bullet.explosive) {
+                            // Explosives destroy nearby wood blocks too
+                            woodBlocks.forEach(wb => {
+                                const dist = Math.hypot(wb.x + wb.width/2 - bullet.x, wb.y + wb.height/2 - bullet.y);
+                                if (dist < 100 && wb !== b) damageWoodBlock(wb, bullet.damage * 0.5);
+                            });
+                        }
+                        hitWood = true;
+                        break;
+                    }
+                }
+                if (hitWood && !bullet.alwaysBounce) {
+                    bullets.splice(i, 1);
+                    continue;
+                }
+
                 // Player collision
                 for (const player of players) {
                     if (player.team !== bullet.team && player.alive &&
@@ -4819,16 +6181,82 @@
         function checkPlayerDeath(player) {
             if (player.health <= 0 && player.alive) {
                 player.alive = false;
-                player.respawnTimer = 3000;
-
-                if (player.team === 'blue') {
-                    redKills++;
-                    document.getElementById('redScore').textContent = redKills;
-                } else {
-                    blueKills++;
-                    document.getElementById('blueScore').textContent = blueKills;
-                }
+                checkSetEnd();
             }
+        }
+
+        function checkSetEnd() {
+            if (setBetweenTimer > 0) return; // already processing a set end
+            const bluePlayers = players.filter(p => p.team === 'blue');
+            const redPlayers = players.filter(p => p.team === 'red');
+            const allBlueDead = bluePlayers.length > 0 && bluePlayers.every(p => !p.alive);
+            const allRedDead = redPlayers.length > 0 && redPlayers.every(p => !p.alive);
+            if (!allBlueDead && !allRedDead) return;
+
+            if (allRedDead && !allBlueDead) {
+                blueKills++;
+                setWinnerText = 'BLUE WINS THE SET!';
+                document.getElementById('blueScore').textContent = blueKills;
+            } else if (allBlueDead && !allRedDead) {
+                redKills++;
+                setWinnerText = 'RED WINS THE SET!';
+                document.getElementById('redScore').textContent = redKills;
+            } else {
+                setWinnerText = 'DRAW!';
+            }
+            document.getElementById('setCounter').textContent = 'SET ' + currentSet + ' / ' + MAX_SETS;
+            setBetweenTimer = 3500;
+        }
+
+        function startNextSet() {
+            currentSet++;
+            setWinnerText = '';
+            document.getElementById('setCounter').textContent = 'SET ' + currentSet + ' / ' + MAX_SETS;
+            players.forEach(p => respawnPlayer(p));
+        }
+
+        function drawDeadOverlay() {
+            const me = players.find(p => p.isHuman);
+            if (!me || me.alive || setBetweenTimer > 0) return;
+            ctx.save();
+            ctx.fillStyle = 'rgba(0,0,0,0.55)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#ff4444';
+            ctx.font = 'bold 64px Arial';
+            ctx.fillText('YOU DIED', canvas.width / 2, canvas.height / 2 - 20);
+            ctx.fillStyle = '#cccccc';
+            ctx.font = '28px Arial';
+            ctx.fillText('Waiting for the set to end...', canvas.width / 2, canvas.height / 2 + 30);
+            ctx.restore();
+        }
+
+        function drawSetBetweenOverlay() {
+            if (setBetweenTimer <= 0) return;
+            ctx.save();
+            ctx.fillStyle = 'rgba(0,0,0,0.72)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.textAlign = 'center';
+            const isBlue = setWinnerText.startsWith('BLUE');
+            const isRed = setWinnerText.startsWith('RED');
+            ctx.fillStyle = isBlue ? '#4ecdc4' : (isRed ? '#ff6b6b' : '#ffffff');
+            ctx.shadowColor = ctx.fillStyle;
+            ctx.shadowBlur = 24;
+            ctx.font = 'bold 68px Arial';
+            ctx.fillText(setWinnerText, canvas.width / 2, canvas.height / 2 - 55);
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 42px Arial';
+            ctx.fillText('BLUE ' + blueKills + '  -  ' + redKills + ' RED', canvas.width / 2, canvas.height / 2 + 15);
+            ctx.font = '24px Arial';
+            ctx.fillStyle = '#aaaaaa';
+            if (currentSet < MAX_SETS) {
+                const secs = Math.ceil(setBetweenTimer / 1000);
+                ctx.fillText('Set ' + (currentSet + 1) + ' / ' + MAX_SETS + ' starting in ' + secs + '...', canvas.width / 2, canvas.height / 2 + 70);
+            } else {
+                ctx.fillText('Final set complete! Calculating results...', canvas.width / 2, canvas.height / 2 + 70);
+            }
+            ctx.restore();
         }
 
         function respawnPlayer(player) {
@@ -5489,7 +6917,7 @@
             const armX = rangePlayer.x + rangePlayer.width / 2;
             const armY = rangePlayer.y + 28;
             const angle = Math.atan2(mouseY - armY, mouseX - armX);
-            rangePlayer.gunAngle = Math.max(-0.8, Math.min(0.8, angle));
+            rangePlayer.gunAngle = angle;
 
             // Gun switching with number keys
             for (let i = 0; i < rangeGunKeys.length && i < 9; i++) {
