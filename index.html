@@ -1656,7 +1656,7 @@
             <button class="btn btn-shop" onclick="showShop('guns')">GUNS</button>
             <button class="btn btn-skins" onclick="showShop('skins')">SKINS</button>
             <button class="btn btn-spin-nav" onclick="showSpinner()">SPIN</button>
-            <button class="btn btn-social" onclick="joinSocialLobby()">LOBBY</button>
+            <button class="btn btn-social" onclick="showSocialRoomModal()">LOBBY</button>
         </div>
         <div class="owned-guns">
             <h3>Your Arsenal:</h3>
@@ -1803,10 +1803,34 @@
         <div class="range-controls-hint">WASD to move | 1-8 to switch guns | Click to shoot | ESC to exit</div>
     </div>
 
+    <!-- SOCIAL ROOM ENTRY MODAL -->
+    <div id="socialRoomModal" style="display:none;position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center">
+        <div style="background:#1a1a2e;border:2px solid #4ecdc4;border-radius:16px;padding:36px 40px;min-width:340px;text-align:center;box-shadow:0 0 40px rgba(78,205,196,0.3)">
+            <div style="font-size:28px;font-weight:bold;color:#4ecdc4;letter-spacing:2px;margin-bottom:6px">SOCIAL LOBBY</div>
+            <div style="color:#888;font-size:14px;margin-bottom:28px">Hang out with friends in a private room</div>
+
+            <button onclick="createSocialRoom()" style="display:block;width:100%;padding:14px;background:linear-gradient(135deg,#4ecdc4,#44a08d);border:none;border-radius:10px;color:#fff;font-size:18px;font-weight:bold;cursor:pointer;margin-bottom:16px">
+                CREATE ROOM
+            </button>
+
+            <div style="color:#666;font-size:13px;margin-bottom:10px">— or join an existing room —</div>
+
+            <div style="display:flex;gap:8px;margin-bottom:20px">
+                <input id="socialJoinCodeInput" type="text" maxlength="6" placeholder="Enter room code"
+                    style="flex:1;padding:12px;background:rgba(255,255,255,0.08);border:1px solid #444;border-radius:8px;color:#fff;font-size:16px;letter-spacing:3px;text-transform:uppercase;text-align:center"
+                    onkeydown="if(event.key==='Enter') joinSocialRoomByCode()">
+                <button onclick="joinSocialRoomByCode()" style="padding:12px 18px;background:#ff6b6b;border:none;border-radius:8px;color:#fff;font-weight:bold;font-size:15px;cursor:pointer">JOIN</button>
+            </div>
+
+            <div id="socialRoomError" style="color:#ff6b6b;font-size:13px;min-height:18px"></div>
+            <button onclick="closeSocialRoomModal()" style="margin-top:12px;background:none;border:none;color:#555;cursor:pointer;font-size:13px">Cancel</button>
+        </div>
+    </div>
+
     <!-- SOCIAL LOBBY -->
     <div id="socialLobby" class="screen">
         <div class="social-hud">
-            <div class="social-info">SOCIAL LOBBY</div>
+            <div class="social-info">SOCIAL LOBBY &nbsp;|&nbsp; Room: <span id="socialRoomCodeDisplay" style="color:#4ecdc4;letter-spacing:2px;font-weight:bold">----</span></div>
             <div class="social-player-count" id="socialPlayerCount">Players: 1</div>
             <button class="btn btn-back" onclick="leaveSocialLobby()">LEAVE</button>
         </div>
@@ -3213,7 +3237,33 @@
         let socialLastStateBroadcast = 0;
         let socialLastInputSend = 0;
 
-        const SOCIAL_LOBBY_PEER_ID = 'RIVALS-SOCIAL-LOBBY';
+        let socialRoomCode = '';
+        function socialPeerIdFromCode(code) { return 'RIVALS-SOCIAL-' + code.toUpperCase(); }
+
+        function showSocialRoomModal() {
+            document.getElementById('socialRoomError').textContent = '';
+            document.getElementById('socialJoinCodeInput').value = '';
+            document.getElementById('socialRoomModal').style.display = 'flex';
+        }
+        function closeSocialRoomModal() {
+            document.getElementById('socialRoomModal').style.display = 'none';
+        }
+        function createSocialRoom() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
+            closeSocialRoomModal();
+            joinSocialLobby(code);
+        }
+        function joinSocialRoomByCode() {
+            const code = document.getElementById('socialJoinCodeInput').value.trim().toUpperCase();
+            if (code.length < 3) {
+                document.getElementById('socialRoomError').textContent = 'Please enter a valid room code.';
+                return;
+            }
+            closeSocialRoomModal();
+            joinSocialLobby(code);
+        }
         const SOCIAL_WIDTH = 1920;
         const SOCIAL_HEIGHT = 1080;
 
@@ -3230,11 +3280,14 @@
         let tradeMySelected = []; // gun keys I'm offering
         let tradeTheirSelected = []; // gun keys they're offering (AI auto-selects)
 
-        function joinSocialLobby() {
+        function joinSocialLobby(code) {
             if (socialPeer) return;
+            socialRoomCode = code.toUpperCase();
+            const roomPeerId = socialPeerIdFromCode(socialRoomCode);
+            document.getElementById('socialRoomCodeDisplay').textContent = socialRoomCode;
 
-            // Try to become host by claiming the fixed peer ID
-            socialPeer = new Peer(SOCIAL_LOBBY_PEER_ID);
+            // Try to become host by claiming the room peer ID
+            socialPeer = new Peer(roomPeerId);
 
             socialPeer.on('open', (id) => {
                 isSocialHost = true;
@@ -3250,12 +3303,12 @@
 
             socialPeer.on('error', (err) => {
                 if (err.type === 'unavailable-id') {
-                    // Someone else is hosting -- join as client
+                    // Someone else is hosting this room -- join as client
                     socialPeer.destroy();
                     socialPeer = new Peer();
                     socialPeer.on('open', (id) => {
                         mySocialPeerId = id;
-                        const conn = socialPeer.connect(SOCIAL_LOBBY_PEER_ID, { reliable: true });
+                        const conn = socialPeer.connect(roomPeerId, { reliable: true });
                         conn.on('open', () => {
                             socialHostConnection = conn;
                             isSocialHost = false;
@@ -3430,9 +3483,49 @@
         }
 
         function handleSocialHostDisconnect() {
-            alert('Lobby host left. Returning to menu.');
-            cleanupSocialLobby();
-            showLobby();
+            // Host left — try to take over as new host instead of kicking everyone
+            socialHostConnection = null;
+            isSocialHost = false;
+            if (socialPeer) { socialPeer.destroy(); socialPeer = null; }
+
+            const roomPeerId = socialPeerIdFromCode(socialRoomCode);
+
+            // Small delay so the old host fully releases the peer ID
+            setTimeout(() => {
+                socialPeer = new Peer(roomPeerId);
+
+                socialPeer.on('open', () => {
+                    isSocialHost = true;
+                    mySocialPeerId = roomPeerId;
+                    // Keep playing — no interruption
+                });
+
+                socialPeer.on('connection', (conn) => {
+                    onSocialPlayerConnect(conn);
+                });
+
+                socialPeer.on('error', (err) => {
+                    if (err.type === 'unavailable-id') {
+                        // Someone else became host first — reconnect as client
+                        socialPeer.destroy();
+                        socialPeer = new Peer();
+                        socialPeer.on('open', (id) => {
+                            mySocialPeerId = id;
+                            const conn = socialPeer.connect(roomPeerId, { reliable: true });
+                            conn.on('open', () => {
+                                socialHostConnection = conn;
+                                isSocialHost = false;
+                                conn.send({ type: 'social-join', name: playerDisplayName || 'Player', skin: selectedSkin, ownedGuns: ownedGuns });
+                                conn.on('data', handleSocialHostMessage);
+                                conn.on('close', handleSocialHostDisconnect);
+                            });
+                            conn.on('error', () => { /* stay in lobby, host may still be migrating */ });
+                        });
+                    } else {
+                        // Unrecoverable error — stay in lobby silently
+                    }
+                });
+            }, 800);
         }
 
         function serializeSocialPlayers() {
