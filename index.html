@@ -17,25 +17,31 @@
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
             color: white;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         .screen {
             display: none;
             width: 100vw;
-            height: 100vh;
+            min-height: 100vh;
         }
 
         .screen.active {
             display: flex;
         }
 
+        #game {
+            height: 100vh;
+            overflow: hidden;
+        }
+
         /* LOBBY SCREEN */
         #lobby {
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 30px;
+            padding: 40px 20px 60px;
         }
 
         .lobby-title {
@@ -89,6 +95,52 @@
             color: #ffd700;
             text-shadow: 0 0 10px #ffd700;
         }
+
+        .flame-display {
+            font-size: 22px;
+            color: #ff6b00;
+            text-shadow: 0 0 10px #ff4400;
+            margin-top: 4px;
+        }
+
+        .tier-badge {
+            margin-top: 6px;
+            padding: 5px 18px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .tier-badge.pro {
+            background: linear-gradient(135deg, #8e44ad, #6c3483);
+            color: #fff;
+            box-shadow: 0 0 18px rgba(142,68,173,0.7);
+        }
+        .tier-badge.max {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: #fff;
+            box-shadow: 0 0 24px rgba(255,165,0,0.9);
+            animation: maxGlow 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes maxGlow {
+            from { box-shadow: 0 0 18px rgba(255,165,0,0.7); }
+            to   { box-shadow: 0 0 36px rgba(255,165,0,1); }
+        }
+
+        .flame-upgrade-card {
+            background: rgba(255,255,255,0.06);
+            border: 2px solid rgba(255,107,0,0.4);
+            border-radius: 14px;
+            padding: 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .flame-upgrade-card.pro-card { border-color: rgba(142,68,173,0.6); }
+        .flame-upgrade-card.max-card { border-color: rgba(255,165,0,0.8); }
+        .upgrade-perks { text-align: left; font-size: 13px; color: #ccc; line-height: 1.8; }
 
         .lobby-buttons {
             display: flex;
@@ -321,6 +373,78 @@
         .btn-buy:disabled {
             background: #666;
             cursor: not-allowed;
+        }
+
+        .btn-watch-ad {
+            padding: 7px 14px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            margin-top: 6px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .btn-watch-ad:hover { background: linear-gradient(135deg, #ff6b6b, #e74c3c); }
+
+        #adOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #adOverlay.active { display: flex; }
+        #adContent {
+            width: min(480px, 90vw);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0,0,0,0.8);
+            position: relative;
+        }
+        #adBody {
+            padding: 40px 30px;
+            text-align: center;
+            min-height: 260px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        #adSkipBtn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid #fff;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            display: none;
+        }
+        #adTimerBar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        #adTimerFill {
+            height: 100%;
+            width: 100%;
+            border-radius: 3px;
+            transition: width 0.1s linear;
         }
 
         .btn-back {
@@ -616,6 +740,66 @@
             font-size: 14px;
             color: #aaa;
         }
+
+        #adminOpenBtn {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            z-index: 9999;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid #ff6b00;
+            color: #ff6b00;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+        #adminOpenBtn:hover { background: rgba(255,107,0,0.2); }
+
+        #adminPanel {
+            position: fixed;
+            top: 48px;
+            right: 12px;
+            z-index: 9999;
+            background: rgba(8,8,18,0.97);
+            border: 2px solid #ff6b00;
+            border-radius: 14px;
+            padding: 18px 16px 12px;
+            min-width: 230px;
+            box-shadow: 0 0 40px rgba(255,107,0,0.25);
+            display: none;
+        }
+        .admin-title {
+            color: #ff6b00;
+            font-weight: bold;
+            font-size: 17px;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid rgba(255,107,0,0.3);
+            padding-bottom: 8px;
+        }
+        .admin-btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            color: #eee;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.15s;
+        }
+        .admin-btn:hover { background: rgba(255,107,0,0.2); border-color: #ff6b00; color: #fff; }
+        .admin-btn.active { background: rgba(255,107,0,0.3); border-color: #ff6b00; color: #ff6b00; }
+        .admin-close { color: #666; border-color: #333; margin-bottom: 0; text-align: center; }
+        .admin-close:hover { background: rgba(255,80,80,0.15); border-color: #ff4444; color: #ff4444; }
 
         /* MAP VOTING SCREEN */
         #mapVote {
@@ -1449,7 +1633,8 @@
     <!-- LOBBY SCREEN -->
     <div id="lobby" class="screen">
         <div class="logged-in-as">
-            Logged in as: <span id="userEmail">-</span>
+            Playing as: <span id="userEmail" style="font-weight:bold;color:#ffd700">-</span>
+            <button onclick="promptChangeName()" style="margin-left:8px;padding:4px 10px;font-size:13px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:6px;color:#fff;cursor:pointer">Edit Name</button>
             <button class="btn-logout" onclick="handleLogout()">LOGOUT</button>
         </div>
         <div class="rivals-logo">
@@ -1461,6 +1646,8 @@
             <div class="rivals-tagline">Fight for glory</div>
         </div>
         <div class="money-display">$<span id="moneyDisplay">100</span></div>
+        <div class="flame-display">🔥 <span id="flameCount">0</span> Flames</div>
+        <div id="tierBadge" class="tier-badge" style="display:none"></div>
         <div class="vip-display" id="vipDisplay">VIP ACTIVE: <span id="vipTimer">0:00</span></div>
         <div class="armor-display" id="armorDisplay"></div>
         <div class="lobby-buttons">
@@ -1488,6 +1675,7 @@
             <button class="tab-btn active" id="tabGuns" onclick="switchShopTab('guns')">GUNS</button>
             <button class="tab-btn" id="tabSkins" onclick="switchShopTab('skins')">SKINS</button>
             <button class="tab-btn" id="tabArmor" onclick="switchShopTab('armor')">ARMOR</button>
+            <button class="tab-btn" id="tabFlames" onclick="switchShopTab('flames')">🔥 FLAMES</button>
         </div>
         <div class="shop-container">
             <div class="shop-grid" id="shopGrid"></div>
@@ -1657,6 +1845,7 @@
     <script>
         // Account System
         let currentUser = null;
+        let playerDisplayName = 'Player';
 
         // Game State (will be loaded from account)
         let money = 100;
@@ -1683,6 +1872,9 @@
             const accounts = getAccounts();
             accounts[currentUser] = {
                 email: currentUser,
+                displayName: playerDisplayName,
+                flames: flames,
+                accountTier: accountTier,
                 money: money,
                 ownedGuns: ownedGuns,
                 selectedGuns: selectedGuns,
@@ -1698,6 +1890,9 @@
             const accounts = getAccounts();
             if (accounts[email]) {
                 const data = accounts[email];
+                playerDisplayName = data.displayName || email.split('@')[0];
+                flames = data.flames || 0;
+                accountTier = data.accountTier || 'normal';
                 money = data.money || 100;
                 ownedGuns = data.ownedGuns || ['pistol', 'grenade'];
                 selectedGuns = data.selectedGuns || ['pistol', 'grenade', null, null];
@@ -1735,12 +1930,13 @@
             localStorage.setItem('rivals_current_user', email);
             loadUserData(email);
 
-            document.getElementById('userEmail').textContent = email;
+            document.getElementById('userEmail').textContent = playerDisplayName;
             showScreen('lobby');
             updateMoneyDisplay();
             updateOwnedGunsList();
             updateArmorDisplay();
             updateVIPDisplay();
+            updateFlameDisplay();
         }
 
         function handleSignup() {
@@ -1764,8 +1960,12 @@
             }
 
             // Create new account with default values
+            const defaultName = email.split('@')[0];
             accounts[email] = {
                 email: email,
+                displayName: defaultName,
+                flames: 0,
+                accountTier: 'normal',
                 money: 100,
                 ownedGuns: ['pistol', 'grenade'],
                 selectedGuns: ['pistol', 'grenade', null, null],
@@ -1781,20 +1981,25 @@
             localStorage.setItem('rivals_current_user', email);
             loadUserData(email);
 
-            document.getElementById('userEmail').textContent = email;
+            document.getElementById('userEmail').textContent = playerDisplayName;
             showScreen('lobby');
             updateMoneyDisplay();
             updateOwnedGunsList();
             updateArmorDisplay();
             updateVIPDisplay();
+            updateFlameDisplay();
         }
 
         function handleLogout() {
             saveCurrentUserData();
             currentUser = null;
+            adminUnlocked = false;
+            document.getElementById('adminPanel').style.display = 'none';
             localStorage.removeItem('rivals_current_user');
 
             // Reset to defaults
+            flames = 0;
+            accountTier = 'normal';
             money = 100;
             ownedGuns = ['pistol', 'grenade'];
             selectedGuns = ['pistol', 'grenade', null, null];
@@ -1806,6 +2011,17 @@
             document.getElementById('emailInput').value = '';
             document.getElementById('authError').textContent = '';
             showScreen('auth');
+        }
+
+        function promptChangeName() {
+            const newName = prompt('Enter your new display name (max 20 characters):', playerDisplayName);
+            if (newName === null) return; // cancelled
+            const trimmed = newName.trim();
+            if (!trimmed) { alert('Name cannot be empty!'); return; }
+            if (trimmed.length > 20) { alert('Name must be 20 characters or less!'); return; }
+            playerDisplayName = trimmed;
+            document.getElementById('userEmail').textContent = trimmed;
+            saveCurrentUserData();
         }
 
         function isValidEmail(email) {
@@ -1831,7 +2047,7 @@
                 if (accounts[savedUser]) {
                     currentUser = savedUser;
                     loadUserData(savedUser);
-                    document.getElementById('userEmail').textContent = savedUser;
+                    document.getElementById('userEmail').textContent = playerDisplayName;
                     showScreen('lobby');
                     return true;
                 }
@@ -1911,7 +2127,7 @@
                 // Add host to lobby
                 lobbyPlayers.push({
                     peerId: id,
-                    name: currentUser || 'Host',
+                    name: playerDisplayName || 'Host',
                     team: 'blue',
                     isHost: true,
                     skin: selectedSkin
@@ -1936,7 +2152,7 @@
                         myPeerId = id;
                         lobbyPlayers = [{
                             peerId: id,
-                            name: currentUser || 'Host',
+                            name: playerDisplayName || 'Host',
                             team: 'blue',
                             isHost: true,
                             skin: selectedSkin
@@ -1985,7 +2201,7 @@
                     // Send join info
                     conn.send({
                         type: 'join',
-                        name: currentUser || 'Player',
+                        name: playerDisplayName || 'Player',
                         skin: selectedSkin,
                         ownedGuns: ownedGuns,
                         selectedGuns: selectedGuns
@@ -2936,10 +3152,11 @@
             if (playerWon) {
                 resultText.className = 'victory-text';
                 resultText.textContent = 'VICTORY!';
-                rewardText.textContent = '+$20 Reward!';
+                const reward = getTierMoneyReward();
+                rewardText.textContent = `+$${reward} Reward!${accountTier !== 'normal' ? ' (' + accountTier.toUpperCase() + ' bonus)' : ''}`;
                 dancer.textContent = '🕺';
                 dancer.style.display = 'block';
-                money += 20;
+                money += reward;
             } else {
                 resultText.className = 'defeat-text';
                 resultText.textContent = 'DEFEAT';
@@ -3044,7 +3261,7 @@
                             isSocialHost = false;
                             conn.send({
                                 type: 'social-join',
-                                name: currentUser || 'Player',
+                                name: playerDisplayName || 'Player',
                                 skin: selectedSkin,
                                 ownedGuns: ownedGuns
                             });
@@ -3310,7 +3527,7 @@
                 vx: 0, vy: 0,
                 facingRight: true,
                 onGround: false,
-                name: currentUser || 'You',
+                name: playerDisplayName || 'You',
                 skin: skins[selectedSkin] || skins.default,
                 skinKey: selectedSkin,
                 currentGun: ownedGuns[0] || 'pistol',
@@ -4144,6 +4361,16 @@
         const MAX_SETS = 10;
         let setBetweenTimer = 0;
         let setWinnerText = '';
+        let adminUnlocked = false;
+        let adminGodModeOn = false;
+        let adminEnemiesFrozen = false;
+        let flames = 0;
+        let accountTier = 'normal'; // 'normal', 'pro', 'max'
+
+        function getTierMaxHealth()       { return accountTier === 'max' ? 200 : accountTier === 'pro' ? 150 : 100; }
+        function getTierSpeed()           { return accountTier === 'max' ? 8   : accountTier === 'pro' ? 6.5 : 5;   }
+        function getTierDamageMultiplier(){ return accountTier === 'max' ? 1.75: accountTier === 'pro' ? 1.3 : 1;   }
+        function getTierMoneyReward()     { return accountTier === 'max' ? 60  : accountTier === 'pro' ? 35  : 20;  }
 
         // Super Grenade white flash effect
         let whiteFlashTimer = 0;
@@ -4166,6 +4393,8 @@
                 updateSkinShop();
             } else if (currentShopTab === 'armor') {
                 updateArmorShop();
+            } else if (currentShopTab === 'flames') {
+                updateFlamesShop();
             }
         }
 
@@ -4226,6 +4455,7 @@
                         <button class="btn-buy" ${owned || !canAfford ? 'disabled' : ''} onclick="buyGun('${key}')">
                             ${owned ? 'OWNED' : (canAfford ? 'BUY' : 'NEED $' + (gun.price - money))}
                         </button>
+                        ${!owned && gun.price > 0 ? `<button class="btn-watch-ad" onclick="watchAdForGun('${key}')">📺 Watch Ad to Unlock</button>` : ''}
                     </div>
                 `;
             }
@@ -4305,15 +4535,188 @@
             document.getElementById('tabGuns').classList.toggle('active', tab === 'guns');
             document.getElementById('tabSkins').classList.toggle('active', tab === 'skins');
             document.getElementById('tabArmor').classList.toggle('active', tab === 'armor');
+            document.getElementById('tabFlames').classList.toggle('active', tab === 'flames');
             if (tab === 'guns') {
                 document.getElementById('shopTitle').textContent = 'GUN SHOP';
             } else if (tab === 'skins') {
                 document.getElementById('shopTitle').textContent = 'SKIN SHOP';
+            } else if (tab === 'flames') {
+                document.getElementById('shopTitle').textContent = '🔥 FLAMES SHOP';
             } else {
                 document.getElementById('shopTitle').textContent = 'ARMOR SHOP';
             }
             updateShop();
         }
+
+        function updateFlameDisplay() {
+            document.getElementById('flameCount').textContent = flames;
+            const badge = document.getElementById('tierBadge');
+            if (accountTier === 'pro') {
+                badge.textContent = '🔥 PRO';
+                badge.className = 'tier-badge pro';
+                badge.style.display = 'block';
+            } else if (accountTier === 'max') {
+                badge.textContent = '🔥🔥 MAX';
+                badge.className = 'tier-badge max';
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function updateFlamesShop() {
+            const grid = document.getElementById('shopGrid');
+            const canAffordFlames = money >= 70000;
+            const isPro = accountTier === 'pro';
+            const isMax = accountTier === 'max';
+            grid.innerHTML = `
+                <div class="flame-upgrade-card" style="grid-column:1/-1;background:rgba(255,107,0,0.08)">
+                    <div style="font-size:36px">🔥</div>
+                    <div style="font-size:20px;font-weight:bold;color:#ff6b00">Buy Flames</div>
+                    <div style="color:#aaa;font-size:14px">20 Flames for $70,000</div>
+                    <div style="font-size:22px;color:#ffd700">You have: 🔥 ${flames}</div>
+                    <button class="btn-buy" ${!canAffordFlames ? 'disabled' : ''} onclick="buyFlames()">
+                        ${canAffordFlames ? 'BUY 20 FLAMES — $70,000' : 'NEED $' + (70000 - money).toLocaleString() + ' MORE'}
+                    </button>
+                </div>
+
+                <div class="flame-upgrade-card pro-card ${isPro || isMax ? 'owned' : ''}">
+                    <div style="font-size:40px">🔥 PRO</div>
+                    <div style="font-size:18px;font-weight:bold;color:#c39bd3">PRO TIER</div>
+                    <div style="font-size:14px;color:#aaa">Costs 10 Flames</div>
+                    <div class="upgrade-perks">
+                        ❤️ +50 Max Health (150 HP)<br>
+                        ⚡ +30% Move Speed<br>
+                        💥 +30% Bullet Damage<br>
+                        💰 +75% Match Reward ($35)
+                    </div>
+                    <button class="btn-buy" ${isPro || isMax || flames < 10 ? 'disabled' : ''} onclick="upgradeToPro()">
+                        ${isMax ? 'EXCEEDED BY MAX' : isPro ? 'ACTIVE' : flames < 10 ? 'NEED ' + (10 - flames) + ' MORE FLAMES' : 'UPGRADE — 10 🔥'}
+                    </button>
+                </div>
+
+                <div class="flame-upgrade-card max-card ${isMax ? 'owned' : ''}">
+                    <div style="font-size:40px">🔥🔥 MAX</div>
+                    <div style="font-size:18px;font-weight:bold;color:#f39c12">MAX TIER</div>
+                    <div style="font-size:14px;color:#aaa">Costs 20 Flames</div>
+                    <div class="upgrade-perks">
+                        ❤️ +100 Max Health (200 HP)<br>
+                        ⚡ +60% Move Speed<br>
+                        💥 +75% Bullet Damage<br>
+                        💰 +200% Match Reward ($60)<br>
+                        🔫 Double Ammo Capacity
+                    </div>
+                    <button class="btn-buy" style="background:linear-gradient(135deg,#f39c12,#e67e22)" ${isMax || flames < 20 ? 'disabled' : ''} onclick="upgradeToMax()">
+                        ${isMax ? 'ACTIVE' : flames < 20 ? 'NEED ' + (20 - flames) + ' MORE FLAMES' : 'UPGRADE — 20 🔥'}
+                    </button>
+                </div>
+            `;
+        }
+
+        function buyFlames() {
+            if (money < 70000) return;
+            money -= 70000;
+            flames += 20;
+            updateMoneyDisplay();
+            updateFlameDisplay();
+            updateShop();
+            saveCurrentUserData();
+        }
+
+        function upgradeToPro() {
+            if (flames < 10 || accountTier === 'pro' || accountTier === 'max') return;
+            flames -= 10;
+            accountTier = 'pro';
+            updateFlameDisplay();
+            updateShop();
+            saveCurrentUserData();
+            alert('🔥 PRO tier unlocked! Enjoy your power boost!');
+        }
+
+        function upgradeToMax() {
+            if (flames < 20 || accountTier === 'max') return;
+            flames -= 20;
+            accountTier = 'max';
+            updateFlameDisplay();
+            updateShop();
+            saveCurrentUserData();
+            alert('🔥🔥 MAX tier unlocked! You are unstoppable!');
+        }
+
+        // ── AD SYSTEM ────────────────────────────────────────────────
+        const AD_DURATION = 15000; // 15 seconds
+        const AD_SKIP_AFTER = 5000; // skip unlocks after 5s
+        let adGunKey = null;
+        let adTimer = null;
+        let adSkipTimer = null;
+        let adStartTime = 0;
+
+        const adScenes = [
+            { bg: 'linear-gradient(135deg,#e74c3c,#c0392b)', emoji: '🏆', headline: 'BE THE BEST!', sub: 'Download RIVALS PRO today!' },
+            { bg: 'linear-gradient(135deg,#8e44ad,#6c3483)', emoji: '⚡', headline: 'POWER UP NOW!', sub: 'Limited time offer — Play free!' },
+            { bg: 'linear-gradient(135deg,#16a085,#1abc9c)', emoji: '🎮', headline: 'GAME ON!', sub: 'Join 10 million players worldwide' },
+            { bg: 'linear-gradient(135deg,#e67e22,#d35400)', emoji: '🔥', headline: 'GO PRO!', sub: 'Unlock all weapons — No limits!' },
+        ];
+
+        function watchAdForGun(gunKey) {
+            adGunKey = gunKey;
+            adStartTime = Date.now();
+
+            const scene = adScenes[Math.floor(Math.random() * adScenes.length)];
+            const body = document.getElementById('adBody');
+            body.style.background = scene.bg;
+            body.innerHTML = `
+                <div style="font-size:72px">${scene.emoji}</div>
+                <div style="font-size:26px;font-weight:bold;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.4)">${scene.headline}</div>
+                <div style="font-size:14px;color:rgba(255,255,255,0.85)">${scene.sub}</div>
+                <div style="margin-top:8px;font-size:13px;color:rgba(255,255,255,0.6)">Unlocking: ${guns[gunKey].icon} ${guns[gunKey].name}</div>
+            `;
+
+            const fill = document.getElementById('adTimerFill');
+            fill.style.background = scene.bg;
+            fill.style.width = '100%';
+
+            document.getElementById('adSkipBtn').style.display = 'none';
+            document.getElementById('adOverlay').classList.add('active');
+
+            // Show skip button after AD_SKIP_AFTER ms
+            adSkipTimer = setTimeout(() => {
+                document.getElementById('adSkipBtn').style.display = 'block';
+            }, AD_SKIP_AFTER);
+
+            // Shrink progress bar
+            let elapsed = 0;
+            const interval = 100;
+            adTimer = setInterval(() => {
+                elapsed += interval;
+                const pct = Math.max(0, 100 - (elapsed / AD_DURATION) * 100);
+                document.getElementById('adTimerFill').style.width = pct + '%';
+                if (elapsed >= AD_DURATION) finishAd();
+            }, interval);
+        }
+
+        function skipAd() {
+            if (Date.now() - adStartTime < AD_SKIP_AFTER) return;
+            finishAd();
+        }
+
+        function finishAd() {
+            clearInterval(adTimer);
+            clearTimeout(adSkipTimer);
+            document.getElementById('adOverlay').classList.remove('active');
+            if (adGunKey && !ownedGuns.includes(adGunKey)) {
+                ownedGuns.push(adGunKey);
+                for (let i = 0; i < 4; i++) {
+                    if (!selectedGuns[i]) { selectedGuns[i] = adGunKey; break; }
+                }
+                updateShop();
+                updateOwnedGunsList();
+                saveCurrentUserData();
+                setTimeout(() => alert(`${guns[adGunKey].icon} ${guns[adGunKey].name} unlocked!`), 100);
+            }
+            adGunKey = null;
+        }
+        // ─────────────────────────────────────────────────────────────
 
         function buyGun(gunKey) {
             if (money >= guns[gunKey].price && !ownedGuns.includes(gunKey)) {
@@ -4365,6 +4768,7 @@
             updateOwnedGunsList();
             updateArmorDisplay();
             updateVIPDisplay();
+            updateFlameDisplay();
         }
 
         function showShop(tab = 'guns') {
@@ -4852,17 +5256,18 @@
             // Generate player name
             let playerName;
             if (isHuman) {
-                playerName = 'You';
+                playerName = playerDisplayName || 'You';
             } else {
                 playerName = aiNames[aiNameIndex % aiNames.length];
                 aiNameIndex++;
             }
 
-            // Initialize ammo for all guns
+            // Initialize ammo for all guns (MAX tier gets double ammo)
+            const ammoMult = (isHuman && accountTier === 'max') ? 2 : 1;
             const ammo = {};
             Object.keys(guns).forEach(gunKey => {
                 const gun = guns[gunKey];
-                ammo[gunKey] = gun.infiniteAmmo ? Infinity : (gun.magSize || 10);
+                ammo[gunKey] = gun.infiniteAmmo ? Infinity : (gun.magSize || 10) * ammoMult;
             });
 
             return {
@@ -4876,8 +5281,8 @@
                 name: playerName,
                 kills: 0,
                 deaths: 0,
-                health: 100,
-                maxHealth: 100,
+                health: isHuman ? getTierMaxHealth() : 100,
+                maxHealth: isHuman ? getTierMaxHealth() : 100,
                 gunIndex: 0,
                 lastShot: 0,
                 facingRight: team === 'blue',
@@ -4937,6 +5342,89 @@
             leaderboard.classList.toggle('minimized');
         }
 
+        // ── ADMIN PANEL ──────────────────────────────────────────────
+        const ADMIN_PASSWORD = '67wspeed';
+
+        function openAdminPanel() {
+            if (!adminUnlocked) {
+                const pw = prompt('Enter admin password:');
+                if (pw !== ADMIN_PASSWORD) {
+                    alert('Wrong password!');
+                    return;
+                }
+                adminUnlocked = true;
+            }
+            const panel = document.getElementById('adminPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function adminKillEnemies() {
+            players.forEach(p => {
+                if (p.team === 'red' && p.alive) {
+                    p.health = 0;
+                    checkPlayerDeath(p);
+                }
+            });
+        }
+
+        function adminToggleGodMode() {
+            adminGodModeOn = !adminGodModeOn;
+            const btn = document.getElementById('adminGodBtn');
+            if (adminGodModeOn) {
+                btn.textContent = '🛡 God Mode: ON';
+                btn.classList.add('active');
+            } else {
+                btn.textContent = '🛡 God Mode: OFF';
+                btn.classList.remove('active');
+            }
+        }
+
+        function adminToggleFreeze() {
+            adminEnemiesFrozen = !adminEnemiesFrozen;
+            const btn = document.getElementById('adminFreezeBtn');
+            if (adminEnemiesFrozen) {
+                btn.textContent = '🧊 Freeze Enemies: ON';
+                btn.classList.add('active');
+                players.forEach(p => { if (p.team === 'red') { p.vx = 0; p.vy = 0; } });
+            } else {
+                btn.textContent = '🧊 Freeze Enemies: OFF';
+                btn.classList.remove('active');
+            }
+        }
+
+        function adminHealSelf() {
+            const me = players.find(p => p.isHuman);
+            if (me) { me.health = me.maxHealth; me.alive = true; }
+        }
+
+        function adminGiveMoney() {
+            money += 1000;
+            updateMoneyDisplay();
+            saveCurrentUserData();
+        }
+
+        function adminGiveAllGuns() {
+            Object.keys(guns).forEach(key => {
+                if (!ownedGuns.includes(key)) ownedGuns.push(key);
+            });
+            saveCurrentUserData();
+            updateGunSlots();
+        }
+
+        function adminWinSet() {
+            players.forEach(p => {
+                if (p.team === 'red' && p.alive) { p.health = 0; p.alive = false; }
+            });
+            checkSetEnd();
+        }
+
+        function adminKillAll() {
+            players.forEach(p => {
+                if (p.alive) { p.health = 0; checkPlayerDeath(p); }
+            });
+        }
+        // ─────────────────────────────────────────────────────────────
+
         // Input handling
         const keys = {};
         let mouseX = 0, mouseY = 0;
@@ -4995,6 +5483,7 @@
         });
 
         document.addEventListener('mousedown', (e) => {
+            if (e.target.closest('#adminPanel') || e.target.closest('#adminOpenBtn') || e.target.closest('#gunSlots')) return;
             if (e.button === 0) {
                 // Build mode: place wood block instead of shooting
                 if (buildMode && gameRunning) {
@@ -5143,6 +5632,12 @@
                     // Dead - waiting for the set to end (no auto-respawn)
                 }
             });
+
+            // God mode - keep human player at full health
+            if (adminGodModeOn) {
+                const godPlayer = players.find(p => p.isHuman);
+                if (godPlayer && godPlayer.alive) godPlayer.health = godPlayer.maxHealth;
+            }
 
             // Update and draw bullets
             updateBullets();
@@ -5460,8 +5955,9 @@
 
         function updateHumanPlayer(player, timestamp) {
             // Movement
-            if (keys['a']) player.vx = -5;
-            else if (keys['d']) player.vx = 5;
+            const spd = getTierSpeed();
+            if (keys['a']) player.vx = -spd;
+            else if (keys['d']) player.vx = spd;
             else player.vx = 0;
 
             // Jump
@@ -5504,6 +6000,7 @@
         }
 
         function updateAIPlayer(player, timestamp) {
+            if (adminEnemiesFrozen && player.team === 'red') return;
             player.aiDecisionTimer -= 16.667 * frameDt;
 
             if (player.aiDecisionTimer <= 0) {
@@ -5855,7 +6352,7 @@
                     y: startY,
                     vx: Math.cos(spreadAngle) * gun.bulletSpeed,
                     vy: Math.sin(spreadAngle) * gun.bulletSpeed,
-                    damage: gun.damage,
+                    damage: gun.damage * (player.isHuman ? getTierDamageMultiplier() : 1),
                     team: player.team,
                     color: gun.color,
                     explosive: gun.explosive,
@@ -6369,10 +6866,11 @@
             if (playerWon) {
                 resultText.className = 'victory-text';
                 resultText.textContent = 'VICTORY!';
-                rewardText.textContent = '+$20 Reward!';
+                const reward = getTierMoneyReward();
+                rewardText.textContent = `+$${reward} Reward!${accountTier !== 'normal' ? ' (' + accountTier.toUpperCase() + ' bonus)' : ''}`;
                 dancer.textContent = '🕺';
                 dancer.style.display = 'block';
-                money += 20;
+                money += reward;
             } else {
                 resultText.className = 'defeat-text';
                 resultText.textContent = 'DEFEAT';
@@ -6557,6 +7055,7 @@
             isVIP = true;
             vipTimeLeft = 180; // 3 minutes = 180 seconds
             updateVIPDisplay();
+            updateFlameDisplay();
 
             if (vipInterval) clearInterval(vipInterval);
             vipInterval = setInterval(() => {
@@ -6565,12 +7064,14 @@
                     money += 5; // $5 per second
                     updateMoneyDisplay();
                     updateVIPDisplay();
+            updateFlameDisplay();
                     updateSpinButton();
                 } else {
                     isVIP = false;
                     clearInterval(vipInterval);
                     vipInterval = null;
                     updateVIPDisplay();
+            updateFlameDisplay();
                     saveCurrentUserData(); // Save when VIP ends
                 }
             }, 1000);
@@ -7384,6 +7885,7 @@
             updateOwnedGunsList();
             updateArmorDisplay();
             updateVIPDisplay();
+            updateFlameDisplay();
         }
         // If not auto-logged in, auth screen is already shown
 
@@ -7401,5 +7903,30 @@
             }
         });
     </script>
+
+    <!-- Ad Overlay -->
+    <div id="adOverlay">
+        <div id="adContent">
+            <button id="adSkipBtn" onclick="skipAd()">Skip Ad ✕</button>
+            <div id="adBody"></div>
+            <div id="adTimerBar"><div id="adTimerFill"></div></div>
+        </div>
+        <div style="color:#888;font-size:12px;margin-top:14px">Watch the full ad to unlock your gun for free!</div>
+    </div>
+
+    <!-- Admin Panel (fixed overlay - visible on all screens) -->
+    <button id="adminOpenBtn" onclick="openAdminPanel()">⚙ ADMIN</button>
+    <div id="adminPanel" onmousedown="event.stopPropagation()" onclick="event.stopPropagation()">
+        <div class="admin-title">⚙ ADMIN PANEL</div>
+        <button class="admin-btn" onclick="adminKillEnemies()">💀 Kill All Enemies</button>
+        <button class="admin-btn" id="adminGodBtn" onclick="adminToggleGodMode()">🛡 God Mode: OFF</button>
+        <button class="admin-btn" id="adminFreezeBtn" onclick="adminToggleFreeze()">🧊 Freeze Enemies: OFF</button>
+        <button class="admin-btn" onclick="adminHealSelf()">❤️ Full Health</button>
+        <button class="admin-btn" onclick="adminGiveMoney()">💰 Give $1000</button>
+        <button class="admin-btn" onclick="adminGiveAllGuns()">🔫 Give All Guns</button>
+        <button class="admin-btn" onclick="adminWinSet()">🏆 Win Current Set</button>
+        <button class="admin-btn" onclick="adminKillAll()">☠️ Kill Everyone</button>
+        <button class="admin-btn admin-close" onclick="document.getElementById('adminPanel').style.display='none'">✕ Close</button>
+    </div>
 </body>
 </html>
