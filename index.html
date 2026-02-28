@@ -757,6 +757,21 @@
             letter-spacing: 1px;
         }
         #adminOpenBtn:hover { background: rgba(255,107,0,0.2); }
+        #muteBtn {
+            position: fixed;
+            top: 12px;
+            right: 100px;
+            z-index: 9999;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid #4ecdc4;
+            color: #4ecdc4;
+            padding: 5px 10px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            line-height: 1;
+        }
+        #muteBtn:hover { background: rgba(78,205,196,0.2); }
 
         #adminPanel {
             position: fixed;
@@ -1675,6 +1690,7 @@
             <button class="tab-btn active" id="tabGuns" onclick="switchShopTab('guns')">GUNS</button>
             <button class="tab-btn" id="tabSkins" onclick="switchShopTab('skins')">SKINS</button>
             <button class="tab-btn" id="tabArmor" onclick="switchShopTab('armor')">ARMOR</button>
+            <button class="tab-btn" id="tabMaps" onclick="switchShopTab('maps')">🗺️ MAPS</button>
             <button class="tab-btn" id="tabFlames" onclick="switchShopTab('flames')">🔥 FLAMES</button>
         </div>
         <div class="shop-container">
@@ -1690,6 +1706,11 @@
             <button class="btn-mode" onclick="selectMode(1)">1v1</button>
             <button class="btn-mode" onclick="selectMode(2)">2v2</button>
             <button class="btn-mode" onclick="selectMode(3)">3v3</button>
+        </div>
+        <p style="color: #888; margin-top: 20px; margin-bottom: 10px;">🎯 Sniper Mode (vs AI)</p>
+        <div class="mode-buttons">
+            <button class="btn-mode" style="background:linear-gradient(45deg,#9b59b6,#6c3483);font-size:22px;padding:30px 45px" onclick="selectSniperMode(1)">1v1 SNIPER</button>
+            <button class="btn-mode" style="background:linear-gradient(45deg,#9b59b6,#6c3483);font-size:22px;padding:30px 45px" onclick="selectSniperMode(2)">2v2 SNIPER</button>
         </div>
         <p style="color: #888; margin-top: 20px; margin-bottom: 10px;">Multiplayer (Online)</p>
         <div class="mp-choice-buttons">
@@ -1880,6 +1901,7 @@
         let currentShopTab = 'guns';
         let selectedSkin = 'default';
         let ownedSkins = ['default'];
+        let ownedMaps = ['bunker'];
 
         // Account Functions
         function getAccounts() {
@@ -1905,7 +1927,8 @@
                 selectedSkin: selectedSkin,
                 ownedSkins: ownedSkins,
                 playerArmor: playerArmor,
-                armorProtection: armorProtection
+                armorProtection: armorProtection,
+                ownedMaps: ownedMaps
             };
             saveAccounts(accounts);
         }
@@ -1924,6 +1947,7 @@
                 ownedSkins = data.ownedSkins || ['default'];
                 playerArmor = data.playerArmor || null;
                 armorProtection = data.armorProtection || 0;
+                ownedMaps = data.ownedMaps || ['bunker'];
                 return true;
             }
             return false;
@@ -2109,13 +2133,13 @@
 
         // Get mouse coordinates scaled to canvas space (for multiplayer fixed resolution)
         function getGameMouseX() {
-            if (isMultiplayer && canvas && canvas.clientWidth > 0) {
+            if (canvas && canvas.clientWidth > 0) {
                 return mouseX * (canvas.width / canvas.clientWidth);
             }
             return mouseX;
         }
         function getGameMouseY() {
-            if (isMultiplayer && canvas && canvas.clientHeight > 0) {
+            if (canvas && canvas.clientHeight > 0) {
                 return mouseY * (canvas.height / canvas.clientHeight);
             }
             return mouseY;
@@ -2593,6 +2617,7 @@
         function startMultiplayerHost(playerAssignments) {
             gameMode = mpGameMode;
             showScreen('game');
+            startGameMusic();
 
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
@@ -2665,6 +2690,7 @@
             gameMode = data.mode;
             mpGameMode = data.mode;
             showScreen('game');
+            startGameMusic();
 
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
@@ -2747,12 +2773,27 @@
             });
 
             walls.forEach(wall => {
-                ctx.fillStyle = map.bounceWalls ? '#666' : '#444';
-                ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
-                if (map.bounceWalls) {
-                    ctx.strokeStyle = '#ffff00';
+                if (wall.isCenterWall) {
+                    ctx.fillStyle = '#1a0000';
+                    ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+                    for (let sy = 0; sy < canvas.height; sy += 60) {
+                        ctx.fillStyle = sy % 120 < 60 ? 'rgba(200,30,30,0.85)' : 'rgba(60,0,0,0.85)';
+                        ctx.fillRect(wall.x, wall.y + sy, wall.width, 60);
+                    }
+                    ctx.shadowColor = '#ff0000';
+                    ctx.shadowBlur = 12;
+                    ctx.strokeStyle = '#ff4444';
                     ctx.lineWidth = 3;
                     ctx.strokeRect(wall.x, wall.y, wall.width, wall.height);
+                    ctx.shadowBlur = 0;
+                } else {
+                    ctx.fillStyle = map.bounceWalls ? '#666' : '#444';
+                    ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+                    if (map.bounceWalls) {
+                        ctx.strokeStyle = '#ffff00';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(wall.x, wall.y, wall.width, wall.height);
+                    }
                 }
             });
 
@@ -3053,12 +3094,27 @@
             });
 
             walls.forEach(wall => {
-                ctx.fillStyle = map.bounceWalls ? '#666' : '#444';
-                ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
-                if (map.bounceWalls) {
-                    ctx.strokeStyle = '#ffff00';
+                if (wall.isCenterWall) {
+                    ctx.fillStyle = '#1a0000';
+                    ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+                    for (let sy = 0; sy < canvas.height; sy += 60) {
+                        ctx.fillStyle = sy % 120 < 60 ? 'rgba(200,30,30,0.85)' : 'rgba(60,0,0,0.85)';
+                        ctx.fillRect(wall.x, wall.y + sy, wall.width, 60);
+                    }
+                    ctx.shadowColor = '#ff0000';
+                    ctx.shadowBlur = 12;
+                    ctx.strokeStyle = '#ff4444';
                     ctx.lineWidth = 3;
                     ctx.strokeRect(wall.x, wall.y, wall.width, wall.height);
+                    ctx.shadowBlur = 0;
+                } else {
+                    ctx.fillStyle = map.bounceWalls ? '#666' : '#444';
+                    ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+                    if (map.bounceWalls) {
+                        ctx.strokeStyle = '#ffff00';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(wall.x, wall.y, wall.width, wall.height);
+                    }
                 }
             });
 
@@ -3161,6 +3217,7 @@
         // Handle multiplayer game over
         function endMpGame(blueWon) {
             gameRunning = false;
+            stopMusic();
 
             // Find which team the local player is on
             const myPlayer = lobbyPlayers.find(p => p.peerId === myPeerId);
@@ -4339,16 +4396,16 @@
 
         // Skin Data
         const skins = {
-            default: { name: 'Default', price: 0, bodyColor: '#4ecdc4', headColor: '#4ecdc4', outlineColor: '#2d9c94' },
-            shadow: { name: 'Shadow', price: 25, bodyColor: '#2c3e50', headColor: '#34495e', outlineColor: '#1a252f' },
-            flame: { name: 'Flame', price: 40, bodyColor: '#e74c3c', headColor: '#c0392b', outlineColor: '#922b21' },
-            gold: { name: 'Gold', price: 60, bodyColor: '#f1c40f', headColor: '#f39c12', outlineColor: '#d68910' },
-            neon: { name: 'Neon Pink', price: 50, bodyColor: '#ff00ff', headColor: '#ff66ff', outlineColor: '#cc00cc' },
-            ice: { name: 'Ice', price: 45, bodyColor: '#00d4ff', headColor: '#66e0ff', outlineColor: '#00a3cc' },
-            toxic: { name: 'Toxic', price: 55, bodyColor: '#39ff14', headColor: '#7fff00', outlineColor: '#2db811' },
-            galaxy: { name: 'Galaxy', price: 80, bodyColor: '#9b59b6', headColor: '#8e44ad', outlineColor: '#6c3483' },
-            lava: { name: 'Lava', price: 70, bodyColor: '#ff4500', headColor: '#ff6347', outlineColor: '#cc3700' },
-            diamond: { name: 'Diamond', price: 100, bodyColor: '#b9f2ff', headColor: '#e0ffff', outlineColor: '#87ceeb' }
+            default: { name: 'Default', price: 0, bodyColor: '#4ecdc4', headColor: '#5ee8de', outlineColor: '#2d9c94', accentColor: '#a8f0ec', glowColor: null, pattern: 'none' },
+            shadow: { name: 'Shadow', price: 25, bodyColor: '#2c3e50', headColor: '#34495e', outlineColor: '#1a252f', accentColor: '#5d6d7e', glowColor: 'rgba(0,0,30,0.9)', pattern: 'shadow' },
+            flame: { name: 'Flame', price: 40, bodyColor: '#e74c3c', headColor: '#ff6b35', outlineColor: '#922b21', accentColor: '#ffd700', glowColor: 'rgba(231,76,60,0.7)', pattern: 'flame' },
+            gold: { name: 'Gold', price: 60, bodyColor: '#f1c40f', headColor: '#ffd700', outlineColor: '#b7950b', accentColor: '#fff9c4', glowColor: 'rgba(241,196,15,0.5)', pattern: 'sparkle' },
+            neon: { name: 'Neon Pink', price: 50, bodyColor: '#ff00ff', headColor: '#ff66ff', outlineColor: '#cc00cc', accentColor: '#ffffff', glowColor: 'rgba(255,0,255,0.8)', pattern: 'neon' },
+            ice: { name: 'Ice', price: 45, bodyColor: '#00d4ff', headColor: '#80eaff', outlineColor: '#0099bb', accentColor: '#e8f8ff', glowColor: 'rgba(0,212,255,0.4)', pattern: 'ice' },
+            toxic: { name: 'Toxic', price: 55, bodyColor: '#39ff14', headColor: '#7fff00', outlineColor: '#1e8c0a', accentColor: '#ccff55', glowColor: 'rgba(57,255,20,0.7)', pattern: 'toxic' },
+            galaxy: { name: 'Galaxy', price: 80, bodyColor: '#6c3483', headColor: '#9b59b6', outlineColor: '#4a235a', accentColor: '#d7bde2', glowColor: 'rgba(155,89,182,0.7)', pattern: 'galaxy' },
+            lava: { name: 'Lava', price: 70, bodyColor: '#ff4500', headColor: '#ff6b35', outlineColor: '#8b1a00', accentColor: '#ffcc00', glowColor: 'rgba(255,69,0,0.6)', pattern: 'lava' },
+            diamond: { name: 'Diamond', price: 100, bodyColor: '#b9f2ff', headColor: '#e8fcff', outlineColor: '#4fc3f7', accentColor: '#ffffff', glowColor: 'rgba(185,242,255,0.8)', pattern: 'diamond' }
         };
 
         // Gun Data with gun shapes
@@ -4376,7 +4433,8 @@
                 bgColor: '#1a1a1a',
                 platformColor: '#4a4a4a',
                 bounceWalls: true,
-                hasWalls: true
+                hasWalls: true,
+                flamePrice: 0
             },
             skyhigh: {
                 name: 'Sky High',
@@ -4385,7 +4443,8 @@
                 bgColor: '#87ceeb',
                 platformColor: '#ffffff',
                 bounceWalls: false,
-                floating: true
+                floating: true,
+                flamePrice: 3
             },
             lavapit: {
                 name: 'Lava Pit',
@@ -4394,7 +4453,8 @@
                 bgColor: '#2d1b0e',
                 platformColor: '#5c3a21',
                 bounceWalls: false,
-                lavaFloor: true
+                lavaFloor: true,
+                flamePrice: 5
             },
             neon: {
                 name: 'Neon City',
@@ -4403,7 +4463,8 @@
                 bgColor: '#0a0a1a',
                 platformColor: '#ff00ff',
                 bounceWalls: false,
-                neonGlow: true
+                neonGlow: true,
+                flamePrice: 7
             },
             forest: {
                 name: 'Dark Forest',
@@ -4412,7 +4473,8 @@
                 bgColor: '#0d1a0d',
                 platformColor: '#2d4a2d',
                 bounceWalls: false,
-                trees: true
+                trees: true,
+                flamePrice: 7
             },
             space: {
                 name: 'Space Station',
@@ -4421,7 +4483,49 @@
                 bgColor: '#000011',
                 platformColor: '#333366',
                 bounceWalls: false,
-                lowGravity: true
+                lowGravity: true,
+                flamePrice: 10
+            },
+            arctic: {
+                name: 'Arctic',
+                icon: '❄️',
+                feature: 'Icy platforms — slide into battle!',
+                bgColor: '#c8e8f4',
+                platformColor: '#a8d8ea',
+                bounceWalls: false,
+                icy: true,
+                flamePrice: 8
+            },
+            volcano: {
+                name: 'Volcano',
+                icon: '🌋',
+                feature: 'Erupting volcano — lava rains from above!',
+                bgColor: '#0d0200',
+                platformColor: '#6b1a00',
+                bounceWalls: false,
+                lavaFloor: true,
+                volcano: true,
+                flamePrice: 15
+            },
+            nuclear_site: {
+                name: 'Nuclear Site',
+                icon: '☢️',
+                feature: 'Shoot the chest to unlock the grenade launcher!',
+                bgColor: '#060f06',
+                platformColor: '#3a4a3a',
+                bounceWalls: false,
+                hasChest: true,
+                flamePrice: 12
+            },
+            sniper_arena: {
+                name: 'Sniper Arena',
+                icon: '🎯',
+                feature: 'Center wall — climb the ladder and snipe!',
+                bgColor: '#080d14',
+                platformColor: '#3d3d6b',
+                bounceWalls: false,
+                hasWalls: false,
+                isSniperArena: true
             }
         };
 
@@ -4432,6 +4536,10 @@
         let voteTimer = null;
         let voteTimeLeft = 10;
         let walls = [];
+        let isSniperMode = false;
+        let gameChests = [];
+        let weaponDrops = [];
+        let nuclearSitePickedLauncher = false;
 
         // Wood block building system
         let woodBlocks = [];
@@ -4454,6 +4562,154 @@
         const MAX_SETS = 10;
         let setBetweenTimer = 0;
         let setWinnerText = '';
+        // ====== MUSIC SYSTEM ======
+        let audioCtx = null;
+        let masterGain = null;
+        let musicMuted = localStorage.getItem('rivalsMusicMuted') === '1';
+        let musicScheduler = null;
+        let musicStep = 0;
+        let musicMode = 'none'; // 'lobby' | 'game' | 'none'
+        let nextNoteTime = 0;
+        const MUSIC_LOOK_AHEAD = 0.1;
+        const MUSIC_SCHEDULE_MS = 50;
+        const LOBBY_BEAT = 60 / 120 / 2; // eighth note @ 120 BPM
+        const GAME_BEAT  = 60 / 155 / 2; // eighth note @ 155 BPM
+
+        // Note frequencies
+        const MN = {
+            C3:130.81, D3:146.83, E3:164.81, F3:174.61, G3:196, A3:220, B3:246.94,
+            C4:261.63, D4:293.66, E4:329.63, F4:349.23, G4:392, A4:440, B4:493.88,
+            C5:523.25, D5:587.33, E5:659.25, G5:783.99, A5:880, R:0
+        };
+
+        // Lobby theme — C major, cheerful arpeggios (16 eighth notes)
+        const lobbyMelody = [
+            MN.C4, MN.E4, MN.G4, MN.C5, MN.B4, MN.G4, MN.E4, MN.C4,
+            MN.A4, MN.C5, MN.E5, MN.A5, MN.G5, MN.E5, MN.C5, MN.G4
+        ];
+        const lobbyBass = [
+            MN.C3, MN.R, MN.G3, MN.R, MN.C3, MN.R, MN.G3, MN.R,
+            MN.A3, MN.R, MN.E3, MN.R, MN.G3, MN.R, MN.D3, MN.R
+        ];
+
+        // Game theme — A minor, intense driving beat (16 eighth notes)
+        const gameMelody = [
+            MN.A4, MN.R,  MN.C5, MN.A4, MN.G4, MN.F4, MN.G4, MN.R,
+            MN.A4, MN.A4, MN.G4, MN.R,  MN.F4, MN.G4, MN.A4, MN.R
+        ];
+        const gameBass = [
+            MN.A3, MN.R, MN.A3, MN.R, MN.G3, MN.R, MN.G3, MN.R,
+            MN.A3, MN.R, MN.A3, MN.R, MN.F3, MN.R, MN.E3, MN.R
+        ];
+
+        function initAudio() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            masterGain = audioCtx.createGain();
+            masterGain.gain.value = musicMuted ? 0 : 0.28;
+            masterGain.connect(audioCtx.destination);
+        }
+
+        function playMusicNote(freq, t, dur, type, vol) {
+            if (!audioCtx || freq === 0) return;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g); g.connect(masterGain);
+            osc.type = type;
+            osc.frequency.value = freq;
+            g.gain.setValueAtTime(vol, t);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.88);
+            osc.start(t); osc.stop(t + dur);
+        }
+
+        function playKick(t) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g); g.connect(masterGain);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(160, t);
+            osc.frequency.exponentialRampToValueAtTime(40, t + 0.12);
+            g.gain.setValueAtTime(0.45, t);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+            osc.start(t); osc.stop(t + 0.2);
+        }
+
+        function playHihat(t) {
+            if (!audioCtx) return;
+            const bufSize = Math.floor(audioCtx.sampleRate * 0.05);
+            const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+            const src = audioCtx.createBufferSource();
+            src.buffer = buf;
+            const hpf = audioCtx.createBiquadFilter();
+            hpf.type = 'highpass'; hpf.frequency.value = 7000;
+            const g = audioCtx.createGain();
+            src.connect(hpf); hpf.connect(g); g.connect(masterGain);
+            g.gain.setValueAtTime(0.1, t);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+            src.start(t); src.stop(t + 0.06);
+        }
+
+        function scheduleMusicStep() {
+            if (!audioCtx || musicMode === 'none') return;
+            while (nextNoteTime < audioCtx.currentTime + MUSIC_LOOK_AHEAD) {
+                const isLobby = musicMode === 'lobby';
+                const beat   = isLobby ? LOBBY_BEAT : GAME_BEAT;
+                const melody = isLobby ? lobbyMelody : gameMelody;
+                const bass   = isLobby ? lobbyBass   : gameBass;
+                const step   = musicStep % melody.length;
+                playMusicNote(melody[step], nextNoteTime, beat * 0.82, 'square', 0.13);
+                playMusicNote(bass[step],   nextNoteTime, beat * 0.88, 'sawtooth', 0.08);
+                if (step % 8 === 0) playKick(nextNoteTime);
+                if (step % 4 === 0) playHihat(nextNoteTime);
+                nextNoteTime += beat;
+                musicStep++;
+            }
+            musicScheduler = setTimeout(scheduleMusicStep, MUSIC_SCHEDULE_MS);
+        }
+
+        function startLobbyMusic() {
+            if (musicMode === 'lobby') return;
+            stopMusic();
+            initAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            musicMode = 'lobby'; musicStep = 0;
+            nextNoteTime = audioCtx.currentTime + 0.05;
+            scheduleMusicStep();
+        }
+
+        function startGameMusic() {
+            if (musicMode === 'game') return;
+            stopMusic();
+            initAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            musicMode = 'game'; musicStep = 0;
+            nextNoteTime = audioCtx.currentTime + 0.05;
+            scheduleMusicStep();
+        }
+
+        function stopMusic() {
+            if (musicScheduler) { clearTimeout(musicScheduler); musicScheduler = null; }
+            musicMode = 'none';
+        }
+
+        function toggleMute() {
+            musicMuted = !musicMuted;
+            if (!audioCtx) initAudio();
+            if (masterGain) masterGain.gain.value = musicMuted ? 0 : 0.28;
+            const btn = document.getElementById('muteBtn');
+            if (btn) btn.textContent = musicMuted ? '🔇' : '🎵';
+            localStorage.setItem('rivalsMusicMuted', musicMuted ? '1' : '0');
+            if (!musicMuted && audioCtx && musicMode !== 'none') {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                nextNoteTime = audioCtx.currentTime + 0.05;
+                scheduleMusicStep();
+            }
+        }
+        // ====== END MUSIC SYSTEM ======
+
         let adminUnlocked = false;
         let adminGodModeOn = false;
         let adminEnemiesFrozen = false;
@@ -4486,6 +4742,8 @@
                 updateSkinShop();
             } else if (currentShopTab === 'armor') {
                 updateArmorShop();
+            } else if (currentShopTab === 'maps') {
+                updateMapShop();
             } else if (currentShopTab === 'flames') {
                 updateFlamesShop();
             }
@@ -4588,39 +4846,186 @@
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, 80, 120);
 
-            const cx = 40;
-            const cy = 60;
+            const cx = 38;
+            const cy = 62;
 
-            // Body
-            ctx.fillStyle = skin.bodyColor;
+            function rr(x, y, w, h, r) {
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + w - r, y);
+                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                ctx.lineTo(x + w, y + h - r);
+                ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                ctx.lineTo(x + r, y + h);
+                ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                ctx.lineTo(x, y + r);
+                ctx.quadraticCurveTo(x, y, x + r, y);
+                ctx.closePath();
+            }
+
+            ctx.lineWidth = 1.5;
+
+            // Legs with gradient
+            if (skin.glowColor) { ctx.shadowBlur = 8; ctx.shadowColor = skin.glowColor; }
+            const legGrad = ctx.createLinearGradient(cx - 12, cy + 24, cx + 12, cy + 44);
+            legGrad.addColorStop(0, skin.bodyColor);
+            legGrad.addColorStop(1, skin.outlineColor);
+            ctx.fillStyle = legGrad;
             ctx.strokeStyle = skin.outlineColor;
-            ctx.lineWidth = 2;
-            ctx.fillRect(cx - 12, cy - 10, 24, 35);
-            ctx.strokeRect(cx - 12, cy - 10, 24, 35);
+            rr(cx - 12, cy + 24, 10, 20, 2);
+            ctx.fill(); ctx.stroke();
+            rr(cx + 2, cy + 24, 10, 20, 2);
+            ctx.fill(); ctx.stroke();
 
-            // Head
-            ctx.beginPath();
-            ctx.arc(cx, cy - 22, 12, 0, Math.PI * 2);
-            ctx.fillStyle = skin.headColor;
+            // Feet
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = skin.accentColor || skin.outlineColor;
+            rr(cx - 14, cy + 41, 12, 4, 2);
             ctx.fill();
+            rr(cx + 2, cy + 41, 12, 4, 2);
+            ctx.fill();
+
+            // Body with gradient
+            if (skin.glowColor) { ctx.shadowBlur = 8; ctx.shadowColor = skin.glowColor; }
+            const bodyGrad = ctx.createLinearGradient(cx - 13, cy - 10, cx + 13, cy + 26);
+            bodyGrad.addColorStop(0, skin.accentColor || skin.headColor);
+            bodyGrad.addColorStop(0.45, skin.bodyColor);
+            bodyGrad.addColorStop(1, skin.outlineColor);
+            ctx.fillStyle = bodyGrad;
+            ctx.strokeStyle = skin.outlineColor;
+            rr(cx - 13, cy - 10, 26, 36, 4);
+            ctx.fill(); ctx.stroke();
+
+            // Chest detail line
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = (skin.accentColor || '#ffffff') + '55';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - 8);
+            ctx.lineTo(cx, cy + 23);
             ctx.stroke();
 
-            // Legs
+            // Arm
+            if (skin.glowColor) { ctx.shadowBlur = 6; ctx.shadowColor = skin.glowColor; }
             ctx.fillStyle = skin.bodyColor;
-            ctx.fillRect(cx - 10, cy + 25, 8, 20);
-            ctx.fillRect(cx + 2, cy + 25, 8, 20);
-            ctx.strokeRect(cx - 10, cy + 25, 8, 20);
-            ctx.strokeRect(cx + 2, cy + 25, 8, 20);
-
-            // Arm holding gun
-            ctx.fillRect(cx + 12, cy - 5, 18, 6);
-            ctx.strokeRect(cx + 12, cy - 5, 18, 6);
+            ctx.strokeStyle = skin.outlineColor;
+            ctx.lineWidth = 1.5;
+            rr(cx + 13, cy - 4, 16, 7, 2);
+            ctx.fill(); ctx.stroke();
 
             // Gun
+            ctx.shadowBlur = 0;
             ctx.fillStyle = '#555';
-            ctx.fillRect(cx + 28, cy - 8, 20, 10);
             ctx.strokeStyle = '#333';
-            ctx.strokeRect(cx + 28, cy - 8, 20, 10);
+            rr(cx + 28, cy - 7, 18, 9, 2);
+            ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#888';
+            rr(cx + 28, cy - 4, 5, 6, 1);
+            ctx.fill();
+
+            // Head with radial gradient
+            const headGrad = ctx.createRadialGradient(cx - 4, cy - 32, 2, cx, cy - 28, 13);
+            headGrad.addColorStop(0, skin.accentColor || '#ffffff');
+            headGrad.addColorStop(0.5, skin.headColor);
+            headGrad.addColorStop(1, skin.outlineColor);
+            ctx.beginPath();
+            ctx.arc(cx, cy - 28, 13, 0, Math.PI * 2);
+            ctx.fillStyle = headGrad;
+            if (skin.glowColor) { ctx.shadowBlur = 10; ctx.shadowColor = skin.glowColor; }
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = skin.outlineColor;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Eyes (facing right)
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.ellipse(cx + 1, cy - 30, 3, 2.5, 0, 0, Math.PI * 2);
+            ctx.ellipse(cx + 7, cy - 30, 3, 2.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#1a1a1a';
+            ctx.beginPath();
+            ctx.arc(cx + 2, cy - 30, 1.8, 0, Math.PI * 2);
+            ctx.arc(cx + 8, cy - 30, 1.8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(cx + 2.6, cy - 31, 0.7, 0, Math.PI * 2);
+            ctx.arc(cx + 8.6, cy - 31, 0.7, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Skin-specific effects
+            if (skin.pattern === 'flame') {
+                for (let i = 0; i < 3; i++) {
+                    const fx = cx - 8 + i * 8;
+                    ctx.shadowBlur = 6; ctx.shadowColor = '#ff6600';
+                    ctx.fillStyle = i === 1 ? '#ffee00' : '#ff5500';
+                    ctx.beginPath();
+                    ctx.moveTo(fx - 3, cy - 40);
+                    ctx.quadraticCurveTo(fx, cy - 53, fx + 3, cy - 40);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                ctx.shadowBlur = 0;
+            } else if (skin.pattern === 'galaxy') {
+                ctx.fillStyle = '#ffffff';
+                [[cx-8, cy],[cx+5, cy-5],[cx, cy+12],[cx-4, cy+20],[cx+7, cy+14]].forEach(([sx, sy]) => {
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, 1.2, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            } else if (skin.pattern === 'diamond') {
+                ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                [[cx-7, cy],[cx+5, cy+8],[cx, cy+18]].forEach(([sx, sy]) => {
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, 1.8, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            } else if (skin.pattern === 'neon') {
+                ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(cx - 10, cy); ctx.lineTo(cx + 10, cy);
+                ctx.moveTo(cx - 10, cy + 12); ctx.lineTo(cx + 10, cy + 12);
+                ctx.stroke();
+            } else if (skin.pattern === 'lava') {
+                ctx.strokeStyle = '#ffcc00';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(cx - 6, cy - 5);
+                ctx.lineTo(cx, cy + 6);
+                ctx.lineTo(cx - 2, cy + 16);
+                ctx.stroke();
+            } else if (skin.pattern === 'ice') {
+                ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(cx - 9, cy - 4); ctx.lineTo(cx, cy + 7);
+                ctx.moveTo(cx + 7, cy - 2); ctx.lineTo(cx, cy + 7);
+                ctx.stroke();
+            } else if (skin.pattern === 'sparkle') {
+                ctx.fillStyle = '#ffffff';
+                [[cx - 9, cy - 2],[cx + 8, cy + 5],[cx, cy + 18]].forEach(([sx, sy]) => {
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            } else if (skin.pattern === 'toxic') {
+                ctx.strokeStyle = 'rgba(180,255,0,0.8)';
+                ctx.lineWidth = 1.5;
+                for (let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    ctx.arc(cx - 8 + i * 8, cy + 5 + i * 5, 2.5, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            } else if (skin.pattern === 'shadow') {
+                ctx.strokeStyle = 'rgba(100,150,255,0.25)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(cx, cy - 28, 18, 0, Math.PI * 2);
+                ctx.stroke();
+            }
         }
 
         function switchShopTab(tab) {
@@ -4628,11 +5033,14 @@
             document.getElementById('tabGuns').classList.toggle('active', tab === 'guns');
             document.getElementById('tabSkins').classList.toggle('active', tab === 'skins');
             document.getElementById('tabArmor').classList.toggle('active', tab === 'armor');
+            document.getElementById('tabMaps').classList.toggle('active', tab === 'maps');
             document.getElementById('tabFlames').classList.toggle('active', tab === 'flames');
             if (tab === 'guns') {
                 document.getElementById('shopTitle').textContent = 'GUN SHOP';
             } else if (tab === 'skins') {
                 document.getElementById('shopTitle').textContent = 'SKIN SHOP';
+            } else if (tab === 'maps') {
+                document.getElementById('shopTitle').textContent = '🗺️ MAP SHOP';
             } else if (tab === 'flames') {
                 document.getElementById('shopTitle').textContent = '🔥 FLAMES SHOP';
             } else {
@@ -4655,6 +5063,156 @@
             } else {
                 badge.style.display = 'none';
             }
+        }
+
+        // ---- CHEST / WEAPON DROP SYSTEM ----
+        function initMapSpecials() {
+            gameChests = [];
+            weaponDrops = [];
+            nuclearSitePickedLauncher = false;
+            if (maps[currentMap] && maps[currentMap].hasChest) {
+                // Chest sits on the central platform (w/2-130 to w/2+130, top at h-220)
+                gameChests.push({
+                    x: Math.floor(canvas.width / 2) - 35,
+                    y: canvas.height - 282,   // sits on platform top (h-220 - chest height 60 - gap 2)
+                    width: 70,
+                    height: 60,
+                    health: 50,
+                    maxHealth: 50,
+                    opened: false
+                });
+            }
+        }
+
+        function drawGameChests() {
+            gameChests.forEach(chest => {
+                if (chest.opened) {
+                    // Draw open empty chest
+                    ctx.fillStyle = '#5c3d0a';
+                    ctx.fillRect(chest.x, chest.y + 10, chest.width, chest.height - 10);
+                    ctx.fillStyle = '#8B6914';
+                    ctx.fillRect(chest.x, chest.y, chest.width, 18);
+                    // Open lid flipped back
+                    ctx.save();
+                    ctx.translate(chest.x + chest.width / 2, chest.y);
+                    ctx.rotate(-Math.PI * 0.55);
+                    ctx.fillStyle = '#8B6914';
+                    ctx.fillRect(-chest.width / 2, 0, chest.width, 18);
+                    ctx.strokeStyle = '#5c3d0a';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(-chest.width / 2, 0, chest.width, 18);
+                    ctx.restore();
+                    ctx.strokeStyle = '#5c3d0a';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(chest.x, chest.y + 10, chest.width, chest.height - 10);
+                } else {
+                    // Health-based glow (more green = full health, more red = damaged)
+                    const hpRatio = chest.health / chest.maxHealth;
+                    const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 300);
+                    ctx.shadowColor = `rgba(0,${Math.floor(200 * hpRatio)},0,0.9)`;
+                    ctx.shadowBlur = 16 + pulse * 8;
+                    // Chest body
+                    ctx.fillStyle = '#5c3d0a';
+                    ctx.fillRect(chest.x, chest.y + 18, chest.width, chest.height - 18);
+                    ctx.strokeStyle = '#ffd700';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(chest.x, chest.y + 18, chest.width, chest.height - 18);
+                    // Chest lid
+                    ctx.fillStyle = '#8B6914';
+                    ctx.fillRect(chest.x, chest.y, chest.width, 22);
+                    ctx.strokeRect(chest.x, chest.y, chest.width, 22);
+                    // Lock / radiation symbol
+                    ctx.fillStyle = '#00ff00';
+                    ctx.shadowColor = '#00ff00';
+                    ctx.shadowBlur = 8;
+                    ctx.font = 'bold 22px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('☢', chest.x + chest.width / 2, chest.y + chest.height - 8);
+                    ctx.textAlign = 'left';
+                    // HP bar
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#333';
+                    ctx.fillRect(chest.x, chest.y - 10, chest.width, 6);
+                    ctx.fillStyle = hpRatio > 0.5 ? '#00cc00' : '#ff6600';
+                    ctx.fillRect(chest.x, chest.y - 10, chest.width * hpRatio, 6);
+                    ctx.shadowBlur = 0;
+                }
+            });
+        }
+
+        function drawWeaponDrops() {
+            const now = Date.now();
+            weaponDrops.forEach(drop => {
+                if (drop.collected) return;
+                const pulse = 0.5 + 0.5 * Math.sin(now / 250);
+                const bobY = drop.y + Math.sin(now / 400) * 6;
+                ctx.shadowColor = '#ff6600';
+                ctx.shadowBlur = 12 + pulse * 10;
+                // Glow circle
+                ctx.fillStyle = `rgba(255,100,0,${0.15 + pulse * 0.15})`;
+                ctx.beginPath();
+                ctx.arc(drop.x + drop.width / 2, bobY + drop.height / 2, drop.width * 0.75, 0, Math.PI * 2);
+                ctx.fill();
+                // Weapon icon
+                ctx.font = `bold ${drop.width}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#ff9900';
+                ctx.fillText('💥', drop.x + drop.width / 2, bobY + drop.height);
+                ctx.textAlign = 'left';
+                // Label
+                ctx.font = 'bold 13px Arial';
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowColor = '#000';
+                ctx.shadowBlur = 4;
+                ctx.textAlign = 'center';
+                ctx.fillText('LAUNCHER', drop.x + drop.width / 2, bobY - 6);
+                ctx.textAlign = 'left';
+                ctx.shadowBlur = 0;
+            });
+        }
+        // ---- END CHEST / WEAPON DROP SYSTEM ----
+
+        function updateMapShop() {
+            const grid = document.getElementById('shopGrid');
+            grid.innerHTML = '';
+            Object.entries(maps).forEach(([key, map]) => {
+                if (map.isSniperArena) return; // sniper arena is a special mode, not in shop
+                const owned = ownedMaps.includes(key);
+                const price = map.flamePrice || 0;
+                const free = price === 0;
+                const canAfford = flames >= price;
+                grid.innerHTML += `
+                    <div class="shop-item ${owned ? 'owned' : ''}">
+                        <div style="position:relative;margin:0 auto 8px;width:160px;height:96px;border-radius:8px;overflow:hidden;border:2px solid ${owned ? '#4caf50' : '#444'}">
+                            <canvas id="mapShopPreview_${key}" width="160" height="96"></canvas>
+                        </div>
+                        <div class="gun-name">${map.icon} ${map.name}</div>
+                        <div class="gun-stats" style="font-size:11px;color:#aaa">${map.feature}</div>
+                        <div class="gun-price" style="color:${owned ? '#4caf50' : '#ff9800'}">${free ? 'FREE' : (owned ? 'OWNED' : '🔥 ' + price + ' Flames')}</div>
+                        <button class="btn-buy" ${owned || (!free && !canAfford) ? 'disabled' : ''} onclick="buyMap('${key}')">
+                            ${owned ? 'UNLOCKED' : (free ? 'UNLOCK FREE' : (canAfford ? 'BUY — 🔥' + price : 'NEED 🔥' + (price - flames) + ' MORE'))}
+                        </button>
+                    </div>
+                `;
+            });
+            setTimeout(() => {
+                Object.entries(maps).forEach(([key, map]) => {
+                    if (map.isSniperArena) return;
+                    drawMapPreview(key, map, 'mapShopPreview_');
+                });
+            }, 10);
+        }
+
+        function buyMap(key) {
+            const map = maps[key];
+            if (!map || ownedMaps.includes(key)) return;
+            const price = map.flamePrice || 0;
+            if (flames < price) return;
+            flames -= price;
+            ownedMaps.push(key);
+            updateFlameDisplay();
+            updateShop();
+            saveCurrentUserData();
         }
 
         function updateFlamesShop() {
@@ -4856,12 +5414,14 @@
 
         function showLobby() {
             gameRunning = false;
+            isSniperMode = false;
             showScreen('lobby');
             updateMoneyDisplay();
             updateOwnedGunsList();
             updateArmorDisplay();
             updateVIPDisplay();
             updateFlameDisplay();
+            startLobbyMusic();
         }
 
         function showShop(tab = 'guns') {
@@ -4878,6 +5438,14 @@
             showMapVoting();
         }
 
+        function selectSniperMode(n) {
+            isSniperMode = true;
+            gameMode = n;
+            currentMap = 'sniper_arena';
+            currentGunIndex = 0;
+            startGame(n);
+        }
+
         function showMapVoting() {
             showScreen('mapVote');
             playerVote = null;
@@ -4885,9 +5453,9 @@
             mapVotes = {};
             voteTimeLeft = 10;
 
-            // Initialize votes for all maps
-            Object.keys(maps).forEach(key => {
-                mapVotes[key] = [];
+            // Initialize votes for owned maps only
+            ownedMaps.forEach(key => {
+                if (!maps[key]?.isSniperArena) mapVotes[key] = [];
             });
 
             // Generate AI votes after a short delay
@@ -4895,7 +5463,8 @@
             setTimeout(() => {
                 for (let i = 0; i < totalAI; i++) {
                     const team = i < gameMode - 1 ? 'blue' : 'red';
-                    const randomMap = Object.keys(maps)[Math.floor(Math.random() * Object.keys(maps).length)];
+                    const votableMaps = ownedMaps.filter(k => !maps[k]?.isSniperArena);
+                    const randomMap = votableMaps[Math.floor(Math.random() * votableMaps.length)];
                     aiVotes.push({ map: randomMap, team: team });
                     mapVotes[randomMap].push({ team: team, isPlayer: false });
                     updateMapVoteDisplay();
@@ -4911,6 +5480,8 @@
             grid.innerHTML = '';
 
             Object.entries(maps).forEach(([key, map]) => {
+                if (map.isSniperArena) return; // sniper arena only via special mode buttons
+                if (!ownedMaps.includes(key)) return; // only show owned maps
                 const isSelected = playerVote === key;
                 grid.innerHTML += `
                     <div class="map-card ${isSelected ? 'selected' : ''}" id="mapCard_${key}" onclick="voteForMap('${key}')">
@@ -4928,13 +5499,14 @@
             // Draw map previews
             setTimeout(() => {
                 Object.entries(maps).forEach(([key, map]) => {
+                    if (map.isSniperArena || !ownedMaps.includes(key)) return;
                     drawMapPreview(key, map);
                 });
             }, 10);
         }
 
-        function drawMapPreview(key, map) {
-            const canvas = document.getElementById(`mapPreview_${key}`);
+        function drawMapPreview(key, map, prefix = 'mapPreview_') {
+            const canvas = document.getElementById(`${prefix}${key}`);
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             const w = canvas.width;
@@ -5026,6 +5598,83 @@
                 ctx.font = '10px Arial';
                 ctx.fillText('↔ BOUNCE', w/2 - 25, 20);
             }
+
+            // Arctic: snowflakes + icy platform tint
+            if (key === 'arctic') {
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                for (let i = 0; i < 20; i++) {
+                    ctx.beginPath();
+                    ctx.arc((i * 37) % w, (i * 53) % h, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                // Ice mountains silhouette
+                ctx.fillStyle = 'rgba(168,216,234,0.5)';
+                for (let i = 0; i < 4; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(i * 60, h - 10);
+                    ctx.lineTo(i * 60 + 30, h - 40 - i * 10);
+                    ctx.lineTo(i * 60 + 60, h - 10);
+                    ctx.fill();
+                }
+            }
+
+            // Volcano: central cone + lava glow
+            if (key === 'volcano') {
+                ctx.fillStyle = '#3d1000';
+                ctx.beginPath();
+                ctx.moveTo(w / 2 - 50, h - 10);
+                ctx.lineTo(w / 2, h - 70);
+                ctx.lineTo(w / 2 + 50, h - 10);
+                ctx.fill();
+                ctx.fillStyle = '#ff4500';
+                ctx.beginPath();
+                ctx.arc(w / 2, h - 70, 8, 0, Math.PI * 2);
+                ctx.fill();
+                // Lava floor indicator
+                ctx.fillStyle = '#ff4500';
+                ctx.fillRect(0, h - 8, w, 8);
+            }
+
+            // Nuclear site: radiation symbol + chest
+            if (key === 'nuclear_site') {
+                ctx.save();
+                ctx.globalAlpha = 0.15;
+                ctx.font = 'bold 60px Arial';
+                ctx.fillStyle = '#00ff00';
+                ctx.textAlign = 'center';
+                ctx.fillText('☢', w / 2, h / 2 + 20);
+                ctx.textAlign = 'left';
+                ctx.restore();
+                // Draw the chest on the central platform
+                ctx.fillStyle = '#8B6914';
+                ctx.fillRect(w/2 - 10, h - 35, 20, 15);
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(w/2 - 10, h - 35, 20, 15);
+                ctx.fillStyle = '#ffd700';
+                ctx.fillRect(w/2 - 3, h - 30, 6, 6);
+            }
+
+            // Sniper arena: center dividing wall + zigzag platforms
+            if (key === 'sniper_arena') {
+                const wallX = Math.floor(w / 2) - 2;
+                ctx.fillStyle = '#880000';
+                ctx.fillRect(wallX, 0, 4, h);
+                ctx.strokeStyle = '#ff4444';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(wallX, 0, 4, h);
+                // Zigzag platforms on left
+                ctx.fillStyle = map.platformColor;
+                ctx.fillRect(10, h - 22, 30, 4);
+                ctx.fillRect(50, h - 36, 30, 4);
+                ctx.fillRect(10, h - 50, 30, 4);
+                ctx.fillRect(50, h - 62, 30, 4);
+                // Zigzag platforms on right
+                ctx.fillRect(wallX + 4 + 5, h - 22, 30, 4);
+                ctx.fillRect(wallX - 35, h - 36, 30, 4);
+                ctx.fillRect(wallX + 4 + 5, h - 50, 30, 4);
+                ctx.fillRect(wallX - 35, h - 62, 30, 4);
+            }
         }
 
         function voteForMap(mapKey) {
@@ -5077,9 +5726,10 @@
         }
 
         function endVoting() {
-            // If player didn't vote, pick random
+            // If player didn't vote, pick random from owned maps
             if (!playerVote) {
-                playerVote = Object.keys(maps)[Math.floor(Math.random() * Object.keys(maps).length)];
+                const votableMaps = ownedMaps.filter(k => !maps[k]?.isSniperArena);
+                playerVote = votableMaps[Math.floor(Math.random() * votableMaps.length)];
                 mapVotes[playerVote].push({ team: 'blue', isPlayer: true });
             }
 
@@ -5110,7 +5760,13 @@
 
         function updateGunSlots() {
             // Sync selectedGuns to match ownedGuns
-            selectedGuns = [...ownedGuns];
+            if (isSniperMode) {
+                selectedGuns = ['supersniper', 'sniper', 'pistol', null];
+            } else if (currentMap === 'nuclear_site') {
+                selectedGuns = nuclearSitePickedLauncher ? ['pistol', 'launcher', null, null] : ['pistol', null, null, null];
+            } else {
+                selectedGuns = [...ownedGuns];
+            }
             if (currentGunIndex >= selectedGuns.length) currentGunIndex = 0;
 
             const slots = document.getElementById('gunSlots');
@@ -5138,11 +5794,12 @@
         function startGame(mode) {
             gameMode = mode;
             showScreen('game');
+            startGameMusic();
 
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = isSniperMode ? window.innerWidth * 2 : window.innerWidth;
+            canvas.height = isSniperMode ? window.innerHeight * 2 : window.innerHeight;
 
             // Reset game state
             players = [];
@@ -5161,6 +5818,7 @@
 
             // Create platforms
             createPlatforms();
+            initMapSpecials();
 
             // Create player (you)
             const player = createPlayer(100, 100, 'blue', true);
@@ -5177,6 +5835,9 @@
             }
 
             updateGunSlots();
+            if (isSniperMode) {
+                players.forEach(p => { p.currentGun = 'supersniper'; });
+            }
             updateLeaderboard();
             document.getElementById('blueScore').textContent = '0';
             document.getElementById('redScore').textContent = '0';
@@ -5287,6 +5948,77 @@
                     platforms.push({ x: w/2 - 120, y: h - 540, width: 240, height: 15 });
                     platforms.push({ x: 150, y: h - 650, width: 100, height: 15 });
                     platforms.push({ x: w - 250, y: h - 650, width: 100, height: 15 });
+                    break;
+
+                case 'sniper_arena': {
+                    const wallX = Math.floor(w / 2) - 10;
+                    const wallW = 20;
+                    walls.push({ x: wallX, y: 0, width: wallW, height: h, isCenterWall: true });
+                    platforms.push({ x: 0, y: h - 60, width: wallX, height: 60 });
+                    platforms.push({ x: wallX + wallW, y: h - 60, width: w - wallX - wallW, height: 60 });
+                    // Proportional 3-column zigzag, 8 platforms per side
+                    // Column positions as fractions of each half-width
+                    const pW    = Math.floor(wallX * 0.23);  // platform width
+                    const marg  = Math.floor(wallX * 0.04);  // edge margin
+                    const colA  = marg;                       // near outer wall
+                    const colB  = Math.floor(wallX * 0.38);  // middle
+                    const colC  = wallX - pW - marg;          // near center wall
+                    // Vertical step — capped at 150 so players can always jump the gap
+                    const vStep = Math.min(150, Math.floor((h - 120) / 9));
+                    const cols  = [colA, colB, colC, colB, colA, colB, colC, colB];
+                    for (let i = 0; i < 8; i++) {
+                        const py = h - 60 - vStep - i * vStep;
+                        if (py > 20) {
+                            platforms.push({ x: cols[i],             y: py, width: pW, height: 22 });
+                            platforms.push({ x: w - cols[i] - pW,   y: py, width: pW, height: 22 });
+                        }
+                    }
+                    break;
+                }
+
+                case 'arctic':
+                    // Icy ground + raised glacier platforms
+                    platforms.push({ x: 0, y: h - 50, width: w, height: 50, icy: true });
+                    platforms.push({ x: 80, y: h - 160, width: 180, height: 20, icy: true });
+                    platforms.push({ x: w - 260, y: h - 160, width: 180, height: 20, icy: true });
+                    platforms.push({ x: w/2 - 120, y: h - 260, width: 240, height: 20, icy: true });
+                    platforms.push({ x: 60, y: h - 370, width: 140, height: 20, icy: true });
+                    platforms.push({ x: w - 200, y: h - 370, width: 140, height: 20, icy: true });
+                    platforms.push({ x: w/2 - 80, y: h - 460, width: 160, height: 20, icy: true });
+                    platforms.push({ x: 100, y: h - 560, width: 120, height: 20, icy: true });
+                    platforms.push({ x: w - 220, y: h - 560, width: 120, height: 20, icy: true });
+                    break;
+
+                case 'volcano':
+                    // Lava floor + rocky ledge platforms around a central cone
+                    platforms.push({ x: 0, y: h - 30, width: w, height: 30, isLava: true });
+                    platforms.push({ x: 40, y: h - 130, width: 160, height: 22 });
+                    platforms.push({ x: w - 200, y: h - 130, width: 160, height: 22 });
+                    platforms.push({ x: w/2 - 220, y: h - 240, width: 160, height: 22 });
+                    platforms.push({ x: w/2 + 60, y: h - 240, width: 160, height: 22 });
+                    platforms.push({ x: 80, y: h - 360, width: 130, height: 22 });
+                    platforms.push({ x: w - 210, y: h - 360, width: 130, height: 22 });
+                    platforms.push({ x: w/2 - 80, y: h - 460, width: 160, height: 22 });
+                    platforms.push({ x: 50, y: h - 560, width: 110, height: 22 });
+                    platforms.push({ x: w - 160, y: h - 560, width: 110, height: 22 });
+                    break;
+
+                case 'nuclear_site':
+                    // Concrete ground + industrial platforms
+                    platforms.push({ x: 0, y: h - 50, width: w, height: 50 });
+                    // Side bunkers
+                    platforms.push({ x: 80, y: h - 180, width: 200, height: 22 });
+                    platforms.push({ x: w - 280, y: h - 180, width: 200, height: 22 });
+                    // Central raised platform (chest sits here)
+                    platforms.push({ x: w/2 - 130, y: h - 220, width: 260, height: 22 });
+                    // Mid-level
+                    platforms.push({ x: 60, y: h - 340, width: 150, height: 22 });
+                    platforms.push({ x: w - 210, y: h - 340, width: 150, height: 22 });
+                    platforms.push({ x: w/2 - 100, y: h - 380, width: 200, height: 22 });
+                    // Upper level
+                    platforms.push({ x: 100, y: h - 490, width: 120, height: 22 });
+                    platforms.push({ x: w - 220, y: h - 490, width: 120, height: 22 });
+                    platforms.push({ x: w/2 - 80, y: h - 540, width: 160, height: 22 });
                     break;
 
                 default:
@@ -5576,7 +6308,7 @@
         });
 
         document.addEventListener('mousedown', (e) => {
-            if (e.target.closest('#adminPanel') || e.target.closest('#adminOpenBtn') || e.target.closest('#gunSlots')) return;
+            if (e.target.closest('#adminPanel') || e.target.closest('#adminOpenBtn') || e.target.closest('#gunSlots') || e.target.closest('#muteBtn')) return;
             if (e.button === 0) {
                 // Build mode: place wood block instead of shooting
                 if (buildMode && gameRunning) {
@@ -5701,13 +6433,28 @@
 
             // Draw walls
             walls.forEach(wall => {
-                ctx.fillStyle = map.bounceWalls ? '#666' : '#444';
-                ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
-                if (map.bounceWalls) {
-                    // Bouncy wall indicator
-                    ctx.strokeStyle = '#ffff00';
+                if (wall.isCenterWall) {
+                    ctx.fillStyle = '#1a0000';
+                    ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+                    for (let sy = 0; sy < canvas.height; sy += 60) {
+                        ctx.fillStyle = sy % 120 < 60 ? 'rgba(200,30,30,0.85)' : 'rgba(60,0,0,0.85)';
+                        ctx.fillRect(wall.x, wall.y + sy, wall.width, 60);
+                    }
+                    ctx.shadowColor = '#ff0000';
+                    ctx.shadowBlur = 12;
+                    ctx.strokeStyle = '#ff4444';
                     ctx.lineWidth = 3;
                     ctx.strokeRect(wall.x, wall.y, wall.width, wall.height);
+                    ctx.shadowBlur = 0;
+                } else {
+                    ctx.fillStyle = map.bounceWalls ? '#666' : '#444';
+                    ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+                    if (map.bounceWalls) {
+                        // Bouncy wall indicator
+                        ctx.strokeStyle = '#ffff00';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(wall.x, wall.y, wall.width, wall.height);
+                    }
                 }
             });
 
@@ -5720,11 +6467,31 @@
                         updateAIPlayer(player, timestamp);
                     }
                     updatePlayerPhysics(player);
+                    // Weapon drop pickup
+                    for (const drop of weaponDrops) {
+                        if (!drop.collected &&
+                            player.x < drop.x + drop.width && player.x + player.width > drop.x &&
+                            player.y < drop.y + drop.height && player.y + player.height > drop.y) {
+                            drop.collected = true;
+                            if (player.isHuman) {
+                                nuclearSitePickedLauncher = true;
+                                selectedGuns[1] = 'launcher';
+                                player.currentGun = 'launcher';
+                                updateGunSlots();
+                            } else {
+                                player.currentGun = 'launcher';
+                            }
+                        }
+                    }
                     drawPlayer(player);
                 } else {
                     // Dead - waiting for the set to end (no auto-respawn)
                 }
             });
+
+            // Draw chests and weapon drops
+            drawGameChests();
+            drawWeaponDrops();
 
             // God mode - keep human player at full health
             if (adminGodModeOn) {
@@ -6033,6 +6800,110 @@
                     ctx.fill();
                     break;
 
+                case 'nuclear_site':
+                    // Industrial grid lines
+                    ctx.strokeStyle = 'rgba(0,80,0,0.12)';
+                    ctx.lineWidth = 1;
+                    for (let i = 0; i < canvas.width; i += 60) {
+                        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+                    }
+                    for (let i = 0; i < canvas.height; i += 60) {
+                        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+                    }
+                    // Large radiation symbol watermark
+                    ctx.save();
+                    ctx.globalAlpha = 0.06;
+                    ctx.font = 'bold 280px Arial';
+                    ctx.fillStyle = '#00ff00';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('☢', canvas.width / 2, canvas.height / 2 + 100);
+                    ctx.textAlign = 'left';
+                    ctx.globalAlpha = 1;
+                    ctx.restore();
+                    // Warning stripe along bottom
+                    for (let i = 0; i < canvas.width; i += 80) {
+                        ctx.fillStyle = i % 160 < 80 ? 'rgba(255,200,0,0.25)' : 'rgba(0,0,0,0)';
+                        ctx.fillRect(i, canvas.height - 54, 80, 8);
+                    }
+                    break;
+
+                case 'sniper_arena':
+                    // Dark tactical background with faint grid
+                    ctx.strokeStyle = 'rgba(50,80,120,0.15)';
+                    ctx.lineWidth = 1;
+                    for (let i = 0; i < canvas.width; i += 80) {
+                        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+                    }
+                    for (let i = 0; i < canvas.height; i += 80) {
+                        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+                    }
+                    // Faint sniper crosshair watermark in each half
+                    ctx.strokeStyle = 'rgba(150,50,50,0.08)';
+                    ctx.lineWidth = 2;
+                    const cx1 = Math.floor(canvas.width / 4);
+                    const cx2 = Math.floor(canvas.width * 3 / 4);
+                    const cy = Math.floor(canvas.height / 2);
+                    const r = 120;
+                    [cx1, cx2].forEach(cx => {
+                        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(cx - r - 20, cy); ctx.lineTo(cx + r + 20, cy); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(cx, cy - r - 20); ctx.lineTo(cx, cy + r + 20); ctx.stroke();
+                    });
+                    break;
+
+                case 'arctic':
+                    // Snowfall
+                    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                    for (let i = 0; i < 80; i++) {
+                        const sx = (i * 197 + Date.now() / 40) % canvas.width;
+                        const sy = (i * 113 + Date.now() / 25) % canvas.height;
+                        ctx.beginPath();
+                        ctx.arc(sx, sy, 2 + (i % 3), 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    // Distant ice mountains
+                    ctx.fillStyle = 'rgba(180,220,240,0.4)';
+                    for (let i = 0; i < 8; i++) {
+                        const mx = i * (canvas.width / 7);
+                        const mh = 120 + (i % 3) * 60;
+                        ctx.beginPath();
+                        ctx.moveTo(mx, canvas.height - 50);
+                        ctx.lineTo(mx + 80, canvas.height - 50 - mh);
+                        ctx.lineTo(mx + 160, canvas.height - 50);
+                        ctx.fill();
+                    }
+                    break;
+
+                case 'volcano':
+                    // Glowing sky from magma
+                    const volGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                    volGrad.addColorStop(0, '#0d0200');
+                    volGrad.addColorStop(1, 'rgba(180,40,0,0.3)');
+                    ctx.fillStyle = volGrad;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    // Central volcano cone
+                    ctx.fillStyle = '#3d1000';
+                    ctx.beginPath();
+                    ctx.moveTo(canvas.width / 2 - 200, canvas.height - 30);
+                    ctx.lineTo(canvas.width / 2, canvas.height - 350);
+                    ctx.lineTo(canvas.width / 2 + 200, canvas.height - 30);
+                    ctx.fill();
+                    // Lava glow at top of cone
+                    ctx.fillStyle = '#ff4500';
+                    ctx.beginPath();
+                    ctx.arc(canvas.width / 2, canvas.height - 350, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Flying embers
+                    ctx.fillStyle = '#ff6600';
+                    for (let i = 0; i < 30; i++) {
+                        const ex = canvas.width / 2 + Math.sin(Date.now() / 300 + i) * (i * 18);
+                        const ey = canvas.height - 350 - ((Date.now() / 8 + i * 40) % (canvas.height - 400));
+                        ctx.beginPath();
+                        ctx.arc(ex, ey, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
+
                 default:
                     // Default stars
                     ctx.fillStyle = '#ffffff';
@@ -6051,6 +6922,7 @@
             const spd = getTierSpeed();
             if (keys['a']) player.vx = -spd;
             else if (keys['d']) player.vx = spd;
+            else if (player.onIce) player.vx *= 0.94; // icy slide — slow decay instead of instant stop
             else player.vx = 0;
 
             // Jump
@@ -6189,6 +7061,7 @@
 
             // Platform collision
             player.onGround = false;
+            player.onIce = false;
             platforms.forEach(p => {
                 if (p.isLava) return; // Don't stand on lava
 
@@ -6200,6 +7073,7 @@
                     player.y = p.y - player.height;
                     player.vy = 0;
                     player.onGround = true;
+                    if (p.icy) player.onIce = true;
                 }
             });
 
@@ -6254,63 +7128,236 @@
             const cx = player.x + player.width / 2;
             const skin = player.skin;
             const gun = guns[player.currentGun] || guns.pistol;
-
-            // Calculate gun angle for aiming
+            const dir = player.facingRight ? 1 : -1;
             const armX = cx;
             const armY = player.y + 28;
-            const dir = player.facingRight ? 1 : -1;
+            const now = Date.now();
 
-            // Legs
+            // Helper: draw rounded rect path
+            function rr(x, y, w, h, r) {
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + w - r, y);
+                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                ctx.lineTo(x + w, y + h - r);
+                ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                ctx.lineTo(x + r, y + h);
+                ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                ctx.lineTo(x, y + r);
+                ctx.quadraticCurveTo(x, y, x + r, y);
+                ctx.closePath();
+            }
+
+            // Enable glow for glowing skins
+            const glowSkins = ['neon', 'flame', 'toxic', 'galaxy', 'diamond', 'ice', 'lava'];
+            const hasGlow = skin.glowColor && glowSkins.includes(skin.pattern);
+            if (hasGlow) { ctx.shadowBlur = 14; ctx.shadowColor = skin.glowColor; }
+            else { ctx.shadowBlur = 0; }
+            ctx.lineWidth = 2;
+
+            // Legs with gradient
+            const legGrad = ctx.createLinearGradient(player.x + 5, player.y + 42, player.x + 35, player.y + 60);
+            legGrad.addColorStop(0, skin.bodyColor);
+            legGrad.addColorStop(1, skin.outlineColor);
+            ctx.fillStyle = legGrad;
+            ctx.strokeStyle = skin.outlineColor;
+            rr(player.x + 8, player.y + 42, 10, 18, 3);
+            ctx.fill(); ctx.stroke();
+            rr(player.x + 22, player.y + 42, 10, 18, 3);
+            ctx.fill(); ctx.stroke();
+
+            // Shoe detail
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = skin.accentColor || skin.outlineColor;
+            rr(player.x + 6, player.y + 57, 13, 4, 2);
+            ctx.fill();
+            rr(player.x + 21, player.y + 57, 13, 4, 2);
+            ctx.fill();
+            if (hasGlow) { ctx.shadowBlur = 14; ctx.shadowColor = skin.glowColor; }
+
+            // Body with gradient
+            const bodyGrad = ctx.createLinearGradient(player.x + 5, player.y + 18, player.x + 35, player.y + 44);
+            bodyGrad.addColorStop(0, skin.accentColor || skin.headColor);
+            bodyGrad.addColorStop(0.45, skin.bodyColor);
+            bodyGrad.addColorStop(1, skin.outlineColor);
+            ctx.fillStyle = bodyGrad;
+            ctx.strokeStyle = skin.outlineColor;
+            rr(player.x + 5, player.y + 18, 30, 26, 4);
+            ctx.fill(); ctx.stroke();
+
+            // Chest detail line
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = (skin.accentColor || '#ffffff') + '55';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(cx, player.y + 20);
+            ctx.lineTo(cx, player.y + 42);
+            ctx.stroke();
+            ctx.lineWidth = 2;
+
+            // Back arm
+            if (hasGlow) { ctx.shadowBlur = 14; ctx.shadowColor = skin.glowColor; }
             ctx.fillStyle = skin.bodyColor;
             ctx.strokeStyle = skin.outlineColor;
-            ctx.lineWidth = 2;
-            ctx.fillRect(player.x + 8, player.y + 42, 10, 18);
-            ctx.fillRect(player.x + 22, player.y + 42, 10, 18);
-            ctx.strokeRect(player.x + 8, player.y + 42, 10, 18);
-            ctx.strokeRect(player.x + 22, player.y + 42, 10, 18);
-
-            // Body
-            ctx.fillStyle = skin.bodyColor;
-            ctx.fillRect(player.x + 5, player.y + 18, 30, 26);
-            ctx.strokeRect(player.x + 5, player.y + 18, 30, 26);
-
-            // Back arm (behind body)
-            ctx.fillStyle = skin.bodyColor;
             const backArmX = player.facingRight ? player.x + 2 : player.x + 28;
-            ctx.fillRect(backArmX, player.y + 20, 8, 18);
-            ctx.strokeRect(backArmX, player.y + 20, 8, 18);
+            rr(backArmX, player.y + 20, 8, 18, 3);
+            ctx.fill(); ctx.stroke();
 
-            // Head
+            // Head with radial gradient
+            const headGrad = ctx.createRadialGradient(cx - 4, player.y + 6, 2, cx, player.y + 10, 13);
+            headGrad.addColorStop(0, skin.accentColor || '#ffffff');
+            headGrad.addColorStop(0.45, skin.headColor);
+            headGrad.addColorStop(1, skin.outlineColor);
             ctx.beginPath();
-            ctx.arc(cx, player.y + 10, 12, 0, Math.PI * 2);
-            ctx.fillStyle = skin.headColor;
+            ctx.arc(cx, player.y + 10, 13, 0, Math.PI * 2);
+            ctx.fillStyle = headGrad;
             ctx.fill();
+            ctx.shadowBlur = 0;
             ctx.strokeStyle = skin.outlineColor;
             ctx.stroke();
 
-            // Eyes
-            ctx.fillStyle = '#fff';
+            // Eyes with highlights
             const eyeOffset = player.facingRight ? 3 : -3;
+            const pupilDir = player.facingRight ? 1 : -1;
+            ctx.fillStyle = '#fff';
             ctx.beginPath();
-            ctx.arc(cx + eyeOffset - 3, player.y + 8, 3, 0, Math.PI * 2);
-            ctx.arc(cx + eyeOffset + 3, player.y + 8, 3, 0, Math.PI * 2);
+            ctx.ellipse(cx + eyeOffset - 3, player.y + 8, 3.5, 3, 0, 0, Math.PI * 2);
+            ctx.ellipse(cx + eyeOffset + 3, player.y + 8, 3.5, 3, 0, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#000';
+            ctx.fillStyle = '#1a1a1a';
             ctx.beginPath();
-            ctx.arc(cx + eyeOffset - 3 + (player.facingRight ? 1 : -1), player.y + 8, 1.5, 0, Math.PI * 2);
-            ctx.arc(cx + eyeOffset + 3 + (player.facingRight ? 1 : -1), player.y + 8, 1.5, 0, Math.PI * 2);
+            ctx.arc(cx + eyeOffset - 3 + pupilDir, player.y + 8, 2, 0, Math.PI * 2);
+            ctx.arc(cx + eyeOffset + 3 + pupilDir, player.y + 8, 2, 0, Math.PI * 2);
             ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(cx + eyeOffset - 3 + pupilDir + 0.8, player.y + 6.5, 0.9, 0, Math.PI * 2);
+            ctx.arc(cx + eyeOffset + 3 + pupilDir + 0.8, player.y + 6.5, 0.9, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Skin-specific effects
+            if (skin.pattern === 'flame') {
+                for (let i = 0; i < 3; i++) {
+                    const fx = cx + (i - 1) * 7;
+                    const flicker = Math.sin(now * 0.008 + i * 1.8) * 3;
+                    ctx.shadowBlur = 8; ctx.shadowColor = '#ff6600';
+                    ctx.fillStyle = i === 1 ? '#ffee00' : '#ff5500';
+                    ctx.beginPath();
+                    ctx.moveTo(fx - 4, player.y - 1);
+                    ctx.quadraticCurveTo(fx - 1, player.y - 10 - flicker, fx, player.y - 16 - flicker);
+                    ctx.quadraticCurveTo(fx + 1, player.y - 10 - flicker, fx + 4, player.y - 1);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                ctx.shadowBlur = 0;
+            } else if (skin.pattern === 'galaxy') {
+                const stars = [[player.x+7,player.y+22],[player.x+15,player.y+30],[player.x+25,player.y+26],[player.x+12,player.y+38],[player.x+28,player.y+34]];
+                for (let i = 0; i < stars.length; i++) {
+                    const v = Math.sin(now * 0.003 + i * 1.4);
+                    if (v > 0.3) {
+                        ctx.globalAlpha = (v - 0.3) / 0.7;
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.arc(stars[i][0], stars[i][1], 1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                ctx.globalAlpha = 1;
+            } else if (skin.pattern === 'diamond') {
+                const t = (now % 2000) / 2000;
+                const sparks = [[player.x+8,player.y+20],[player.x+30,player.y+32],[player.x+15,player.y+40],[player.x+25,player.y+25]];
+                for (let i = 0; i < sparks.length; i++) {
+                    const phase = (t + i * 0.25) % 1;
+                    if (phase < 0.35) {
+                        ctx.globalAlpha = Math.sin(phase / 0.35 * Math.PI);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.arc(sparks[i][0], sparks[i][1], 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                ctx.globalAlpha = 1;
+            } else if (skin.pattern === 'ice') {
+                ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(player.x + 10, player.y + 23);
+                ctx.lineTo(player.x + 18, player.y + 32);
+                ctx.moveTo(player.x + 28, player.y + 23);
+                ctx.lineTo(player.x + 20, player.y + 32);
+                ctx.stroke();
+                ctx.lineWidth = 2;
+            } else if (skin.pattern === 'lava') {
+                ctx.strokeStyle = '#ffcc00';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(player.x + 12, player.y + 20);
+                ctx.lineTo(player.x + 19, player.y + 29);
+                ctx.lineTo(player.x + 15, player.y + 38);
+                ctx.moveTo(player.x + 23, player.y + 22);
+                ctx.lineTo(player.x + 27, player.y + 34);
+                ctx.stroke();
+                ctx.lineWidth = 2;
+            } else if (skin.pattern === 'toxic') {
+                const t = (now % 1500) / 1500;
+                for (let i = 0; i < 3; i++) {
+                    const phase = (t + i * 0.33) % 1;
+                    const bx = player.x + 10 + i * 8;
+                    const by = player.y + 18 - phase * 14;
+                    ctx.strokeStyle = `rgba(180,255,0,${1 - phase})`;
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.arc(bx, by, 2.5, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                ctx.lineWidth = 2;
+            } else if (skin.pattern === 'shadow') {
+                ctx.strokeStyle = 'rgba(0,0,30,0.4)';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(cx, player.y + 10, 17, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.lineWidth = 2;
+            } else if (skin.pattern === 'neon') {
+                ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(player.x + 8, player.y + 23);
+                ctx.lineTo(player.x + 32, player.y + 23);
+                ctx.moveTo(player.x + 8, player.y + 35);
+                ctx.lineTo(player.x + 32, player.y + 35);
+                ctx.stroke();
+                ctx.lineWidth = 2;
+            } else if (skin.pattern === 'sparkle') {
+                const t = (now % 1200) / 1200;
+                const sparks = [[player.x+8,player.y+21],[player.x+29,player.y+26],[player.x+18,player.y+39]];
+                for (let i = 0; i < sparks.length; i++) {
+                    const phase = (t + i * 0.33) % 1;
+                    if (phase < 0.5) {
+                        ctx.globalAlpha = Math.sin(phase * Math.PI * 2);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.arc(sparks[i][0], sparks[i][1], 2.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            // Reset before gun drawing
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
 
             // Front arm holding gun
             ctx.save();
             ctx.translate(armX, armY);
-
             const gunAngle = player.gunAngle || 0;
             ctx.rotate(gunAngle * dir);
 
             // Arm
             ctx.fillStyle = skin.bodyColor;
             ctx.strokeStyle = skin.outlineColor;
+            ctx.lineWidth = 2;
             ctx.fillRect(0, -4, 20 * dir, 8);
 
             // Hand
@@ -6342,7 +7389,6 @@
                 ctx.fillStyle = '#333';
                 ctx.fillRect((18 + gunLength - 5) * dir, -gunWidth/2 - 2, 5, gunWidth + 4);
             } else if (gun.name === 'Minigun') {
-                // Multiple barrels
                 ctx.strokeStyle = '#222';
                 for (let i = -2; i <= 2; i++) {
                     ctx.beginPath();
@@ -6351,7 +7397,6 @@
                     ctx.stroke();
                 }
             } else if (gun.name === 'Launcher') {
-                // Rocket tube
                 ctx.fillStyle = '#333';
                 ctx.beginPath();
                 ctx.arc((18 + gunLength) * dir, 0, gunWidth/2 + 2, 0, Math.PI * 2);
@@ -6680,6 +7725,34 @@
                     continue;
                 }
 
+                // Chest collision
+                let hitChest = false;
+                for (const chest of gameChests) {
+                    if (!chest.opened &&
+                        bullet.x > chest.x && bullet.x < chest.x + chest.width &&
+                        bullet.y > chest.y && bullet.y < chest.y + chest.height) {
+                        chest.health -= bullet.damage || 15;
+                        hitChest = true;
+                        if (chest.health <= 0) {
+                            chest.opened = true;
+                            // Spawn launcher drop at chest center
+                            weaponDrops.push({
+                                x: chest.x + chest.width / 2 - 20,
+                                y: chest.y - 10,
+                                width: 40,
+                                height: 40,
+                                gunKey: 'launcher',
+                                collected: false
+                            });
+                        }
+                        break;
+                    }
+                }
+                if (hitChest && !bullet.alwaysBounce) {
+                    bullets.splice(i, 1);
+                    continue;
+                }
+
                 // Player collision
                 for (const player of players) {
                     if (player.team !== bullet.team && player.alive &&
@@ -6945,6 +8018,7 @@
 
         function endGame(playerWon) {
             gameRunning = false;
+            stopMusic();
             showScreen('victory');
 
             // Reset armor after game (armor lasts one game)
@@ -7995,6 +9069,12 @@
                 saveCurrentUserData();
             }
         });
+
+        // Sync mute button icon with saved preference on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('muteBtn');
+            if (btn) btn.textContent = musicMuted ? '🔇' : '🎵';
+        });
     </script>
 
     <!-- Ad Overlay -->
@@ -8006,6 +9086,9 @@
         </div>
         <div style="color:#888;font-size:12px;margin-top:14px">Watch the full ad to unlock your gun for free!</div>
     </div>
+
+    <!-- Music toggle (fixed overlay) -->
+    <button id="muteBtn" onclick="toggleMute()">🎵</button>
 
     <!-- Admin Panel (fixed overlay - visible on all screens) -->
     <button id="adminOpenBtn" onclick="openAdminPanel()">⚙ ADMIN</button>
