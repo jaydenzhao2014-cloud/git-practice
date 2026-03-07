@@ -815,6 +815,15 @@
         .admin-btn.active { background: rgba(255,107,0,0.3); border-color: #ff6b00; color: #ff6b00; }
         .admin-close { color: #666; border-color: #333; margin-bottom: 0; text-align: center; }
         .admin-close:hover { background: rgba(255,80,80,0.15); border-color: #ff4444; color: #ff4444; }
+        #adminPwSection { margin-bottom: 12px; }
+        #adminPwSection input {
+            width: 100%; box-sizing: border-box;
+            padding: 7px 10px; border-radius: 7px;
+            border: 1px solid rgba(255,107,0,0.5);
+            background: rgba(0,0,0,0.5); color: #fff;
+            font-size: 13px; margin-bottom: 6px;
+        }
+        #adminPwError { color: #ff4444; font-size: 12px; display: none; margin-bottom: 4px; }
 
         /* MAP VOTING SCREEN */
         #mapVote {
@@ -6171,16 +6180,28 @@
         const ADMIN_PASSWORD = '67wspeed';
 
         function openAdminPanel() {
-            if (!adminUnlocked) {
-                const pw = prompt('Enter admin password:');
-                if (pw !== ADMIN_PASSWORD) {
-                    alert('Wrong password!');
-                    return;
-                }
-                adminUnlocked = true;
-            }
             const panel = document.getElementById('adminPanel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            const isVisible = panel.style.display !== 'none';
+            panel.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible && !adminUnlocked) {
+                document.getElementById('adminPwSection').style.display = '';
+                document.getElementById('adminControls').style.display = 'none';
+                document.getElementById('adminPwInput').value = '';
+                document.getElementById('adminPwError').style.display = 'none';
+                setTimeout(() => document.getElementById('adminPwInput').focus(), 50);
+            }
+        }
+
+        function adminSubmitPw() {
+            const pw = document.getElementById('adminPwInput').value;
+            if (pw !== ADMIN_PASSWORD) {
+                document.getElementById('adminPwError').style.display = 'block';
+                document.getElementById('adminPwInput').value = '';
+                return;
+            }
+            adminUnlocked = true;
+            document.getElementById('adminPwSection').style.display = 'none';
+            document.getElementById('adminControls').style.display = '';
         }
 
         function adminKillEnemies() {
@@ -9094,6 +9115,12 @@
     <button id="adminOpenBtn" onclick="openAdminPanel()">⚙ ADMIN</button>
     <div id="adminPanel" onmousedown="event.stopPropagation()" onclick="event.stopPropagation()">
         <div class="admin-title">⚙ ADMIN PANEL</div>
+        <div id="adminPwSection">
+            <input type="password" id="adminPwInput" placeholder="Enter password..." onkeydown="if(event.key==='Enter')adminSubmitPw()"/>
+            <div id="adminPwError">Wrong password!</div>
+            <button class="admin-btn" onclick="adminSubmitPw()">🔓 Unlock</button>
+        </div>
+        <div id="adminControls" style="display:none">
         <button class="admin-btn" onclick="adminKillEnemies()">💀 Kill All Enemies</button>
         <button class="admin-btn" id="adminGodBtn" onclick="adminToggleGodMode()">🛡 God Mode: OFF</button>
         <button class="admin-btn" id="adminFreezeBtn" onclick="adminToggleFreeze()">🧊 Freeze Enemies: OFF</button>
@@ -9103,6 +9130,7 @@
         <button class="admin-btn" onclick="adminWinSet()">🏆 Win Current Set</button>
         <button class="admin-btn" onclick="adminKillAll()">☠️ Kill Everyone</button>
         <button class="admin-btn admin-close" onclick="document.getElementById('adminPanel').style.display='none'">✕ Close</button>
+        </div>
     </div>
 </body>
 </html>
