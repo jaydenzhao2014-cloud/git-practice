@@ -746,14 +746,14 @@ function updatePhysics(){
     if(p1Player){
         let dx=0; if(keys['KeyA'])dx=-1; if(keys['KeyD'])dx=1;
         if(dx){p1Player.x=clamp(p1Player.x+dx*PLAYER_SPD);p1Player.dir=dx>0?1:-1;}
-        let dz=0; if(keys['KeyW'])dz=-1; if(keys['KeyS'])dz=1;
+        let dz=0; if(keys['KeyW'])dz=1; if(keys['KeyS'])dz=-1;
         if(dz)p1Player.depth=Math.max(0.1,Math.min(0.9,p1Player.depth+dz*0.018));
     }
     // P2 (2P only) — ←/→ = left/right, ↑/↓ = up/down (depth)
     if(!vsAI&&p2Player){
         let dx=0; if(keys['ArrowLeft'])dx=-1; if(keys['ArrowRight'])dx=1;
         if(dx){p2Player.x=clamp(p2Player.x+dx*PLAYER_SPD);p2Player.dir=dx>0?1:-1;}
-        let dz=0; if(keys['ArrowUp'])dz=-1; if(keys['ArrowDown'])dz=1;
+        let dz=0; if(keys['ArrowUp'])dz=1; if(keys['ArrowDown'])dz=-1;
         if(dz)p2Player.depth=Math.max(0.1,Math.min(0.9,p2Player.depth+dz*0.018));
     }
 
