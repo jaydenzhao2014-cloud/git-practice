@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ICE HOCKEY</title>
+<title>ICE HOCKEY v4</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#0a0514;font-family:'Impact','Arial Black',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;overflow:hidden;color:#fff;user-select:none;}
@@ -386,7 +386,7 @@ function showBracket(){
     const info=document.getElementById('bracketInfo');
     const btns=document.getElementById('bracketBtns'); btns.innerHTML='';
     const phaseNames={QF:'QUARTERFINALS',SF:'SEMIFINALS','3rd':'3RD PLACE',F:'FINAL'};
-    const playerResult=tRes[tournPhase]?.(Array.isArray(tRes[tournPhase])?tRes[tournPhase][tournPlayerMatchIdx]:tRes[tournPhase]);
+    const _ph=tRes[tournPhase];const playerResult=_ph?(Array.isArray(_ph)?_ph[tournPlayerMatchIdx]:_ph):null;
     const tournDone=tournPhase==='done';
 
     if(tournDone){
