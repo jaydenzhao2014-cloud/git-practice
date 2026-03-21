@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MY GAMES</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#07070f;font-family:'Impact','Arial Black',sans-serif;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px 60px;}
+
+.site-title{font-size:clamp(42px,8vw,88px);letter-spacing:16px;background:linear-gradient(180deg,#ffffff,#888888);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
+.site-sub{font-size:12px;letter-spacing:8px;color:#333;margin-bottom:50px;}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;width:100%;max-width:1100px;}
+
+.card{background:#0d0d1a;border:2px solid var(--col);border-radius:16px;padding:0;overflow:hidden;text-decoration:none;color:#fff;display:flex;flex-direction:column;transition:transform 0.2s,box-shadow 0.2s;position:relative;}
+.card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 0 40px var(--glow);}
+
+.card-banner{height:130px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.card-banner::before{content:'';position:absolute;inset:0;background:var(--bg);opacity:0.18;}
+.card-icon{font-size:64px;position:relative;z-index:1;filter:drop-shadow(0 0 18px var(--col));}
+
+.card-body{padding:18px 20px 20px;flex:1;display:flex;flex-direction:column;gap:10px;}
+.card-title{font-size:22px;letter-spacing:6px;color:var(--col);filter:drop-shadow(0 0 8px var(--glow));}
+.card-desc{font-size:11px;letter-spacing:2px;color:#555;line-height:1.7;font-family:Arial,sans-serif;font-weight:normal;flex:1;}
+
+.play-btn{display:block;text-align:center;background:var(--col);color:#07070f;border:none;border-radius:8px;padding:10px 0;font-size:14px;font-family:inherit;font-weight:bold;letter-spacing:4px;cursor:pointer;text-decoration:none;margin-top:4px;transition:opacity 0.15s,filter 0.15s;}
+.play-btn:hover{opacity:0.85;filter:brightness(1.15);}
+
+.card-badge{position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.6);border:1px solid var(--col);border-radius:6px;padding:3px 8px;font-size:9px;letter-spacing:3px;color:var(--col);}
+
+footer{margin-top:50px;font-size:10px;letter-spacing:4px;color:#222;}
+</style>
+</head>
+<body>
+
+<div class="site-title">MY GAMES</div>
+<div class="site-sub">BROWSER GAMES — PLAY NOW</div>
+
+<div class="grid">
+
+  <!-- RIVALS -->
+  <a class="card" href="https://jaydenzhao2014-cloud.github.io/git-practice/" style="--col:#44aaff;--glow:rgba(68,170,255,0.4);--bg:linear-gradient(135deg,#0044aa,#001133);">
+    <div class="card-banner">
+      <div class="card-icon">🎯</div>
+      <div class="card-badge">MULTIPLAYER</div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">RIVALS</div>
+      <div class="card-desc">Top-down multiplayer shooter. Pick your team, battle online with friends using peer-to-peer room codes. Tournament mode included.</div>
+      <a class="play-btn" href="https://jaydenzhao2014-cloud.github.io/git-practice/">▶ PLAY</a>
+    </div>
+  </a>
+
+  <!-- AKEDO BATTLE -->
+  <a class="card" href="https://jaydenzhao2014-cloud.github.io/git-practice/akedo.html" style="--col:#ff4444;--glow:rgba(255,68,68,0.4);--bg:linear-gradient(135deg,#aa0000,#330000);">
+    <div class="card-banner">
+      <div class="card-icon">⚔️</div>
+      <div class="card-badge">FIGHTING</div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">AKEDO BATTLE</div>
+      <div class="card-desc">Fast-paced arena fighter. Choose your warrior and battle opponents in intense one-on-one combat.</div>
+      <a class="play-btn" href="https://jaydenzhao2014-cloud.github.io/git-practice/akedo.html">▶ PLAY</a>
+    </div>
+  </a>
+
+  <!-- ICE HOCKEY -->
+  <a class="card" href="https://jaydenzhao2014-cloud.github.io/git-practice/hockey.html" style="--col:#88ddff;--glow:rgba(136,221,255,0.4);--bg:linear-gradient(135deg,#0066aa,#001a33);">
+    <div class="card-banner">
+      <div class="card-icon">🏒</div>
+      <div class="card-badge">SPORTS</div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">ICE HOCKEY</div>
+      <div class="card-desc">3/4 perspective ice hockey with 8 international teams. VS AI, 2-player local, and full tournament bracket with trophies.</div>
+      <a class="play-btn" href="https://jaydenzhao2014-cloud.github.io/git-practice/hockey.html">▶ PLAY</a>
+    </div>
+  </a>
+
+  <!-- WORLD CUP SOCCER -->
+  <a class="card" href="https://jaydenzhao2014-cloud.github.io/git-practice/soccer.html" style="--col:#44dd66;--glow:rgba(68,221,102,0.4);--bg:linear-gradient(135deg,#006600,#001a00);">
+    <div class="card-banner">
+      <div class="card-icon">⚽</div>
+      <div class="card-badge">SPORTS</div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">WORLD CUP SOCCER</div>
+      <div class="card-desc">3/4 perspective soccer with 8 World Cup nations. VS AI, 2-player local, and full tournament bracket with trophies.</div>
+      <a class="play-btn" href="https://jaydenzhao2014-cloud.github.io/git-practice/soccer.html">▶ PLAY</a>
+    </div>
+  </a>
+
+</div>
+
+<footer>ALL GAMES MADE BY JAYDEN</footer>
+
+</body>
+</html>
