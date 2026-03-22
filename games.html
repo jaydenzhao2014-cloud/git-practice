@@ -3,97 +3,206 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MY GAMES</title>
+<title>Jayden's Games</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#07070f;font-family:'Impact','Arial Black',sans-serif;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px 60px;}
+:root{--bg:#f0f0f8;--sidebar:#1a1a2e;--header:#1a1a2e;--card:#fff;--accent:#5c5ce0;}
+body{background:var(--bg);font-family:'Segoe UI',Arial,sans-serif;color:#222;min-height:100vh;display:flex;flex-direction:column;}
 
-.site-title{font-size:clamp(42px,8vw,88px);letter-spacing:16px;background:linear-gradient(180deg,#ffffff,#888888);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
-.site-sub{font-size:12px;letter-spacing:8px;color:#333;margin-bottom:50px;}
+/* ── HEADER ── */
+header{background:var(--header);display:flex;align-items:center;gap:14px;padding:0 22px;height:62px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.35);}
+.logo{font-family:'Impact','Arial Black',sans-serif;font-size:26px;letter-spacing:4px;background:linear-gradient(90deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;}
+.search-wrap{flex:1;max-width:480px;position:relative;}
+.search-wrap input{width:100%;padding:9px 16px 9px 40px;border-radius:24px;border:none;background:#2a2a40;color:#fff;font-size:14px;outline:none;transition:background 0.2s;}
+.search-wrap input::placeholder{color:#666;}
+.search-wrap input:focus{background:#33335a;}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#666;font-size:15px;pointer-events:none;}
+.header-right{margin-left:auto;font-size:12px;color:#444;letter-spacing:2px;white-space:nowrap;}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;width:100%;max-width:1100px;}
+/* ── LAYOUT ── */
+.layout{display:flex;flex:1;}
 
-.card{background:#0d0d1a;border:2px solid var(--col);border-radius:16px;padding:0;overflow:hidden;text-decoration:none;color:#fff;display:flex;flex-direction:column;transition:transform 0.2s,box-shadow 0.2s;position:relative;}
-.card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 0 40px var(--glow);}
+/* ── SIDEBAR ── */
+aside{width:210px;background:var(--sidebar);padding:22px 0;display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
+.side-label{font-size:10px;letter-spacing:3px;color:#333;padding:14px 20px 6px;text-transform:uppercase;}
+.side-btn{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;border:none;background:none;color:#888;font-size:13px;font-family:inherit;letter-spacing:1px;border-radius:0;transition:all 0.15s;text-align:left;width:100%;}
+.side-btn:hover{background:rgba(255,255,255,0.06);color:#ccc;}
+.side-btn.active{background:rgba(92,92,224,0.2);color:#a78bfa;border-left:3px solid #a78bfa;}
+.side-icon{font-size:16px;width:20px;text-align:center;}
 
-.card-banner{height:130px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
-.card-banner::before{content:'';position:absolute;inset:0;background:var(--bg);opacity:0.18;}
-.card-icon{font-size:64px;position:relative;z-index:1;filter:drop-shadow(0 0 18px var(--col));}
+/* ── MAIN ── */
+main{flex:1;padding:28px 28px 50px;}
+.section-title{font-size:20px;font-weight:800;color:#1a1a2e;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.section-title span{font-size:22px;}
+.no-results{text-align:center;color:#aaa;padding:60px 0;font-size:15px;}
 
-.card-body{padding:18px 20px 20px;flex:1;display:flex;flex-direction:column;gap:10px;}
-.card-title{font-size:22px;letter-spacing:6px;color:var(--col);filter:drop-shadow(0 0 8px var(--glow));}
-.card-desc{font-size:11px;letter-spacing:2px;color:#555;line-height:1.7;font-family:Arial,sans-serif;font-weight:normal;flex:1;}
+/* ── GAME GRID ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;}
+.card{background:var(--card);border-radius:14px;overflow:hidden;cursor:pointer;text-decoration:none;color:inherit;display:flex;flex-direction:column;box-shadow:0 2px 10px rgba(0,0,0,0.08);transition:transform 0.18s,box-shadow 0.18s;position:relative;}
+.card:hover{transform:translateY(-5px);box-shadow:0 10px 28px rgba(0,0,0,0.16);}
+.card:hover .play-overlay{opacity:1;}
 
-.play-btn{display:block;text-align:center;background:var(--col);color:#07070f;border:none;border-radius:8px;padding:10px 0;font-size:14px;font-family:inherit;font-weight:bold;letter-spacing:4px;cursor:pointer;text-decoration:none;margin-top:4px;transition:opacity 0.15s,filter 0.15s;}
-.play-btn:hover{opacity:0.85;filter:brightness(1.15);}
+.thumb{height:140px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.thumb-icon{font-size:70px;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.3));position:relative;z-index:1;transition:transform 0.2s;}
+.card:hover .thumb-icon{transform:scale(1.1);}
+.thumb-bg{position:absolute;inset:0;}
 
-.card-badge{position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.6);border:1px solid var(--col);border-radius:6px;padding:3px 8px;font-size:9px;letter-spacing:3px;color:var(--col);}
+.play-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.18s;z-index:2;}
+.play-circle{width:52px;height:52px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;color:#1a1a2e;padding-left:4px;}
 
-footer{margin-top:50px;font-size:10px;letter-spacing:4px;color:#222;}
+.card-foot{padding:12px 14px 14px;}
+.card-name{font-size:14px;font-weight:700;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-tags{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;}
+.tag{background:#f0f0ff;color:#5c5ce0;border-radius:20px;padding:2px 9px;font-size:10px;font-weight:600;letter-spacing:0.5px;}
+.tag.red{background:#fff0f0;color:#e05c5c;}
+.tag.green{background:#f0fff4;color:#22c55e;}
+.tag.cyan{background:#f0faff;color:#0ea5e9;}
+
+/* ── CATEGORY PILLS (top of main) ── */
+.cat-bar{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
+.cat-pill{padding:7px 18px;border-radius:20px;border:2px solid #ddd;background:#fff;color:#555;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;}
+.cat-pill:hover{border-color:#a78bfa;color:#5c5ce0;}
+.cat-pill.active{background:#5c5ce0;border-color:#5c5ce0;color:#fff;}
 </style>
 </head>
 <body>
 
-<div class="site-title">MY GAMES</div>
-<div class="site-sub">BROWSER GAMES — PLAY NOW</div>
+<!-- HEADER -->
+<header>
+  <div class="logo">JAYDEN'S GAMES</div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search games..." oninput="filterGames()">
+  </div>
+  <div class="header-right">4 GAMES</div>
+</header>
 
-<div class="grid">
+<div class="layout">
 
-  <!-- RIVALS -->
-  <a class="card" href="https://jaydenzhao2014-cloud.github.io/git-practice/" style="--col:#44aaff;--glow:rgba(68,170,255,0.4);--bg:linear-gradient(135deg,#0044aa,#001133);">
-    <div class="card-banner">
-      <div class="card-icon">🎯</div>
-      <div class="card-badge">MULTIPLAYER</div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">RIVALS</div>
-      <div class="card-desc">Top-down multiplayer shooter. Pick your team, battle online with friends using peer-to-peer room codes. Tournament mode included.</div>
-      <a class="play-btn" href="https://jaydenzhao2014-cloud.github.io/git-practice/">▶ PLAY</a>
-    </div>
-  </a>
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="side-label">Browse</div>
+    <button class="side-btn active" onclick="setSide(this,'all')"><span class="side-icon">🎮</span>All Games</button>
+    <button class="side-btn" onclick="setSide(this,'sports')"><span class="side-icon">🏆</span>Sports</button>
+    <button class="side-btn" onclick="setSide(this,'fighting')"><span class="side-icon">⚔️</span>Fighting</button>
+    <button class="side-btn" onclick="setSide(this,'multiplayer')"><span class="side-icon">👥</span>Multiplayer</button>
+    <button class="side-btn" onclick="setSide(this,'shooter')"><span class="side-icon">🎯</span>Shooter</button>
+  </aside>
 
-  <!-- AKEDO BATTLE -->
-  <a class="card" href="https://jaydenzhao2014-cloud.github.io/git-practice/akedo.html" style="--col:#ff4444;--glow:rgba(255,68,68,0.4);--bg:linear-gradient(135deg,#aa0000,#330000);">
-    <div class="card-banner">
-      <div class="card-icon">⚔️</div>
-      <div class="card-badge">FIGHTING</div>
+  <!-- MAIN -->
+  <main>
+    <div class="cat-bar">
+      <div class="cat-pill active" onclick="setCat(this,'all')">All</div>
+      <div class="cat-pill" onclick="setCat(this,'sports')">Sports</div>
+      <div class="cat-pill" onclick="setCat(this,'fighting')">Fighting</div>
+      <div class="cat-pill" onclick="setCat(this,'multiplayer')">Multiplayer</div>
+      <div class="cat-pill" onclick="setCat(this,'shooter')">Shooter</div>
     </div>
-    <div class="card-body">
-      <div class="card-title">AKEDO BATTLE</div>
-      <div class="card-desc">Fast-paced arena fighter. Choose your warrior and battle opponents in intense one-on-one combat.</div>
-      <a class="play-btn" href="https://jaydenzhao2014-cloud.github.io/git-practice/akedo.html">▶ PLAY</a>
-    </div>
-  </a>
 
-  <!-- ICE HOCKEY -->
-  <a class="card" href="https://jaydenzhao2014-cloud.github.io/git-practice/hockey.html" style="--col:#88ddff;--glow:rgba(136,221,255,0.4);--bg:linear-gradient(135deg,#0066aa,#001a33);">
-    <div class="card-banner">
-      <div class="card-icon">🏒</div>
-      <div class="card-badge">SPORTS</div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">ICE HOCKEY</div>
-      <div class="card-desc">3/4 perspective ice hockey with 8 international teams. VS AI, 2-player local, and full tournament bracket with trophies.</div>
-      <a class="play-btn" href="https://jaydenzhao2014-cloud.github.io/git-practice/hockey.html">▶ PLAY</a>
-    </div>
-  </a>
-
-  <!-- WORLD CUP SOCCER -->
-  <a class="card" href="https://jaydenzhao2014-cloud.github.io/git-practice/soccer.html" style="--col:#44dd66;--glow:rgba(68,221,102,0.4);--bg:linear-gradient(135deg,#006600,#001a00);">
-    <div class="card-banner">
-      <div class="card-icon">⚽</div>
-      <div class="card-badge">SPORTS</div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">WORLD CUP SOCCER</div>
-      <div class="card-desc">3/4 perspective soccer with 8 World Cup nations. VS AI, 2-player local, and full tournament bracket with trophies.</div>
-      <a class="play-btn" href="https://jaydenzhao2014-cloud.github.io/git-practice/soccer.html">▶ PLAY</a>
-    </div>
-  </a>
-
+    <div class="section-title"><span>🎮</span> <span id="sectionLabel">All Games</span></div>
+    <div class="grid" id="gameGrid"></div>
+    <div class="no-results" id="noResults" style="display:none">No games found.</div>
+  </main>
 </div>
 
-<footer>ALL GAMES MADE BY JAYDEN</footer>
+<script>
+const GAMES = [
+  {
+    name: "RIVALS",
+    desc: "Top-down multiplayer shooter with room codes and tournament mode.",
+    icon: "🎯",
+    bg: "linear-gradient(135deg,#0d1b4b,#1a3a8f)",
+    tags: ["shooter","multiplayer"],
+    tagLabels: [{t:"SHOOTER",cls:""},{t:"MULTIPLAYER",cls:""}],
+    url: "https://jaydenzhao2014-cloud.github.io/git-practice/"
+  },
+  {
+    name: "AKEDO BATTLE",
+    desc: "Fast-paced arena fighter with intense one-on-one combat.",
+    icon: "⚔️",
+    bg: "linear-gradient(135deg,#4b0d0d,#8f1a1a)",
+    tags: ["fighting"],
+    tagLabels: [{t:"FIGHTING",cls:"red"}],
+    url: "https://jaydenzhao2014-cloud.github.io/git-practice/akedo.html"
+  },
+  {
+    name: "ICE HOCKEY",
+    desc: "3/4 perspective hockey with 8 teams, tournaments and trophies.",
+    icon: "🏒",
+    bg: "linear-gradient(135deg,#0d2b4b,#0e5a8a)",
+    tags: ["sports","multiplayer"],
+    tagLabels: [{t:"SPORTS",cls:"cyan"},{t:"2 PLAYER",cls:""}],
+    url: "https://jaydenzhao2014-cloud.github.io/git-practice/hockey.html"
+  },
+  {
+    name: "WORLD CUP SOCCER",
+    desc: "3/4 perspective soccer with 8 World Cup nations and tournament bracket.",
+    icon: "⚽",
+    bg: "linear-gradient(135deg,#0d3b1a,#1a7a35)",
+    tags: ["sports","multiplayer"],
+    tagLabels: [{t:"SPORTS",cls:"green"},{t:"2 PLAYER",cls:""}],
+    url: "https://jaydenzhao2014-cloud.github.io/git-practice/soccer.html"
+  }
+];
 
+let currentCat = "all";
+let currentSearch = "";
+
+function renderGames() {
+  const grid = document.getElementById("gameGrid");
+  const noRes = document.getElementById("noResults");
+  const q = currentSearch.toLowerCase();
+  const filtered = GAMES.filter(g => {
+    const matchCat = currentCat === "all" || g.tags.includes(currentCat);
+    const matchSearch = g.name.toLowerCase().includes(q) || g.desc.toLowerCase().includes(q);
+    return matchCat && matchSearch;
+  });
+
+  grid.innerHTML = filtered.map(g => `
+    <a class="card" href="${g.url}" target="_blank">
+      <div class="thumb">
+        <div class="thumb-bg" style="background:${g.bg}"></div>
+        <div class="thumb-icon">${g.icon}</div>
+        <div class="play-overlay"><div class="play-circle">▶</div></div>
+      </div>
+      <div class="card-foot">
+        <div class="card-name">${g.name}</div>
+        <div class="card-tags">${g.tagLabels.map(t=>`<span class="tag ${t.cls}">${t.t}</span>`).join('')}</div>
+      </div>
+    </a>
+  `).join('');
+
+  noRes.style.display = filtered.length === 0 ? "block" : "none";
+}
+
+function setCat(el, cat) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  const labels = {all:"All Games",sports:"Sports Games",fighting:"Fighting Games",multiplayer:"Multiplayer Games",shooter:"Shooter Games"};
+  document.getElementById("sectionLabel").textContent = labels[cat];
+  renderGames();
+}
+
+function setSide(el, cat) {
+  currentCat = cat;
+  document.querySelectorAll('.side-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  // sync pills
+  document.querySelectorAll('.cat-pill').forEach(p=>{
+    p.classList.toggle('active', p.getAttribute('onclick').includes(`'${cat}'`));
+  });
+  const labels = {all:"All Games",sports:"Sports Games",fighting:"Fighting Games",multiplayer:"Multiplayer Games",shooter:"Shooter Games"};
+  document.getElementById("sectionLabel").textContent = labels[cat];
+  renderGames();
+}
+
+function filterGames() {
+  currentSearch = document.getElementById("searchInput").value;
+  renderGames();
+}
+
+renderGames();
+</script>
 </body>
 </html>
