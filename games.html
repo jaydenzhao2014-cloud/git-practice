@@ -74,7 +74,7 @@ main{flex:1;padding:28px 28px 50px;}
     <span class="search-icon">🔍</span>
     <input type="text" id="searchInput" placeholder="Search games..." oninput="filterGames()">
   </div>
-  <div class="header-right">4 GAMES</div>
+  <div class="header-right">5 GAMES</div>
 </header>
 
 <div class="layout">
@@ -87,6 +87,7 @@ main{flex:1;padding:28px 28px 50px;}
     <button class="side-btn" onclick="setSide(this,'fighting')"><span class="side-icon">⚔️</span>Fighting</button>
     <button class="side-btn" onclick="setSide(this,'multiplayer')"><span class="side-icon">👥</span>Multiplayer</button>
     <button class="side-btn" onclick="setSide(this,'shooter')"><span class="side-icon">🎯</span>Shooter</button>
+    <button class="side-btn" onclick="setSide(this,'pvp')"><span class="side-icon">⚔️</span>PVP</button>
   </aside>
 
   <!-- MAIN -->
@@ -97,6 +98,7 @@ main{flex:1;padding:28px 28px 50px;}
       <div class="cat-pill" onclick="setCat(this,'fighting')">Fighting</div>
       <div class="cat-pill" onclick="setCat(this,'multiplayer')">Multiplayer</div>
       <div class="cat-pill" onclick="setCat(this,'shooter')">Shooter</div>
+      <div class="cat-pill" onclick="setCat(this,'pvp')">PVP</div>
     </div>
 
     <div class="section-title"><span>🎮</span> <span id="sectionLabel">All Games</span></div>
@@ -107,6 +109,15 @@ main{flex:1;padding:28px 28px 50px;}
 
 <script>
 const GAMES = [
+  {
+    name: "MINECRAFT PVP",
+    desc: "Top-down Minecraft-style PVP arena. Buy swords and armor, fight AI or real players online. Character rotates to face your mouse.",
+    icon: "⚔️",
+    bg: "linear-gradient(135deg,#1a3a0d,#2a6a1a)",
+    tags: ["pvp","fighting","multiplayer"],
+    tagLabels: [{t:"PVP",cls:"green"},{t:"MULTIPLAYER",cls:""}],
+    url: "https://jaydenzhao2014-cloud.github.io/git-practice/mcpvp.html"
+  },
   {
     name: "RIVALS",
     desc: "Top-down multiplayer shooter with room codes and tournament mode.",
@@ -179,7 +190,7 @@ function setCat(el, cat) {
   currentCat = cat;
   document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
-  const labels = {all:"All Games",sports:"Sports Games",fighting:"Fighting Games",multiplayer:"Multiplayer Games",shooter:"Shooter Games"};
+  const labels = {all:"All Games",sports:"Sports Games",fighting:"Fighting Games",multiplayer:"Multiplayer Games",shooter:"Shooter Games",pvp:"PVP Games"};
   document.getElementById("sectionLabel").textContent = labels[cat];
   renderGames();
 }
@@ -192,7 +203,7 @@ function setSide(el, cat) {
   document.querySelectorAll('.cat-pill').forEach(p=>{
     p.classList.toggle('active', p.getAttribute('onclick').includes(`'${cat}'`));
   });
-  const labels = {all:"All Games",sports:"Sports Games",fighting:"Fighting Games",multiplayer:"Multiplayer Games",shooter:"Shooter Games"};
+  const labels = {all:"All Games",sports:"Sports Games",fighting:"Fighting Games",multiplayer:"Multiplayer Games",shooter:"Shooter Games",pvp:"PVP Games"};
   document.getElementById("sectionLabel").textContent = labels[cat];
   renderGames();
 }
