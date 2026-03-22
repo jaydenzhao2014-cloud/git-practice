@@ -6,369 +6,342 @@
 <title>MINECRAFT PVP ARENA</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#111;font-family:'Courier New',monospace;color:#fff;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-.screen{display:none;flex-direction:column;align-items:center;justify-content:center;position:fixed;inset:0;z-index:10;background:#111;}
-.screen.active{display:flex;}
-.mc-title{font-size:clamp(36px,6vw,72px);letter-spacing:8px;color:#55ff55;text-shadow:4px 4px 0 #1a7a1a;margin-bottom:6px;}
-.mc-sub{font-size:12px;letter-spacing:6px;color:#555;margin-bottom:28px;}
-.mc-btn{padding:11px 38px;font-size:15px;font-family:'Courier New',monospace;border:3px solid;border-radius:2px;cursor:pointer;font-weight:bold;letter-spacing:3px;text-transform:uppercase;transition:all .12s;margin:5px;min-width:220px;text-align:center;}
-.mc-btn:hover{filter:brightness(1.25);transform:scale(1.03);}
-.mc-btn:active{transform:scale(0.97);}
-.btn-g{background:#1e4a1e;border-color:#55ff55;color:#55ff55;}
-.btn-a{background:#1a1a3a;border-color:#6688ff;color:#6688ff;}
-.btn-y{background:#3a2e00;border-color:#ffd700;color:#ffd700;}
-.btn-r{background:#3a0000;border-color:#ff4444;color:#ff4444;}
-.btn-gray{background:#222;border-color:#666;color:#aaa;}
-/* SHOP */
-.shop-box{background:#1a1a1a;border:3px solid #444;border-radius:3px;padding:22px;width:min(680px,95vw);max-height:90vh;overflow-y:auto;}
-.shop-hd{font-size:24px;letter-spacing:6px;color:#55ff55;text-align:center;margin-bottom:4px;}
-.shop-cash{text-align:center;font-size:15px;color:#ffd700;margin-bottom:18px;}
-.sec-lbl{font-size:10px;letter-spacing:4px;color:#666;border-bottom:1px solid #2a2a2a;padding-bottom:4px;margin-bottom:10px;}
-.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:18px;}
-.item{background:#222;border:2px solid #333;border-radius:2px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .12s;}
+body{background:#1a1a1a;font-family:'Courier New',monospace;color:#fff;overflow:hidden;}
+/* ── SCREENS ── */
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;
+  position:fixed;inset:0;z-index:20;background:#1a1a1a;}
+.screen.on{display:flex;}
+.mc-title{font-size:clamp(36px,6vw,70px);letter-spacing:8px;color:#55ff55;
+  text-shadow:4px 4px 0 #1a6a1a;margin-bottom:6px;}
+.mc-sub{font-size:11px;letter-spacing:6px;color:#555;margin-bottom:28px;}
+.mc-btn{padding:11px 36px;font-size:14px;font-family:'Courier New',monospace;border:2px solid;
+  border-radius:2px;cursor:pointer;font-weight:bold;letter-spacing:3px;text-transform:uppercase;
+  transition:all .12s;margin:5px;min-width:210px;background:transparent;}
+.mc-btn:hover{filter:brightness(1.3);transform:scale(1.04);}
+.btn-g{border-color:#55ff55;color:#55ff55;}
+.btn-y{border-color:#ffd700;color:#ffd700;}
+.btn-b{border-color:#6688ff;color:#6688ff;}
+.btn-x{border-color:#666;color:#888;}
+/* ── SHOP ── */
+.shop-box{background:#222;border:2px solid #444;padding:22px;
+  width:min(660px,94vw);max-height:88vh;overflow-y:auto;}
+.shop-hd{font-size:22px;letter-spacing:6px;color:#55ff55;text-align:center;margin-bottom:4px;}
+.shop-cash{text-align:center;font-size:14px;color:#ffd700;margin-bottom:16px;}
+.sec-lbl{font-size:9px;letter-spacing:4px;color:#555;border-bottom:1px solid #333;
+  padding-bottom:4px;margin-bottom:10px;}
+.igrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:7px;margin-bottom:16px;}
+.item{background:#2a2a2a;border:2px solid #3a3a3a;padding:9px 7px;text-align:center;
+  cursor:pointer;transition:border-color .1s;}
 .item:hover{border-color:#888;}
-.item.owned{border-color:#44aa44;}
-.item.eqpd{border-color:#ffd700;background:#1e1800;}
-.item.locked{opacity:.38;cursor:default;}
-.item-icon{font-size:26px;margin-bottom:4px;}
-.item-name{font-size:10px;color:#ccc;letter-spacing:1px;margin-bottom:2px;}
-.item-stat{font-size:9px;color:#777;}
-.item-tag{font-size:9px;letter-spacing:2px;margin-top:3px;}
-.tag-own{color:#44aa44;} .tag-eq{color:#ffd700;} .tag-price{color:#ffd700;}
-/* GAME */
-#gameWrap{position:fixed;inset:0;display:none;flex-direction:column;background:#000;}
-#gameWrap.active{display:flex;}
-#gameCanvas{display:block;width:100%;height:100%;image-rendering:pixelated;cursor:crosshair;}
-/* HUD */
-#hud{position:fixed;inset:0;pointer-events:none;z-index:6;}
+.item.own{border-color:#44aa44;}
+.item.eq{border-color:#ffd700;background:#201c00;}
+.item.no{opacity:.32;cursor:default;}
+.iico{font-size:24px;margin-bottom:3px;}
+.inm{font-size:9px;color:#ccc;letter-spacing:1px;}
+.ist{font-size:8px;color:#666;margin-top:1px;}
+.itg{font-size:8px;letter-spacing:2px;margin-top:3px;}
+/* ── ARENA ── */
+.arena-box{background:#222;border:2px solid #444;padding:24px;
+  width:min(400px,90vw);display:flex;flex-direction:column;align-items:center;gap:10px;}
+.a-code{font-size:30px;letter-spacing:10px;color:#ffd700;min-height:38px;}
+.a-status{font-size:11px;letter-spacing:3px;color:#777;}
+.a-input{padding:9px;background:#1a1a1a;border:2px solid #555;color:#fff;
+  font-family:'Courier New',monospace;font-size:14px;letter-spacing:5px;
+  width:152px;text-transform:uppercase;}
+/* ── STATS ── */
+.stats-box{background:#222;border:2px solid #444;padding:26px;min-width:280px;text-align:center;}
+/* ── RESULT ── */
+.res-big{font-size:clamp(36px,6vw,72px);letter-spacing:10px;margin-bottom:8px;}
+.res-earn{font-size:17px;color:#ffd700;margin-bottom:6px;}
+.res-rnk{font-size:12px;letter-spacing:3px;margin-bottom:20px;}
+/* ── GAME ── */
+#gameWrap{position:fixed;inset:0;display:none;background:#000;z-index:10;}
+#gameWrap.on{display:block;}
+#gameCanvas{display:block;width:100%;height:100%;cursor:crosshair;}
+/* ── HUD (over canvas) ── */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:15;}
 #hudTL{position:absolute;top:8px;left:12px;}
-#hearts{display:flex;gap:1px;font-size:16px;line-height:1;}
-#armorTxt{font-size:10px;color:#aaa;letter-spacing:2px;margin-top:2px;}
+#hudHearts{font-size:15px;line-height:1.4;}
+#hudArmor{font-size:9px;color:#aaa;letter-spacing:2px;margin-top:1px;}
 #hudTR{position:absolute;top:8px;right:12px;text-align:right;}
-#hudCash{font-size:14px;color:#ffd700;letter-spacing:2px;}
-#hudRank{font-size:10px;letter-spacing:2px;margin-top:1px;}
-#hudMid{position:absolute;top:8px;left:50%;transform:translateX(-50%);text-align:center;}
-#matchTxt{font-size:11px;color:#666;letter-spacing:3px;}
-#hotbar{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;}
-.hslot{width:42px;height:42px;background:rgba(0,0,0,.75);border:2px solid #444;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:20px;}
-.hslot.on{border-color:#fff;}
-#killfeed{position:absolute;top:50px;left:50%;transform:translateX(-50%);font-size:16px;letter-spacing:3px;color:#ffdd44;text-shadow:1px 1px 0 #000;opacity:0;transition:opacity .4s;white-space:nowrap;}
-/* RESULT */
-.res-title{font-size:clamp(40px,7vw,80px);letter-spacing:10px;margin-bottom:8px;}
-.res-earn{font-size:18px;color:#ffd700;margin-bottom:8px;}
-.res-rank{font-size:13px;letter-spacing:3px;margin-bottom:22px;}
-/* ARENA */
-.arena-box{background:#1a1a1a;border:3px solid #444;border-radius:3px;padding:26px;width:min(440px,90vw);display:flex;flex-direction:column;align-items:center;gap:12px;}
-.arena-code{font-size:32px;letter-spacing:10px;color:#ffd700;min-height:42px;}
-.arena-status{font-size:12px;letter-spacing:3px;color:#888;}
-.arena-input{padding:10px;background:#222;border:2px solid #555;color:#fff;font-family:'Courier New',monospace;font-size:15px;letter-spacing:5px;border-radius:2px;width:160px;text-transform:uppercase;}
-/* STATS */
-.stats-box{background:#1a1a1a;border:3px solid #444;border-radius:3px;padding:28px;min-width:300px;text-align:center;}
-.stats-rank-big{font-size:32px;letter-spacing:6px;margin-bottom:14px;}
-.stats-line{font-size:13px;color:#ccc;letter-spacing:2px;line-height:2.2;}
+#hudCash{font-size:13px;color:#ffd700;letter-spacing:2px;}
+#hudRank{font-size:9px;letter-spacing:2px;margin-top:2px;}
+#hotbar{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  display:flex;gap:5px;}
+.hs{width:40px;height:40px;background:rgba(0,0,0,.75);border:2px solid #444;
+  display:flex;align-items:center;justify-content:center;font-size:18px;}
+.hs.on{border-color:#fff;}
+#killfeed{position:absolute;top:50px;left:50%;transform:translateX(-50%);
+  font-size:15px;letter-spacing:3px;color:#ffdd44;text-shadow:1px 1px 0 #000;
+  opacity:0;transition:opacity .4s;white-space:nowrap;}
 </style>
 </head>
 <body>
 
-<!-- ═══ TITLE ═══ -->
-<div id="sc-title" class="screen active">
+<!-- TITLE -->
+<div id="sc-title" class="screen on">
   <div class="mc-title">⚔ PVP ARENA</div>
   <div class="mc-sub">MINECRAFT STYLE</div>
-  <button class="mc-btn btn-g" onclick="goShop(true)">▶ PLAY</button>
+  <button class="mc-btn btn-g" onclick="startVsAI()">▶ PLAY VS AI</button>
+  <button class="mc-btn btn-b" onclick="goArena()">🌐 GLOBAL ARENA</button>
   <button class="mc-btn btn-y" onclick="goShop(false)">⚒ SHOP</button>
-  <button class="mc-btn btn-gray" onclick="showStats()">📊 STATS / RANK</button>
+  <button class="mc-btn btn-x" onclick="showStats()">📊 STATS</button>
 </div>
 
-<!-- ═══ SHOP ═══ -->
+<!-- SHOP -->
 <div id="sc-shop" class="screen">
   <div class="shop-box">
     <div class="shop-hd">⚒ SHOP</div>
     <div class="shop-cash" id="shopCash">💰 $0</div>
-    <div class="sec-lbl">⚔ SWORDS — click to buy or equip</div>
-    <div class="item-grid" id="swordGrid"></div>
-    <div class="sec-lbl">🛡 ARMOR — click to buy or equip</div>
-    <div class="item-grid" id="armorGrid"></div>
-    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px;">
-      <button class="mc-btn btn-g" id="shopPlayBtn" onclick="goMode()">▶ PLAY</button>
-      <button class="mc-btn btn-gray" onclick="show('sc-title')">◀ BACK</button>
+    <div class="sec-lbl">⚔ SWORDS</div>
+    <div class="igrid" id="swordGrid"></div>
+    <div class="sec-lbl">🛡 ARMOR</div>
+    <div class="igrid" id="armorGrid"></div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px;">
+      <button class="mc-btn btn-g" onclick="startVsAI()">▶ PLAY</button>
+      <button class="mc-btn btn-x" onclick="show('sc-title')">◀ BACK</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ MODE SELECT ═══ -->
-<div id="sc-mode" class="screen">
-  <div style="font-size:22px;letter-spacing:6px;color:#55ff55;margin-bottom:22px;">SELECT MODE</div>
-  <button class="mc-btn btn-g" onclick="startVsAI()">⚔ VS AI</button>
-  <button class="mc-btn btn-a" onclick="goArena()">🌐 GLOBAL ARENA</button>
-  <button class="mc-btn btn-gray" onclick="goShop(false)">◀ BACK</button>
-</div>
-
-<!-- ═══ GLOBAL ARENA ═══ -->
+<!-- GLOBAL ARENA -->
 <div id="sc-arena" class="screen">
   <div class="arena-box">
-    <div style="font-size:20px;letter-spacing:6px;color:#55ff55;">🌐 GLOBAL ARENA</div>
-    <div class="arena-status" id="arenaStatus">–</div>
-    <div class="arena-code" id="arenaCode"></div>
-    <div style="font-size:10px;color:#444;letter-spacing:2px;" id="arenaHint"></div>
-    <button class="mc-btn btn-g" id="arenaStartBtn" style="display:none" onclick="mpStartMatch()">▶ START MATCH</button>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;">
-      <input class="arena-input" id="joinInput" placeholder="ROOM CODE" maxlength="7">
-      <button class="mc-btn btn-y" onclick="mpJoin()" style="min-width:90px;padding:10px 14px;">JOIN</button>
+    <div style="font-size:18px;letter-spacing:6px;color:#55ff55;">🌐 GLOBAL ARENA</div>
+    <div class="a-status" id="aStatus">–</div>
+    <div class="a-code" id="aCode"></div>
+    <div style="font-size:9px;color:#444;letter-spacing:2px;" id="aHint"></div>
+    <button class="mc-btn btn-g" id="aStartBtn" style="display:none" onclick="mpStart()">▶ START</button>
+    <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:center;">
+      <input class="a-input" id="joinInput" placeholder="CODE" maxlength="7">
+      <button class="mc-btn btn-y" onclick="mpJoin()" style="min-width:80px;padding:9px 12px;">JOIN</button>
     </div>
-    <button class="mc-btn btn-gray" onclick="mpLeave()">◀ BACK</button>
+    <button class="mc-btn btn-x" onclick="mpLeave()">◀ BACK</button>
   </div>
 </div>
 
-<!-- ═══ GAME ═══ -->
+<!-- RESULT -->
+<div id="sc-result" class="screen">
+  <div class="res-big" id="resTtl"></div>
+  <div class="res-earn" id="resEarn"></div>
+  <div class="res-rnk" id="resRnk"></div>
+  <button class="mc-btn btn-g" onclick="startVsAI()">▶ PLAY AGAIN</button>
+  <button class="mc-btn btn-y" onclick="goShop(false)">⚒ SHOP</button>
+  <button class="mc-btn btn-x" onclick="show('sc-title')">◀ MENU</button>
+</div>
+
+<!-- STATS -->
+<div id="sc-stats" class="screen">
+  <div class="stats-box">
+    <div id="statRnk" style="font-size:28px;letter-spacing:5px;margin-bottom:12px;"></div>
+    <div id="statLines" style="font-size:12px;color:#ccc;letter-spacing:2px;line-height:2.2;"></div>
+    <button class="mc-btn btn-x" onclick="show('sc-title')" style="margin-top:14px;">◀ BACK</button>
+  </div>
+</div>
+
+<!-- GAME -->
 <div id="gameWrap">
   <canvas id="gameCanvas"></canvas>
   <div id="hud">
     <div id="hudTL">
-      <div id="hearts"></div>
-      <div id="armorTxt"></div>
+      <div id="hudHearts"></div>
+      <div id="hudArmor"></div>
     </div>
-    <div id="hudMid"><div id="matchTxt"></div></div>
     <div id="hudTR">
       <div id="hudCash">💰 $0</div>
       <div id="hudRank"></div>
     </div>
     <div id="hotbar">
-      <div class="hslot on" id="hs0"></div>
-      <div class="hslot" id="hs1"></div>
+      <div class="hs on" id="hs0">🪵</div>
+      <div class="hs" id="hs1">👕</div>
     </div>
     <div id="killfeed"></div>
   </div>
 </div>
 
-<!-- ═══ RESULT ═══ -->
-<div id="sc-result" class="screen">
-  <div class="res-title" id="resTtl"></div>
-  <div class="res-earn" id="resEarn"></div>
-  <div class="res-rank" id="resRank"></div>
-  <button class="mc-btn btn-g" onclick="goMode()">▶ PLAY AGAIN</button>
-  <button class="mc-btn btn-y" onclick="goShop(false)">⚒ SHOP</button>
-  <button class="mc-btn btn-gray" onclick="show('sc-title')">◀ MENU</button>
-</div>
-
-<!-- ═══ STATS ═══ -->
-<div id="sc-stats" class="screen">
-  <div class="stats-box">
-    <div class="stats-rank-big" id="statRankBig"></div>
-    <div class="stats-line" id="statLines"></div>
-    <button class="mc-btn btn-gray" onclick="show('sc-title')" style="margin-top:16px;">◀ BACK</button>
-  </div>
-</div>
-
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <script>
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 //  DATA
-// ══════════════════════════════════════════════
-const SWORDS=[
-  {name:'Wooden', icon:'🪵',col:'#8B6914',dmg:2,cd:660,cost:0,   reach:30},
-  {name:'Stone',  icon:'🪨',col:'#aaaaaa',dmg:3,cd:580,cost:300, reach:32},
-  {name:'Iron',   icon:'🔩',col:'#d0d0d0',dmg:4,cd:500,cost:900, reach:34},
-  {name:'Gold',   icon:'✨',col:'#FFD700',dmg:5,cd:380,cost:1800,reach:33},
-  {name:'Diamond',icon:'💎',col:'#44ffff',dmg:7,cd:440,cost:3600,reach:37},
+// ══════════════════════════════════════
+const SW=[
+  {n:'Wooden', i:'🪵',c:'#c8941a',dmg:2,cd:660,cost:0,   rch:32},
+  {n:'Stone',  i:'🪨',c:'#c0c0c0',dmg:3,cd:580,cost:300, rch:34},
+  {n:'Iron',   i:'🔩',c:'#e0e0e0',dmg:4,cd:500,cost:900, rch:36},
+  {n:'Gold',   i:'✨',c:'#FFD700',dmg:5,cd:380,cost:1800,rch:35},
+  {n:'Diamond',i:'💎',c:'#44ffff',dmg:7,cd:440,cost:3600,rch:38},
 ];
-const ARMORS=[
-  {name:'None',    icon:'👕',col:null,      def:0,  cost:0},
-  {name:'Leather', icon:'🟫',col:'#8B4513',def:1,   cost:300},
-  {name:'Chain',   icon:'⛓',col:'#888',    def:1.5, cost:900},
-  {name:'Iron',    icon:'🔧',col:'#c0c0c0',def:2.5, cost:1800},
-  {name:'Diamond', icon:'🔷',col:'#44aaff',def:4,   cost:3600},
+const AR=[
+  {n:'None',    i:'👕',c:null,      def:0,  cost:0},
+  {n:'Leather', i:'🟫',c:'#8B5020',def:1,   cost:300},
+  {n:'Chain',   i:'⛓',c:'#909090',def:1.5, cost:900},
+  {n:'Iron',    i:'🔧',c:'#d8d8d8',def:2.5, cost:1800},
+  {n:'Diamond', i:'🔷',c:'#55aaff',def:4,   cost:3600},
 ];
 const RANKS=[
-  {name:'WOOD',     col:'#8B6914',wins:0},
-  {name:'STONE',    col:'#aaaaaa',wins:3},
-  {name:'IRON',     col:'#d0d0d0',wins:10},
-  {name:'GOLD',     col:'#FFD700',wins:25},
-  {name:'DIAMOND',  col:'#44ffff',wins:50},
-  {name:'NETHERITE',col:'#cc88ff',wins:100},
+  {n:'WOOD',     c:'#c8941a',w:0},
+  {n:'STONE',    c:'#c0c0c0',w:3},
+  {n:'IRON',     c:'#e0e0e0',w:10},
+  {n:'GOLD',     c:'#FFD700',w:25},
+  {n:'DIAMOND',  c:'#44ffff',w:50},
+  {n:'NETHERITE',c:'#cc88ff',w:100},
 ];
 
-// ══════════════════════════════════════════════
-//  SAVE
-// ══════════════════════════════════════════════
-function ld(){
-  return{
-    money:+localStorage.getItem('mcpvp_m')||0,
-    wins:  +localStorage.getItem('mcpvp_w')||0,
-    kills: +localStorage.getItem('mcpvp_k')||0,
-    sword: +localStorage.getItem('mcpvp_sw')||0,
-    armor: +localStorage.getItem('mcpvp_ar')||0,
-    os:JSON.parse(localStorage.getItem('mcpvp_os')||'[0]'),
-    oa:JSON.parse(localStorage.getItem('mcpvp_oa')||'[0]'),
-  };
-}
+// ══════════════════════════════════════
+//  SAVE / LOAD
+// ══════════════════════════════════════
+function ld(){return{
+  money:+localStorage.getItem('m2')||0,
+  wins: +localStorage.getItem('w2')||0,
+  kills:+localStorage.getItem('k2')||0,
+  sword:+localStorage.getItem('s2')||0,
+  armor:+localStorage.getItem('a2')||0,
+  os:JSON.parse(localStorage.getItem('os2')||'[0]'),
+  oa:JSON.parse(localStorage.getItem('oa2')||'[0]'),
+};}
 function sv(s){
-  localStorage.setItem('mcpvp_m',s.money);
-  localStorage.setItem('mcpvp_w',s.wins);
-  localStorage.setItem('mcpvp_k',s.kills);
-  localStorage.setItem('mcpvp_sw',s.sword);
-  localStorage.setItem('mcpvp_ar',s.armor);
-  localStorage.setItem('mcpvp_os',JSON.stringify(s.os));
-  localStorage.setItem('mcpvp_oa',JSON.stringify(s.oa));
+  localStorage.setItem('m2',s.money);localStorage.setItem('w2',s.wins);
+  localStorage.setItem('k2',s.kills);localStorage.setItem('s2',s.sword);
+  localStorage.setItem('a2',s.armor);
+  localStorage.setItem('os2',JSON.stringify(s.os));
+  localStorage.setItem('oa2',JSON.stringify(s.oa));
 }
 let S=ld();
-function rank(w){let r=RANKS[0];for(const k of RANKS)if(w>=k.wins)r=k;return r;}
+function getRank(w){let r=RANKS[0];for(const k of RANKS)if(w>=k.w)r=k;return r;}
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 //  SCREENS
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 function show(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById('gameWrap').classList.remove('on');
   const el=document.getElementById(id);
-  if(el) el.classList.add('active');
-  document.getElementById('gameWrap').classList.remove('active');
+  if(el)el.classList.add('on');
 }
 function showGame(){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById('gameWrap').classList.add('active');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById('gameWrap').classList.add('on');
 }
-let _goPlayAfterShop=false;
-function goShop(play){
-  _goPlayAfterShop=!!play;
-  S=ld(); renderShop();
-  show('sc-shop');
-}
-function goMode(){ show('sc-mode'); }
+function goShop(play){S=ld();renderShop();show('sc-shop');}
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 //  SHOP
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 function renderShop(){
-  document.getElementById('shopCash').textContent='💰 $'+S.money.toLocaleString();
-  document.getElementById('swordGrid').innerHTML=SWORDS.map((sw,i)=>{
-    const own=S.os.includes(i),eq=S.sword===i,afford=S.money>=sw.cost;
-    const cls=own?(eq?'eqpd':'owned'):(afford?'':'locked');
-    const tag=own?(eq?`<div class="item-tag tag-eq">EQUIPPED</div>`:`<div class="item-tag tag-own">OWNED</div>`):`<div class="item-tag tag-price">$${sw.cost}</div>`;
-    return`<div class="item ${cls}" onclick="buySword(${i})"><div class="item-icon">${sw.icon}</div><div class="item-name">${sw.name}</div><div class="item-stat">DMG ${sw.dmg} · SPD ${Math.round(1000/sw.cd*10)/10}/s</div>${tag}</div>`;
-  }).join('');
-  document.getElementById('armorGrid').innerHTML=ARMORS.map((ar,i)=>{
-    const own=S.oa.includes(i),eq=S.armor===i,afford=S.money>=ar.cost;
-    const cls=own?(eq?'eqpd':'owned'):(afford?'':'locked');
-    const tag=own?(eq?`<div class="item-tag tag-eq">EQUIPPED</div>`:`<div class="item-tag tag-own">OWNED</div>`):`<div class="item-tag tag-price">$${ar.cost}</div>`;
-    return`<div class="item ${cls}" onclick="buyArmor(${i})"><div class="item-icon">${ar.icon}</div><div class="item-name">${ar.name}</div><div class="item-stat">DEF ${ar.def}</div>${tag}</div>`;
-  }).join('');
-}
-function buySword(i){
-  if(S.os.includes(i)){S.sword=i;}
-  else if(S.money>=SWORDS[i].cost){S.money-=SWORDS[i].cost;S.os.push(i);S.sword=i;}
-  sv(S);renderShop();
-}
-function buyArmor(i){
-  if(S.oa.includes(i)){S.armor=i;}
-  else if(S.money>=ARMORS[i].cost){S.money-=ARMORS[i].cost;S.oa.push(i);S.armor=i;}
-  sv(S);renderShop();
-}
-
-// ══════════════════════════════════════════════
-//  STATS
-// ══════════════════════════════════════════════
-function showStats(){
   S=ld();
-  const r=rank(S.wins),nxt=RANKS.find(k=>k.wins>S.wins);
-  document.getElementById('statRankBig').innerHTML=`<span style="color:${r.col}">★ ${r.name}</span>`;
+  document.getElementById('shopCash').textContent='💰 $'+S.money.toLocaleString();
+  document.getElementById('swordGrid').innerHTML=SW.map((s,i)=>{
+    const own=S.os.includes(i),eq=S.sword===i,aff=S.money>=s.cost;
+    const cls=own?(eq?'eq':'own'):(aff?'':'no');
+    const tag=own?(eq?`<div class="itg" style="color:#ffd700">EQUIPPED</div>`:`<div class="itg" style="color:#44aa44">OWNED</div>`):`<div class="itg" style="color:#ffd700">$${s.cost}</div>`;
+    return`<div class="item ${cls}" onclick="buySW(${i})"><div class="iico">${s.i}</div><div class="inm">${s.n}</div><div class="ist">DMG ${s.dmg}</div>${tag}</div>`;
+  }).join('');
+  document.getElementById('armorGrid').innerHTML=AR.map((a,i)=>{
+    const own=S.oa.includes(i),eq=S.armor===i,aff=S.money>=a.cost;
+    const cls=own?(eq?'eq':'own'):(aff?'':'no');
+    const tag=own?(eq?`<div class="itg" style="color:#ffd700">EQUIPPED</div>`:`<div class="itg" style="color:#44aa44">OWNED</div>`):`<div class="itg" style="color:#ffd700">$${a.cost}</div>`;
+    return`<div class="item ${cls}" onclick="buyAR(${i})"><div class="iico">${a.i}</div><div class="inm">${a.n}</div><div class="ist">DEF ${a.def}</div>${tag}</div>`;
+  }).join('');
+}
+function buySW(i){if(S.os.includes(i)){S.sword=i;}else if(S.money>=SW[i].cost){S.money-=SW[i].cost;S.os.push(i);S.sword=i;}sv(S);renderShop();}
+function buyAR(i){if(S.oa.includes(i)){S.armor=i;}else if(S.money>=AR[i].cost){S.money-=AR[i].cost;S.oa.push(i);S.armor=i;}sv(S);renderShop();}
+
+// ══════════════════════════════════════
+//  STATS
+// ══════════════════════════════════════
+function showStats(){
+  S=ld();const r=getRank(S.wins),nx=RANKS.find(k=>k.w>S.wins);
+  document.getElementById('statRnk').innerHTML=`<span style="color:${r.c}">★ ${r.n}</span>`;
   document.getElementById('statLines').innerHTML=
     `💰 Money: <b style="color:#ffd700">$${S.money.toLocaleString()}</b><br>`+
-    `⚔ Kills: <b>${S.kills}</b><br>`+
-    `🏆 Wins: <b>${S.wins}</b><br>`+
-    `⚔ Sword: <b>${SWORDS[S.sword].name}</b><br>`+
-    `🛡 Armor: <b>${ARMORS[S.armor].name}</b><br>`+
-    (nxt?`<span style="color:#555;font-size:10px">${nxt.wins-S.wins} more wins → ${nxt.name}</span>`:`<span style="color:#cc88ff">MAX RANK!</span>`);
+    `⚔ Kills: <b>${S.kills}</b>  🏆 Wins: <b>${S.wins}</b><br>`+
+    `⚔ Sword: <b>${SW[S.sword].n}</b>  🛡 Armor: <b>${AR[S.armor].n}</b><br>`+
+    (nx?`<span style="color:#555;font-size:10px">${nx.w-S.wins} wins → ${nx.n}</span>`:`<span style="color:#cc88ff">MAX RANK!</span>`);
   show('sc-stats');
 }
 
-// ══════════════════════════════════════════════
-//  MAP GENERATION
-// ══════════════════════════════════════════════
-const TW=22,MAP_W=60,MAP_H=42;
-// 0=grass 1=stone 2=cobble 3=dirt 4=gravel
-const TCOLS={
-  0:['#4a7028','#527830','#426025'],
-  1:['#666','#5a5a5a','#727272'],
-  2:['#6a5a48','#5e5040','#766450'],
-  3:['#7a5230','#6e4828','#866038'],
-  4:['#7a7070','#6e6464','#868080'],
+// ══════════════════════════════════════
+//  MAP
+// ══════════════════════════════════════
+const TW=22,MW=62,MH=44;
+const TCOL={
+  0:[['#3d6b20','#457826','#355e1a'],true],   // grass
+  1:[['#5a5a5a','#525252','#626262'],false],   // stone wall
+  2:[['#5e5040','#544838','#687058'],false],   // cobble wall
+  3:[['#6e4a28','#624020','#7a5230'],true],    // dirt
+  4:[['#686868','#606060','#707070'],true],    // stone floor
 };
-function solid(map,tx,ty){
-  if(tx<0||ty<0||tx>=MAP_W||ty>=MAP_H)return true;
-  const t=map[ty][tx];return t===1||t===2;
+let map,tvar;
+function solid(tx,ty){
+  if(tx<0||ty<0||tx>=MW||ty>=MH)return true;
+  return map[ty][tx]===1||map[ty][tx]===2;
 }
-let tileVar=[];
 function buildMap(){
-  tileVar=[];
-  const m=[];
-  for(let y=0;y<MAP_H;y++){
-    m[y]=[];
-    for(let x=0;x<MAP_W;x++){
-      const border=x===0||x===MAP_W-1||y===0||y===MAP_H-1;
-      m[y][x]=border?1:(Math.random()<0.12?3:Math.random()<0.1?4:0);
-      tileVar.push(Math.floor(Math.random()*3));
+  tvar=[];
+  map=[];
+  for(let y=0;y<MH;y++){
+    map[y]=[];
+    for(let x=0;x<MW;x++){
+      const b=x===0||x===MW-1||y===0||y===MH-1;
+      map[y][x]=b?1:(Math.random()<.1?3:Math.random()<.08?4:0);
+      tvar.push(Math.floor(Math.random()*3));
     }
   }
-  // Pillar obstacles – avoid spawn zones
-  for(let i=0;i<70;i++){
-    const ox=2+Math.floor(Math.random()*(MAP_W-4));
-    const oy=2+Math.floor(Math.random()*(MAP_H-4));
-    if(ox<7&&oy<7)continue;
-    if(ox>MAP_W-8&&oy>MAP_H-8)continue;
+  // Random pillars — avoid spawn corners
+  for(let i=0;i<75;i++){
+    const ox=2+Math.floor(Math.random()*(MW-4));
+    const oy=2+Math.floor(Math.random()*(MH-4));
+    if(ox<8&&oy<8)continue;
+    if(ox>MW-9&&oy>MH-9)continue;
     const sz=1+Math.floor(Math.random()*2);
     for(let dy=0;dy<sz;dy++)for(let dx=0;dx<sz;dx++){
-      if(m[oy+dy]&&oy+dy>0&&oy+dy<MAP_H-1)
-        m[oy+dy][ox+dx]=Math.random()<.55?1:2;
+      if(map[oy+dy]&&oy+dy>0&&oy+dy<MH-1)
+        map[oy+dy][ox+dx]=Math.random()<.55?1:2;
     }
   }
-  return m;
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 //  GAME STATE
-// ══════════════════════════════════════════════
-const CW=900,CH=520,PSPD=2.7,PR=10;
-let canvas,ctx,map2,keys={},mouseX=CW/2,mouseY=CH/2;
+// ══════════════════════════════════════
+const CW=900,CH=520,SPD=2.8,PR=10;
+let canvas,ctx,keys={},mxRaw=CW/2,myRaw=CH/2;
 let player,bots,parts,camX=0,camY=0;
-let running=false,vsAI=true,animId=null,lastTs=0;
-let swingDebounce=false;
+let running=false,animId=null,lastTs=0,vsAI=true;
 
-function mkEnt(x,y,human,swi,ari,name,team){
-  return{x,y,human,name,team,
-    sw:swi,ar:ari,hp:20,maxHp:20,
-    vx:0,vy:0,kx:0,ky:0,
-    atkCd:0,swingP:-1,swingA:0,
-    hitFlash:0,dead:false,
-    aiState:'wander',aiT:0,aiTx:0,aiTy:0,
-    skin:team===0?'#e8c080':'#88b8e0',
-    shirt:team===0?'#2a6a2a':'#2a2a8a',
-  };
-}
+function mkEnt(x,y,human,sw,ar,name,team){return{
+  x,y,human,name,team,sw,ar,hp:20,maxHp:20,
+  kx:0,ky:0,atkCd:0,swP:-1,swA:0,hitFlash:0,dead:false,
+  aiState:'w',aiT:0,aiTx:0,aiTy:0,
+  skin:team===0?'#e8c080':'#88b8d8',
+  shirt:team===0?'#2a6a2a':'#2a308a',
+};}
 
-// ══════════════════════════════════════════════
-//  START
-// ══════════════════════════════════════════════
-function startVsAI(){
-  vsAI=true; S=ld(); initGame();
-}
+// ── Get mouse in game-world coords ──
+function gmx(){return mxRaw*(CW/canvas.clientWidth);}
+function gmy(){return myRaw*(CH/canvas.clientHeight);}
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+function startVsAI(){vsAI=true;S=ld();initGame();}
 function initGame(){
   canvas=document.getElementById('gameCanvas');
-  canvas.width=CW; canvas.height=CH;
+  canvas.width=CW;canvas.height=CH;
   ctx=canvas.getContext('2d');
-  map2=buildMap();
+  buildMap();
   parts=[];
-  player=mkEnt(5*TW+TW/2,5*TW+TW/2,true,S.sword,S.ar,'YOU',0);
+  player=mkEnt(5*TW+TW/2,5*TW+TW/2,true,S.sword,S.armor,'YOU',0);
   bots=[];
-  if(vsAI){
-    bots.push(mkEnt((MAP_W-7)*TW,(MAP_H-7)*TW,false,
-      Math.min(S.sword,4),Math.min(S.ar,4),'BOT',1));
-  }
+  if(vsAI)bots.push(mkEnt((MW-8)*TW,(MH-8)*TW,false,
+    Math.min(S.sword,4),Math.min(S.armor,4),'BOT',1));
   keys={};
   showGame();
   updateHUD();
-  canvas.onmousemove=e=>{const r=canvas.getBoundingClientRect();const sx=CW/r.width;const sy=CH/r.height;mouseX=(e.clientX-r.left)*sx;mouseY=(e.clientY-r.top)*sy;};
-  canvas.onmousedown=e=>{if(e.button===0){e.preventDefault();swing(player);}};
-  document.onkeydown=e=>{keys[e.code]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();};
-  document.onkeyup=e=>{keys[e.code]=false;};
+  canvas.onmousemove=e=>{const r=canvas.getBoundingClientRect();mxRaw=e.clientX-r.left;myRaw=e.clientY-r.top;};
+  canvas.onmousedown=e=>{if(e.button===0){e.preventDefault();doSwing(player);}};
+  window.onkeydown=e=>{keys[e.code]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();};
+  window.onkeyup=e=>{keys[e.code]=false;};
   running=true;
   if(animId)cancelAnimationFrame(animId);
   lastTs=performance.now();
@@ -377,65 +350,59 @@ function initGame(){
 function stopGame(){
   running=false;
   canvas.onmousemove=null;canvas.onmousedown=null;
-  document.onkeydown=null;document.onkeyup=null;
+  window.onkeydown=null;window.onkeyup=null;
   if(animId)cancelAnimationFrame(animId);
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 //  MOVEMENT + COLLISION
-// ══════════════════════════════════════════════
-function move(e,dx,dy){
+// ══════════════════════════════════════
+function mv(e,dx,dy){
   const r=PR;
   const nx=e.x+dx,ny=e.y+dy;
-  if(!solid(map2,~~((nx+r)/TW),~~(e.y/TW))&&!solid(map2,~~((nx-r)/TW),~~(e.y/TW))&&
-     !solid(map2,~~((nx+r)/TW),~~((e.y+r-1)/TW))&&!solid(map2,~~((nx-r)/TW),~~((e.y+r-1)/TW)))
-    e.x=nx;
-  if(!solid(map2,~~(e.x/TW),~~((ny+r)/TW))&&!solid(map2,~~(e.x/TW),~~((ny-r)/TW))&&
-     !solid(map2,~~((e.x+r-1)/TW),~~((ny+r)/TW))&&!solid(map2,~~((e.x-r+1)/TW),~~((ny+r)/TW)))
-    e.y=ny;
+  if(!solid(~~((nx+r)/TW),~~(e.y/TW))&&!solid(~~((nx-r)/TW),~~(e.y/TW))&&
+     !solid(~~((nx+r)/TW),~~((e.y+r-1)/TW))&&!solid(~~((nx-r)/TW),~~((e.y+r-1)/TW)))e.x=nx;
+  if(!solid(~~(e.x/TW),~~((ny+r)/TW))&&!solid(~~(e.x/TW),~~((ny-r)/TW))&&
+     !solid(~~((e.x+r-1)/TW),~~((ny+r)/TW))&&!solid(~~((e.x-r+1)/TW),~~((ny+r)/TW)))e.y=ny;
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 //  COMBAT
-// ══════════════════════════════════════════════
-function swing(atk){
+// ══════════════════════════════════════
+function faceAngle(e){
+  // Angle the entity is facing
+  if(e.human){
+    const sx=e.x-camX,sy=e.y-camY;
+    return Math.atan2(gmy()-sy,gmx()-sx);
+  }
+  return Math.atan2(player.y-e.y,player.x-e.x);
+}
+function doSwing(atk){
   if(atk.dead||atk.atkCd>0)return;
-  const sw=SWORDS[atk.sw];
-  atk.atkCd=sw.cd;
-  const angle=atk.human
-    ?Math.atan2(mouseY-(atk.y-camY),mouseX-(atk.x-camX))
-    :Math.atan2(player.y-atk.y,player.x-atk.x);
-  atk.swingA=angle; atk.swingP=0;
+  const s=SW[atk.sw];
+  atk.atkCd=s.cd;
+  const angle=faceAngle(atk);
+  atk.swA=angle;atk.swP=0;
   const tgts=atk.human?bots:[player];
   for(const t of tgts){
     if(t.dead)continue;
-    const dx=t.x-atk.x,dy=t.y-atk.y;
-    const dist=Math.hypot(dx,dy);
-    if(dist>sw.reach+PR)continue;
+    const dx=t.x-atk.x,dy=t.y-atk.y,dist=Math.hypot(dx,dy);
+    if(dist>s.rch+PR)continue;
     let diff=Math.abs(angle-Math.atan2(dy,dx));
     if(diff>Math.PI)diff=2*Math.PI-diff;
-    if(diff>0.95)continue;
-    const def=ARMORS[t.ar].def;
-    const dmg=Math.max(1,sw.dmg-def);
+    if(diff>1.0)continue;
+    const dmg=Math.max(1,s.dmg-AR[t.ar].def);
     t.hp-=dmg;
-    const k=4+sw.dmg;
-    t.kx+=(dx/dist)*k; t.ky+=(dy/dist)*k;
-    t.hitFlash=10;
-    blood(t.x,t.y);
-    if(t.hp<=0)kill(atk,t);
+    const k=4+s.dmg;t.kx+=(dx/dist)*k;t.ky+=(dy/dist)*k;
+    t.hitFlash=10;blood(t.x,t.y);
+    if(t.hp<=0)onKill(atk,t);
   }
 }
-function kill(killer,victim){
-  victim.dead=true;
-  boom(victim.x,victim.y);
-  if(killer.human){
-    S.kills++;S.money+=300;sv(S);
-    kfeed(`+$300  💀 ${victim.name}`);
-    updateHUD();
-  }
+function onKill(killer,victim){
+  victim.dead=true;boom(victim.x,victim.y);
+  if(killer.human){S.kills++;S.money+=300;sv(S);kfeed(`+$300  💀 ${victim.name}`);updateHUD();}
   if(vsAI){
-    const allDead=bots.every(b=>b.dead);
-    if(allDead)setTimeout(()=>endMatch(true),1200);
+    if(bots.every(b=>b.dead))setTimeout(()=>endMatch(true),1200);
     if(victim===player)setTimeout(()=>endMatch(false),1200);
   }
 }
@@ -443,213 +410,237 @@ function endMatch(won){
   stopGame();
   const prev=S.wins;
   if(won){S.wins++;S.money+=300;sv(S);}
-  const r=rank(S.wins),rp=rank(prev);
+  const r=getRank(S.wins),rp=getRank(prev);
   document.getElementById('resTtl').textContent=won?'🏆 VICTORY!':'💀 DEFEATED';
   document.getElementById('resTtl').style.color=won?'#55ff55':'#ff4444';
   document.getElementById('resEarn').textContent=won?`+$300 earned  ·  Total: $${S.money.toLocaleString()}`:`Total: $${S.money.toLocaleString()}`;
-  document.getElementById('resRank').innerHTML=
-    (won&&r.name!==rp.name?`<span style="color:#55ff55">🎉 RANK UP → </span>`:``) +
-    `<span style="color:${r.col}">★ ${r.name}</span>  ·  ${S.wins} wins`;
+  document.getElementById('resRnk').innerHTML=(won&&r.n!==rp.n?`<span style="color:#55ff55">🎉 RANK UP → </span>`:``)+`<span style="color:${r.c}">★ ${r.n}</span>  ·  ${S.wins} wins`;
   show('sc-result');
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 //  AI
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 function aiTick(ai,dt){
   if(ai.dead)return;
   ai.aiT-=dt;
   const dx=player.x-ai.x,dy=player.y-ai.y,dist=Math.hypot(dx,dy);
-  if(dist<220){
-    ai.aiState='chase';
-    if(dist>26)move(ai,(dx/dist)*PSPD*.88,(dy/dist)*PSPD*.88);
-    if(dist<SWORDS[ai.sw].reach+PR+5&&ai.atkCd<=0)swing(ai);
+  if(dist<230){
+    ai.aiState='c';
+    if(dist>26)mv(ai,(dx/dist)*SPD*.88,(dy/dist)*SPD*.88);
+    if(dist<SW[ai.sw].rch+PR+4&&ai.atkCd<=0)doSwing(ai);
   } else {
-    if(ai.aiT<=0||ai.aiState==='chase'){
-      ai.aiState='wander';ai.aiT=1000+Math.random()*1500;
+    if(ai.aiT<=0||ai.aiState==='c'){
+      ai.aiState='w';ai.aiT=900+Math.random()*1400;
       const a=Math.random()*Math.PI*2,d=40+Math.random()*70;
       ai.aiTx=ai.x+Math.cos(a)*d;ai.aiTy=ai.y+Math.sin(a)*d;
     }
     const wx=ai.aiTx-ai.x,wy=ai.aiTy-ai.y,wd=Math.hypot(wx,wy);
-    if(wd>4)move(ai,(wx/wd)*PSPD*.72,(wy/wd)*PSPD*.72);
+    if(wd>4)mv(ai,(wx/wd)*SPD*.7,(wy/wd)*SPD*.7);
   }
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 //  PARTICLES
-// ══════════════════════════════════════════════
-function blood(x,y){for(let i=0;i<7;i++){const a=Math.random()*Math.PI*2,s=1+Math.random()*3;parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:28,ml:28,c:'#cc2222',sz:2+Math.random()*3});}}
-function boom(x,y){for(let i=0;i<18;i++){const a=Math.random()*Math.PI*2,s=1.5+Math.random()*4.5;parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:55,ml:55,c:Math.random()<.5?'#cc2222':'#ff8888',sz:2+Math.random()*5});}}
+// ══════════════════════════════════════
+function blood(x,y){for(let i=0;i<7;i++){const a=Math.random()*Math.PI*2,s=1+Math.random()*3;parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:28,ml:28,c:'#cc1111',sz:2+Math.random()*3});}}
+function boom(x,y){for(let i=0;i<20;i++){const a=Math.random()*Math.PI*2,s=1.5+Math.random()*5;parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:55,ml:55,c:Math.random()<.5?'#cc1111':'#ff7777',sz:2+Math.random()*5});}}
 
-// ══════════════════════════════════════════════
-//  DRAW
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
+//  DRAW MAP
+// ══════════════════════════════════════
 function drawMap(){
-  const sx0=Math.max(0,~~(camX/TW)),sy0=Math.max(0,~~(camY/TW));
-  const sx1=Math.min(MAP_W,sx0+~~(CW/TW)+2),sy1=Math.min(MAP_H,sy0+~~(CH/TW)+2);
-  for(let ty=sy0;ty<sy1;ty++)for(let tx=sx0;tx<sx1;tx++){
-    const t=map2[ty][tx];
-    const cs=TCOLS[t]||TCOLS[0];
-    const v=tileVar[ty*MAP_W+tx];
-    ctx.fillStyle=cs[v];
+  const tx0=Math.max(0,~~(camX/TW)),ty0=Math.max(0,~~(camY/TW));
+  const tx1=Math.min(MW,tx0+~~(CW/TW)+2),ty1=Math.min(MH,ty0+~~(CH/TW)+2);
+  for(let ty=ty0;ty<ty1;ty++)for(let tx=tx0;tx<tx1;tx++){
+    const t=map[ty][tx];
+    const [cols,floor]=TCOL[t]||TCOL[0];
+    ctx.fillStyle=cols[tvar[ty*MW+tx]];
     const px=tx*TW-camX,py=ty*TW-camY;
     ctx.fillRect(px,py,TW,TW);
-    if(t===1||t===2){
+    if(!floor){
       ctx.fillStyle='rgba(255,255,255,.07)';ctx.fillRect(px,py,TW,2);ctx.fillRect(px,py,2,TW);
-      ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(px+TW-2,py,2,TW);ctx.fillRect(px,py+TW-2,TW,2);
-    } else {
-      ctx.strokeStyle='rgba(0,0,0,.1)';ctx.strokeRect(px+.5,py+.5,TW-1,TW-1);
+      ctx.fillStyle='rgba(0,0,0,.2)';ctx.fillRect(px+TW-2,py,2,TW);ctx.fillRect(px,py+TW-2,TW,2);
     }
+    ctx.strokeStyle='rgba(0,0,0,.12)';ctx.strokeRect(px+.5,py+.5,TW-1,TW-1);
   }
 }
+
+// ══════════════════════════════════════
+//  DRAW ENTITY (with mouse-look rotation)
+// ══════════════════════════════════════
 function drawEnt(e){
   if(e.dead)return;
   const sx=e.x-camX,sy=e.y-camY;
   const fl=e.hitFlash>0;
-  const ac=ARMORS[e.ar].col;
-  ctx.save();ctx.translate(sx,sy);
+  const ac=AR[e.ar].c;
+  const angle=faceAngle(e); // direction entity faces
+
+  // ── Draw rotated character ──
+  ctx.save();
+  ctx.translate(sx,sy);
+  ctx.rotate(angle+Math.PI/2); // +PI/2 so "forward" faces mouse
+
   // Shadow
-  ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(0,10,11,4,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,.25)';
+  ctx.beginPath();ctx.ellipse(0,12,11,4,0,0,Math.PI*2);ctx.fill();
+
   // Legs
-  ctx.fillStyle=fl?'#ff9999':'#222';
-  ctx.fillRect(-6,8,5,8);ctx.fillRect(1,8,5,8);
+  ctx.fillStyle=fl?'#ff9999':'#1a1a1a';
+  ctx.fillRect(-6,4,5,9);ctx.fillRect(1,4,5,9);
+
   // Body
   ctx.fillStyle=fl?'#ff9999':(ac||e.shirt);
-  ctx.fillRect(-7,-5,14,14);
-  if(ac){ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(-7,-5,14,2);}
+  ctx.fillRect(-7,-8,14,13);
+  if(ac){ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(-7,-8,14,3);}
+
   // Head
   ctx.fillStyle=fl?'#ffbbbb':e.skin;
-  ctx.fillRect(-7,-18,14,14);
-  // Eyes
-  ctx.fillStyle='#222';ctx.fillRect(-5,-15,3,3);ctx.fillRect(2,-15,3,3);
+  ctx.fillRect(-7,-21,14,14);
+
+  // Eyes (always facing "up" = forward direction)
+  ctx.fillStyle='#1a1a1a';
+  ctx.fillRect(-5,-18,3,3);ctx.fillRect(2,-18,3,3);
   // Mouth
-  ctx.fillRect(-3,-10,6,2);
-  // Name
-  ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(-22,-30,44,12);
+  ctx.fillRect(-3,-13,7,2);
+
+  // Sword
+  const s=SW[e.sw];
+  if(e.swP>=0&&e.swP<1){
+    // Animated swing arc
+    const arc=(e.swP-.5)*Math.PI*.95;
+    ctx.save();ctx.rotate(arc);
+    ctx.strokeStyle=fl?'#fff':s.c;ctx.lineWidth=4;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(7,-8);ctx.lineTo(7+s.rch*.6,-8-s.rch*.8);ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=2;ctx.stroke();
+    ctx.restore();
+  } else {
+    // Idle sword
+    ctx.strokeStyle=s.c;ctx.lineWidth=3.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(20,-12);ctx.stroke();
+  }
+
+  ctx.restore();
+
+  // ── Name & HP bar (always horizontal) ──
+  ctx.save();ctx.translate(sx,sy);
+  const hf=Math.max(0,e.hp/e.maxHp);
+  ctx.fillStyle='#111';ctx.fillRect(-17,-40,34,5);
+  ctx.fillStyle=hf>.5?'#44ee44':hf>.25?'#ffaa00':'#ff3333';
+  ctx.fillRect(-17,-40,34*hf,5);
+  ctx.fillStyle='rgba(0,0,0,.65)';ctx.fillRect(-22,-52,44,12);
   ctx.fillStyle=e.human?'#55ff55':'#ff5555';
   ctx.font='bold 8px Courier New';ctx.textAlign='center';
-  ctx.fillText(e.name,0,-21);
-  // HP bar
-  const hf=e.hp/e.maxHp;
-  ctx.fillStyle='#1a1a1a';ctx.fillRect(-17,-35,34,5);
-  ctx.fillStyle=hf>.5?'#44ee44':hf>.25?'#ffaa00':'#ff3333';
-  ctx.fillRect(-17,-35,34*hf,5);
-  // Sword
-  const sw=SWORDS[e.sw];
-  if(e.swingP>=0&&e.swingP<1){
-    const sa=e.swingA+(e.swingP-.5)*Math.PI*.9;
-    ctx.strokeStyle=fl?'#fff':sw.col;ctx.lineWidth=4;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(Math.cos(sa)*9,Math.sin(sa)*9);
-    ctx.lineTo(Math.cos(sa)*(9+24),Math.sin(sa)*(9+24));ctx.stroke();
-    ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=2;ctx.stroke();
-  } else {
-    ctx.strokeStyle=sw.col;ctx.lineWidth=3.5;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(7,2);ctx.lineTo(20,12);ctx.stroke();
-  }
+  ctx.fillText(e.name,0,-43);
   ctx.restore();
 }
+
+// ══════════════════════════════════════
+//  DRAW PARTICLES
+// ══════════════════════════════════════
 function drawParts(){
   for(const p of parts){
-    ctx.globalAlpha=p.life/p.ml;
-    ctx.fillStyle=p.c;
+    ctx.globalAlpha=p.life/p.ml;ctx.fillStyle=p.c;
     ctx.fillRect(p.x-camX-p.sz/2,p.y-camY-p.sz/2,p.sz,p.sz);
   }
   ctx.globalAlpha=1;
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 //  HUD
-// ══════════════════════════════════════════════
-let hudTick=0;
+// ══════════════════════════════════════
 function updateHUD(){
   const h=Math.ceil(player.hp/2),mh=Math.ceil(player.maxHp/2);
-  let hstr='';for(let i=0;i<mh;i++)hstr+=i<h?'❤️':'🖤';
-  document.getElementById('hearts').innerHTML=hstr;
-  document.getElementById('armorTxt').textContent=ARMORS[player.ar].name!=='None'?`🛡 ${ARMORS[player.ar].name}`:'';
+  let hs='';for(let i=0;i<mh;i++)hs+=i<h?'❤️':'🖤';
+  document.getElementById('hudHearts').innerHTML=hs;
+  document.getElementById('hudArmor').textContent=AR[player.ar].n!=='None'?`🛡 ${AR[player.ar].n}`:'';
   document.getElementById('hudCash').textContent=`💰 $${S.money.toLocaleString()}`;
-  const r=rank(S.wins);
-  document.getElementById('hudRank').innerHTML=`<span style="color:${r.col}">★ ${r.name}</span>`;
-  document.getElementById('hs0').textContent=SWORDS[player.sw].icon;
-  document.getElementById('hs1').textContent=ARMORS[player.ar].icon;
+  const r=getRank(S.wins);
+  document.getElementById('hudRank').innerHTML=`<span style="color:${r.c}">★ ${r.n}</span>`;
+  document.getElementById('hs0').textContent=SW[player.sw].i;
+  document.getElementById('hs1').textContent=AR[player.ar].i;
 }
-let kfTimeout=null;
+let kfTm=null;
 function kfeed(msg){
   const el=document.getElementById('killfeed');
   el.textContent=msg;el.style.opacity='1';
-  clearTimeout(kfTimeout);
-  kfTimeout=setTimeout(()=>el.style.opacity='0',2200);
+  clearTimeout(kfTm);kfTm=setTimeout(()=>el.style.opacity='0',2400);
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 //  MAIN LOOP
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
+let hudTimer=0;
 function loop(ts){
   if(!running)return;
   const dt=Math.min(ts-lastTs,50);lastTs=ts;
-  // Player move
+
+  // Player input
   if(!player.dead){
     let dx=0,dy=0;
-    if(keys.KeyA||keys.ArrowLeft)dx-=PSPD;
-    if(keys.KeyD||keys.ArrowRight)dx+=PSPD;
-    if(keys.KeyW||keys.ArrowUp)dy-=PSPD;
-    if(keys.KeyS||keys.ArrowDown)dy+=PSPD;
+    if(keys.KeyA||keys.ArrowLeft)dx-=SPD;
+    if(keys.KeyD||keys.ArrowRight)dx+=SPD;
+    if(keys.KeyW||keys.ArrowUp)dy-=SPD;
+    if(keys.KeyS||keys.ArrowDown)dy+=SPD;
     if(dx&&dy){dx*=.707;dy*=.707;}
-    move(player,dx,dy);
+    mv(player,dx,dy);
   }
-  // All entities: knockback, cooldowns, swing anim
+
+  // Physics & timers
   for(const e of[player,...bots]){
-    if(Math.abs(e.kx)>.1||Math.abs(e.ky)>.1){move(e,e.kx,e.ky);e.kx*=.68;e.ky*=.68;}
+    if(Math.abs(e.kx)>.08||Math.abs(e.ky)>.08){mv(e,e.kx,e.ky);e.kx*=.65;e.ky*=.65;}
     e.atkCd=Math.max(0,e.atkCd-dt);
     if(e.hitFlash>0)e.hitFlash--;
-    if(e.swingP>=0){e.swingP+=dt/190;if(e.swingP>=1)e.swingP=-1;}
+    if(e.swP>=0){e.swP+=dt/185;if(e.swP>=1)e.swP=-1;}
   }
+
   // AI
   for(const b of bots)aiTick(b,dt);
+
   // Particles
-  for(const p of parts){p.x+=p.vx;p.y+=p.vy;p.vx*=.87;p.vy*=.87;p.life--;}
+  for(const p of parts){p.x+=p.vx;p.y+=p.vy;p.vx*=.86;p.vy*=.86;p.life--;}
   parts=parts.filter(p=>p.life>0);
+
   // Camera
   camX+=(player.x-CW/2-camX)*.1;
   camY+=(player.y-CH/2-camY)*.1;
-  camX=Math.max(0,Math.min(MAP_W*TW-CW,camX));
-  camY=Math.max(0,Math.min(MAP_H*TW-CH,camY));
+  camX=Math.max(0,Math.min(MW*TW-CW,camX));
+  camY=Math.max(0,Math.min(MH*TW-CH,camY));
+
   // Render
   ctx.clearRect(0,0,CW,CH);
   drawMap();
   drawParts();
-  const all=[player,...bots].sort((a,b)=>a.y-b.y);
-  for(const e of all)drawEnt(e);
-  // Throttled HUD
-  hudTick+=dt;if(hudTick>120){hudTick=0;updateHUD();}
+  [...[player,...bots]].sort((a,b)=>a.y-b.y).forEach(drawEnt);
+
+  // HUD throttle
+  hudTimer+=dt;if(hudTimer>100){hudTimer=0;updateHUD();}
+
   animId=requestAnimationFrame(loop);
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 //  MULTIPLAYER (PeerJS)
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 let peer=null,mpConn=null,mpHost=false,mpOpp=null;
-
+function setA(st,code,hint){
+  document.getElementById('aStatus').textContent=st;
+  document.getElementById('aCode').textContent=code||'';
+  document.getElementById('aHint').textContent=hint||'';
+}
 function goArena(){
-  show('sc-arena');
-  setArena('HOSTING...','','Share code with a friend to connect');
+  show('sc-arena');setA('HOSTING...','','');
   if(peer){peer.destroy();peer=null;}
   mpHost=true;
   const code='PVP'+Math.floor(1000+Math.random()*9000);
   peer=new Peer(code);
-  peer.on('open',id=>{setArena('WAITING FOR OPPONENT...',id,'Send this code to a friend');});
-  peer.on('connection',conn=>{
-    mpConn=conn;
-    setArena('OPPONENT CONNECTED!','','Ready to fight!');
-    document.getElementById('arenaStartBtn').style.display='block';
-    conn.on('data',mpData);
-    conn.on('error',()=>setArena('CONNECTION ERROR','',''));
+  peer.on('open',id=>{setA('WAITING FOR OPPONENT...',id,'Share this code with a friend');});
+  peer.on('connection',c=>{
+    mpConn=c;setA('OPPONENT JOINED!','','Ready!');
+    document.getElementById('aStartBtn').style.display='block';
+    c.on('data',mpData);
   });
-  peer.on('error',e=>setArena('ERROR: '+e.type,'',''));
-}
-function setArena(status,code,hint){
-  document.getElementById('arenaStatus').textContent=status;
-  document.getElementById('arenaCode').textContent=code;
-  document.getElementById('arenaHint').textContent=hint;
+  peer.on('error',e=>setA('ERROR: '+e.type));
 }
 function mpJoin(){
   const code=document.getElementById('joinInput').value.trim().toUpperCase();
@@ -658,65 +649,59 @@ function mpJoin(){
   mpHost=false;
   peer=new Peer();
   peer.on('open',()=>{
-    setArena('CONNECTING TO '+code+'...','','');
+    setA('CONNECTING TO '+code+'...','','');
     mpConn=peer.connect(code);
-    mpConn.on('open',()=>{setArena('CONNECTED!','','Waiting for host to start...');mpConn.send({t:'hello'});});
+    mpConn.on('open',()=>{setA('CONNECTED!','','Waiting for host...');mpConn.send({t:'hi'});});
     mpConn.on('data',mpData);
-    mpConn.on('error',()=>setArena('FAILED TO CONNECT','','Check the code'));
+    mpConn.on('error',()=>setA('FAILED','','Check code'));
   });
-  peer.on('error',e=>setArena('ERROR: '+e.type,'',''));
+  peer.on('error',e=>setA('ERROR: '+e.type));
 }
-function mpStartMatch(){
+function mpStart(){
   if(!mpConn)return;
   mpConn.send({t:'start',sw:S.sword,ar:S.armor});
-  mpBeginGame({sw:S.sword,ar:S.armor},true);
+  mpBegin({sw:S.sword,ar:S.armor},true);
 }
 function mpData(d){
-  if(d.t==='start')mpBeginGame(d,false);
-  else if(d.t==='pos'&&mpOpp){mpOpp.x=d.x;mpOpp.y=d.y;mpOpp.swingP=d.sp;mpOpp.swingA=d.sa;mpOpp.dead=d.dead;}
+  if(d.t==='start')mpBegin(d,false);
+  else if(d.t==='pos'&&mpOpp){mpOpp.x=d.x;mpOpp.y=d.y;mpOpp.swP=d.sp;mpOpp.swA=d.sa;mpOpp.dead=d.dead;}
   else if(d.t==='hit'&&!player.dead){
-    const def=ARMORS[player.ar].def,dmg=Math.max(1,d.dmg-def);
+    const dmg=Math.max(1,d.dmg-AR[player.ar].def);
     player.hp-=dmg;player.kx+=d.kx;player.ky+=d.ky;player.hitFlash=10;
     blood(player.x,player.y);
-    if(player.hp<=0&&mpOpp)kill(mpOpp,player);
+    if(player.hp<=0&&mpOpp)onKill(mpOpp,player);
     updateHUD();
   }
 }
-function mpBeginGame(d,iAm){
-  vsAI=false; S=ld(); initGame(); bots=[];
+function mpBegin(d,iAm){
+  vsAI=false;S=ld();initGame();bots=[];
   const os=mpHost?d.sw:S.sword,oa=mpHost?d.ar:S.armor;
-  mpOpp=mkEnt(mpHost?(MAP_W-7)*TW:5*TW,mpHost?(MAP_H-7)*TW:5*TW,false,os,oa,'OPPONENT',1);
+  mpOpp=mkEnt(mpHost?(MW-8)*TW:5*TW,mpHost?(MH-8)*TW:5*TW,false,os,oa,'OPPONENT',1);
   bots=[mpOpp];
-  // Patch swing to send hit over network
-  const origSwing=swing;
-  window._mpSwing=function(atk){
-    if(atk!==player)return;
-    if(atk.dead||atk.atkCd>0)return;
-    const sw2=SWORDS[atk.sw];atk.atkCd=sw2.cd;
-    const angle=Math.atan2(mouseY-(atk.y-camY),mouseX-(atk.x-camX));
-    atk.swingA=angle;atk.swingP=0;
+  canvas.onmousedown=e=>{
+    if(e.button!==0)return;e.preventDefault();
+    if(player.dead||player.atkCd>0)return;
+    const s=SW[player.sw];player.atkCd=s.cd;
+    const angle=faceAngle(player);player.swA=angle;player.swP=0;
     if(mpOpp&&!mpOpp.dead){
-      const dx=mpOpp.x-atk.x,dy=mpOpp.y-atk.y,dist=Math.hypot(dx,dy);
-      if(dist<=sw2.reach+PR){
+      const dx=mpOpp.x-player.x,dy=mpOpp.y-player.y,dist=Math.hypot(dx,dy);
+      if(dist<=s.rch+PR){
         let diff=Math.abs(angle-Math.atan2(dy,dx));
         if(diff>Math.PI)diff=2*Math.PI-diff;
-        if(diff<=0.95&&mpConn){
-          const k=4+sw2.dmg;
-          mpConn.send({t:'hit',dmg:sw2.dmg,kx:(dx/dist)*k,ky:(dy/dist)*k});
-          blood(mpOpp.x,mpOpp.y);
-          mpOpp.hitFlash=10;
+        if(diff<=1.0&&mpConn){
+          const k=4+s.dmg;
+          mpConn.send({t:'hit',dmg:s.dmg,kx:(dx/dist)*k,ky:(dy/dist)*k});
+          blood(mpOpp.x,mpOpp.y);mpOpp.hitFlash=10;
         }
       }
     }
   };
-  canvas.onmousedown=e=>{if(e.button===0){e.preventDefault();window._mpSwing(player);}};
-  // Send position updates
-  setInterval(()=>{
-    if(mpConn&&!player.dead)
-      mpConn.send({t:'pos',x:player.x,y:player.y,sp:player.swingP,sa:player.swingA,dead:player.dead});
+  const posInt=setInterval(()=>{
+    if(!running){clearInterval(posInt);return;}
+    if(mpConn)mpConn.send({t:'pos',x:player.x,y:player.y,sp:player.swP,sa:player.swA,dead:player.dead});
   },50);
 }
-function mpLeave(){if(peer){peer.destroy();peer=null;}mpConn=null;show('sc-mode');}
+function mpLeave(){if(peer){peer.destroy();peer=null;}mpConn=null;show('sc-title');}
 </script>
 </body>
 </html>
