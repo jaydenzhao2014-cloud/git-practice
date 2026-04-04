@@ -74,7 +74,7 @@ main{flex:1;padding:28px 28px 50px;}
     <span class="search-icon">🔍</span>
     <input type="text" id="searchInput" placeholder="Search games..." oninput="filterGames()">
   </div>
-  <div class="header-right">6 GAMES</div>
+  <div class="header-right">7 GAMES</div>
 </header>
 
 <div class="layout">
@@ -111,6 +111,16 @@ main{flex:1;padding:28px 28px 50px;}
 
 <script>
 const GAMES = [
+  {
+    name: "PARTY PLANNER",
+    desc: "Plan your perfect party! Track guests & RSVPs, manage your budget, pick food, and check off your to-do list. Countdown to party time!",
+    icon: "🎉",
+    bg: "linear-gradient(135deg,#1a0030,#4a0060)",
+    tags: ["other"],
+    tagLabels: [{t:"⭐ FEATURED",cls:"gold"},{t:"PLANNER",cls:""}],
+    url: "https://jaydenzhao2014-cloud.github.io/git-practice/party.html",
+    featured: true
+  },
   {
     name: "RACING",
     desc: "Top-down championship racing. Choose your car, earn coins, unlock faster rides, and race against 3 AI opponents on a full circuit.",
