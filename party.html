@@ -141,16 +141,23 @@ label{font-size:11px;letter-spacing:2px;color:#666;margin-bottom:4px;display:blo
 .confirm-box h2{font-size:20px;letter-spacing:4px;color:#ff4444;margin-bottom:10px;}
 .confirm-box p{font-size:13px;color:#888;letter-spacing:1px;line-height:1.8;margin-bottom:22px;}
 /* ACCOUNT / LOGIN */
-.auth-screen{display:none;position:fixed;inset:0;background:#0d0017;z-index:300;align-items:center;justify-content:center;flex-direction:column;}
-.auth-screen.show{display:flex;}
-.auth-box{background:#110020;border:2px solid #4400aa;border-radius:16px;padding:32px;width:min(420px,94vw);}
-.auth-logo{font-size:26px;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,#ff44cc,#aa44ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:4px;}
-.auth-sub{font-size:10px;letter-spacing:6px;color:#444;text-align:center;margin-bottom:24px;}
-.auth-tabs{display:flex;background:#0a0013;border-radius:8px;margin-bottom:22px;overflow:hidden;}
-.auth-tab{flex:1;padding:10px;text-align:center;cursor:pointer;font-size:12px;letter-spacing:3px;font-weight:700;color:#555;transition:all .15s;}
-.auth-tab.on{background:#1a0030;color:#ff44cc;}
-.auth-err{font-size:12px;color:#ff4444;letter-spacing:1px;text-align:center;margin-bottom:10px;min-height:18px;}
-.auth-success{font-size:12px;color:#44cc66;letter-spacing:1px;text-align:center;margin-bottom:10px;min-height:18px;}
+.auth-screen{display:none;position:fixed;inset:0;z-index:300;background:#0d0017;overflow-y:auto;}
+.auth-screen.show{display:block;}
+.auth-page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;}
+.auth-hero{text-align:center;margin-bottom:36px;}
+.auth-hero-emoji{font-size:72px;margin-bottom:14px;display:block;animation:bounce 2s ease-in-out infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+.auth-hero-title{font-size:clamp(32px,7vw,62px);font-weight:900;letter-spacing:8px;background:linear-gradient(135deg,#ff44cc,#aa44ff,#44aaff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;}
+.auth-hero-sub{font-size:12px;letter-spacing:6px;color:#444;}
+.auth-features{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:36px;}
+.auth-feat{background:#110020;border:1px solid #2a0050;border-radius:10px;padding:12px 18px;font-size:11px;letter-spacing:2px;color:#666;display:flex;align-items:center;gap:8px;}
+.auth-feat span{font-size:18px;}
+.auth-box{background:#110020;border:2px solid #3a0070;border-radius:20px;padding:32px;width:min(420px,94vw);box-shadow:0 0 60px rgba(170,68,255,.15);}
+.auth-box-title{font-size:14px;font-weight:900;letter-spacing:4px;color:#aa66ff;text-align:center;margin-bottom:20px;}
+.auth-tabs{display:flex;background:#0a0013;border-radius:10px;margin-bottom:24px;overflow:hidden;border:1px solid #2a0050;}
+.auth-tab{flex:1;padding:12px;text-align:center;cursor:pointer;font-size:13px;letter-spacing:3px;font-weight:700;color:#444;transition:all .15s;}
+.auth-tab.on{background:linear-gradient(135deg,#2a0050,#1a0030);color:#ff44cc;}
+.auth-err{font-size:12px;color:#ff4444;letter-spacing:1px;text-align:center;margin-bottom:12px;min-height:18px;}
 .user-badge{display:flex;align-items:center;gap:8px;background:rgba(170,68,255,.15);border:1px solid #4400aa;border-radius:8px;padding:5px 12px;font-size:12px;color:#aa66ff;letter-spacing:1px;}
 .logout-btn{background:none;border:1px solid #333;color:#555;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;letter-spacing:1px;transition:all .15s;}
 .logout-btn:hover{border-color:#ff4444;color:#ff4444;}
@@ -189,32 +196,67 @@ label{font-size:11px;letter-spacing:2px;color:#666;margin-bottom:4px;display:blo
   </div>
 </div>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH SCREEN (full landing page) -->
 <div class="auth-screen" id="authScreen">
-  <div class="auth-box">
-    <div class="auth-logo">🎉 PARTY PLANNER</div>
-    <div class="auth-sub">BY JAYDEN'S GAMES</div>
-    <div class="auth-tabs">
-      <div class="auth-tab on" id="tabLogin" onclick="switchAuth('login')">LOG IN</div>
-      <div class="auth-tab" id="tabSignup" onclick="switchAuth('signup')">SIGN UP</div>
+  <div class="auth-page">
+
+    <!-- Hero -->
+    <div class="auth-hero">
+      <span class="auth-hero-emoji">🎉</span>
+      <div class="auth-hero-title">PARTY PLANNER</div>
+      <div class="auth-hero-sub">BY JAYDEN'S GAMES</div>
     </div>
-    <div class="auth-err" id="authErr"></div>
-    <div id="authLogin">
-      <label>USERNAME</label>
-      <input id="liUser" placeholder="Enter your username" style="margin-bottom:12px" autocomplete="username">
-      <label>PASSWORD</label>
-      <input id="liPass" type="password" placeholder="Enter your password" style="margin-bottom:20px" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-      <button class="btn btn-pink" style="width:100%" onclick="doLogin()">▶ LOG IN</button>
+
+    <!-- Feature pills -->
+    <div class="auth-features">
+      <div class="auth-feat"><span>👥</span> Guest List & RSVPs</div>
+      <div class="auth-feat"><span>💰</span> Budget Tracker</div>
+      <div class="auth-feat"><span>🍕</span> Food Planner</div>
+      <div class="auth-feat"><span>🗓</span> Party Schedule</div>
+      <div class="auth-feat"><span>✅</span> Checklist</div>
+      <div class="auth-feat"><span>⏳</span> Countdown Timer</div>
     </div>
-    <div id="authSignup" style="display:none">
-      <label>USERNAME</label>
-      <input id="suUser" placeholder="Choose a username" style="margin-bottom:12px" autocomplete="username">
-      <label>PASSWORD</label>
-      <input id="suPass" type="password" placeholder="Choose a password" style="margin-bottom:12px" autocomplete="new-password">
-      <label>CONFIRM PASSWORD</label>
-      <input id="suPass2" type="password" placeholder="Repeat password" style="margin-bottom:20px" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSignup()">
-      <button class="btn btn-purple" style="width:100%" onclick="doSignup()">✨ CREATE ACCOUNT</button>
+
+    <!-- Login / Signup box -->
+    <div class="auth-box">
+      <div class="auth-box-title">YOUR ACCOUNT</div>
+      <div class="auth-tabs">
+        <div class="auth-tab on" id="tabLogin" onclick="switchAuth('login')">LOG IN</div>
+        <div class="auth-tab" id="tabSignup" onclick="switchAuth('signup')">SIGN UP</div>
+      </div>
+      <div class="auth-err" id="authErr"></div>
+
+      <!-- Login form -->
+      <div id="authLogin">
+        <label>USERNAME</label>
+        <input id="liUser" placeholder="Enter your username" style="margin-bottom:12px" autocomplete="username">
+        <label>PASSWORD</label>
+        <input id="liPass" type="password" placeholder="Enter your password" style="margin-bottom:22px" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="btn btn-pink" style="width:100%;font-size:15px;padding:13px" onclick="doLogin()">▶ LOG IN</button>
+        <div style="text-align:center;margin-top:14px;font-size:11px;color:#444;letter-spacing:1px;">
+          No account? <span onclick="switchAuth('signup')" style="color:#aa44ff;cursor:pointer;text-decoration:underline;">Sign up free</span>
+        </div>
+      </div>
+
+      <!-- Signup form -->
+      <div id="authSignup" style="display:none">
+        <label>USERNAME</label>
+        <input id="suUser" placeholder="Choose a username (3+ chars)" style="margin-bottom:12px" autocomplete="username">
+        <label>PASSWORD</label>
+        <input id="suPass" type="password" placeholder="Choose a password (4+ chars)" style="margin-bottom:12px" autocomplete="new-password">
+        <label>CONFIRM PASSWORD</label>
+        <input id="suPass2" type="password" placeholder="Repeat your password" style="margin-bottom:22px" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSignup()">
+        <button class="btn btn-purple" style="width:100%;font-size:15px;padding:13px" onclick="doSignup()">✨ CREATE ACCOUNT</button>
+        <div style="text-align:center;margin-top:14px;font-size:11px;color:#444;letter-spacing:1px;">
+          Already have one? <span onclick="switchAuth('login')" style="color:#ff44cc;cursor:pointer;text-decoration:underline;">Log in</span>
+        </div>
+      </div>
     </div>
+
+    <div style="margin-top:24px;font-size:10px;color:#2a2a2a;letter-spacing:3px;text-align:center;">
+      <a href="https://jaydenzhao2014-cloud.github.io/git-practice/games.html" style="color:#2a2a2a;text-decoration:none;">◀ BACK TO JAYDEN'S GAMES</a>
+    </div>
+
   </div>
 </div>
 
