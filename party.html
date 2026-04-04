@@ -140,6 +140,20 @@ label{font-size:11px;letter-spacing:2px;color:#666;margin-bottom:4px;display:blo
 .confirm-box{background:#110020;border:2px solid #cc2222;border-radius:16px;padding:28px;width:min(400px,94vw);text-align:center;}
 .confirm-box h2{font-size:20px;letter-spacing:4px;color:#ff4444;margin-bottom:10px;}
 .confirm-box p{font-size:13px;color:#888;letter-spacing:1px;line-height:1.8;margin-bottom:22px;}
+/* ACCOUNT / LOGIN */
+.auth-screen{display:none;position:fixed;inset:0;background:#0d0017;z-index:300;align-items:center;justify-content:center;flex-direction:column;}
+.auth-screen.show{display:flex;}
+.auth-box{background:#110020;border:2px solid #4400aa;border-radius:16px;padding:32px;width:min(420px,94vw);}
+.auth-logo{font-size:26px;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,#ff44cc,#aa44ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:4px;}
+.auth-sub{font-size:10px;letter-spacing:6px;color:#444;text-align:center;margin-bottom:24px;}
+.auth-tabs{display:flex;background:#0a0013;border-radius:8px;margin-bottom:22px;overflow:hidden;}
+.auth-tab{flex:1;padding:10px;text-align:center;cursor:pointer;font-size:12px;letter-spacing:3px;font-weight:700;color:#555;transition:all .15s;}
+.auth-tab.on{background:#1a0030;color:#ff44cc;}
+.auth-err{font-size:12px;color:#ff4444;letter-spacing:1px;text-align:center;margin-bottom:10px;min-height:18px;}
+.auth-success{font-size:12px;color:#44cc66;letter-spacing:1px;text-align:center;margin-bottom:10px;min-height:18px;}
+.user-badge{display:flex;align-items:center;gap:8px;background:rgba(170,68,255,.15);border:1px solid #4400aa;border-radius:8px;padding:5px 12px;font-size:12px;color:#aa66ff;letter-spacing:1px;}
+.logout-btn{background:none;border:1px solid #333;color:#555;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;letter-spacing:1px;transition:all .15s;}
+.logout-btn:hover{border-color:#ff4444;color:#ff4444;}
 </style>
 </head>
 <body>
@@ -175,6 +189,35 @@ label{font-size:11px;letter-spacing:2px;color:#666;margin-bottom:4px;display:blo
   </div>
 </div>
 
+<!-- AUTH SCREEN -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">🎉 PARTY PLANNER</div>
+    <div class="auth-sub">BY JAYDEN'S GAMES</div>
+    <div class="auth-tabs">
+      <div class="auth-tab on" id="tabLogin" onclick="switchAuth('login')">LOG IN</div>
+      <div class="auth-tab" id="tabSignup" onclick="switchAuth('signup')">SIGN UP</div>
+    </div>
+    <div class="auth-err" id="authErr"></div>
+    <div id="authLogin">
+      <label>USERNAME</label>
+      <input id="liUser" placeholder="Enter your username" style="margin-bottom:12px" autocomplete="username">
+      <label>PASSWORD</label>
+      <input id="liPass" type="password" placeholder="Enter your password" style="margin-bottom:20px" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn btn-pink" style="width:100%" onclick="doLogin()">▶ LOG IN</button>
+    </div>
+    <div id="authSignup" style="display:none">
+      <label>USERNAME</label>
+      <input id="suUser" placeholder="Choose a username" style="margin-bottom:12px" autocomplete="username">
+      <label>PASSWORD</label>
+      <input id="suPass" type="password" placeholder="Choose a password" style="margin-bottom:12px" autocomplete="new-password">
+      <label>CONFIRM PASSWORD</label>
+      <input id="suPass2" type="password" placeholder="Repeat password" style="margin-bottom:20px" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSignup()">
+      <button class="btn btn-purple" style="width:100%" onclick="doSignup()">✨ CREATE ACCOUNT</button>
+    </div>
+  </div>
+</div>
+
 <!-- NEW PARTY CONFIRM MODAL -->
 <div class="confirm-modal" id="confirmModal">
   <div class="confirm-box">
@@ -190,8 +233,10 @@ label{font-size:11px;letter-spacing:2px;color:#666;margin-bottom:4px;display:blo
 <!-- HEADER -->
 <div class="header">
   <div class="logo">PARTY PLANNER<span>BY JAYDEN'S GAMES</span></div>
-  <div style="display:flex;gap:10px;align-items:center;">
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+    <div class="user-badge" id="userBadge">👤 <span id="userLabel">–</span></div>
     <button onclick="document.getElementById('confirmModal').classList.add('show')" style="padding:7px 14px;background:rgba(255,68,68,.15);border:1px solid #cc2222;color:#ff4444;border-radius:8px;cursor:pointer;font-size:11px;letter-spacing:2px;">➕ NEW PARTY</button>
+    <button class="logout-btn" onclick="doLogout()">⏏ LOG OUT</button>
     <a href="https://jaydenzhao2014-cloud.github.io/git-practice/games.html" style="font-size:11px;color:#555;text-decoration:none;letter-spacing:2px;">◀ GAMES</a>
   </div>
 </div>
@@ -368,16 +413,78 @@ label{font-size:11px;letter-spacing:2px;color:#666;margin-bottom:4px;display:blo
 
 <script>
 // ════════════════════════════════
-//  SAVE / LOAD
+//  ACCOUNTS
 // ════════════════════════════════
-function ld(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch{return d;}}
-function sv(k,v){localStorage.setItem(k,JSON.stringify(v));}
+let currentUser=localStorage.getItem('pp_loggedin')||null;
 
-let party=ld('pp_party',{name:'MY PARTY',date:'',time:'',venue:'',budget:500,theme:'🎉 General Party'});
-let guests=ld('pp_guests',[]);
-let expenses=ld('pp_expenses',[]);
-let tasks=ld('pp_tasks',defaultTasks());
-let foodPicked=ld('pp_food',[]);
+function getAccounts(){try{return JSON.parse(localStorage.getItem('pp_accounts'))||[];}catch{return[];}}
+function saveAccounts(a){localStorage.setItem('pp_accounts',JSON.stringify(a));}
+
+function switchAuth(tab){
+  document.getElementById('authLogin').style.display=tab==='login'?'block':'none';
+  document.getElementById('authSignup').style.display=tab==='signup'?'block':'none';
+  document.getElementById('tabLogin').classList.toggle('on',tab==='login');
+  document.getElementById('tabSignup').classList.toggle('on',tab==='signup');
+  document.getElementById('authErr').textContent='';
+}
+function doLogin(){
+  const user=document.getElementById('liUser').value.trim().toLowerCase();
+  const pass=document.getElementById('liPass').value;
+  if(!user||!pass){document.getElementById('authErr').textContent='Fill in all fields';return;}
+  const accs=getAccounts();
+  const found=accs.find(a=>a.user===user&&a.pass===pass);
+  if(!found){document.getElementById('authErr').textContent='Wrong username or password';return;}
+  loginAs(user);
+}
+function doSignup(){
+  const user=document.getElementById('suUser').value.trim().toLowerCase();
+  const pass=document.getElementById('suPass').value;
+  const pass2=document.getElementById('suPass2').value;
+  if(!user||!pass){document.getElementById('authErr').textContent='Fill in all fields';return;}
+  if(user.length<3){document.getElementById('authErr').textContent='Username must be 3+ characters';return;}
+  if(pass.length<4){document.getElementById('authErr').textContent='Password must be 4+ characters';return;}
+  if(pass!==pass2){document.getElementById('authErr').textContent='Passwords do not match';return;}
+  const accs=getAccounts();
+  if(accs.find(a=>a.user===user)){document.getElementById('authErr').textContent='Username already taken';return;}
+  accs.push({user,pass});
+  saveAccounts(accs);
+  loginAs(user);
+}
+function loginAs(user){
+  currentUser=user;
+  localStorage.setItem('pp_loggedin',user);
+  document.getElementById('authScreen').classList.remove('show');
+  document.getElementById('userLabel').textContent=user.toUpperCase();
+  loadUserData();
+}
+function doLogout(){
+  currentUser=null;
+  localStorage.removeItem('pp_loggedin');
+  document.getElementById('authScreen').classList.add('show');
+  document.getElementById('liUser').value='';
+  document.getElementById('liPass').value='';
+  document.getElementById('authErr').textContent='';
+}
+
+// ════════════════════════════════
+//  SAVE / LOAD (per-user)
+// ════════════════════════════════
+function pfx(k){return'pp_'+currentUser+'_'+k;}
+function ld(k,d){try{return JSON.parse(localStorage.getItem(pfx(k)))||d;}catch{return d;}}
+function sv(k,v){localStorage.setItem(pfx(k),JSON.stringify(v));}
+
+let party,guests,expenses,tasks,foodPicked;
+
+function loadUserData(){
+  party=ld('party',{name:'MY PARTY',date:'',time:'',venue:'',budget:500,theme:'🎉 General Party'});
+  guests=ld('guests',[]);
+  expenses=ld('expenses',[]);
+  tasks=ld('tasks',defaultTasks());
+  foodPicked=ld('food',[]);
+  events=ld('events',[]);
+  refreshBanner();refreshOverview();refreshGuests();refreshBudget();refreshFood();refreshTasks();refreshSchedule();
+  if(!localStorage.getItem(pfx('party')))openSetup();
+}
 
 function defaultTasks(){
   return [
@@ -420,7 +527,7 @@ function saveSetup(){
   party.venue=document.getElementById('pVenue').value;
   party.budget=parseFloat(document.getElementById('pBudget').value)||0;
   party.theme=document.getElementById('pTheme').value;
-  sv('pp_party',party);
+  sv('party',party);
   document.getElementById('setupModal').classList.remove('show');
   refreshBanner();refreshOverview();refreshBudget();
 }
@@ -514,12 +621,12 @@ function addGuest(){
   const name=document.getElementById('gName').value.trim();
   if(!name)return;
   guests.push({id:Date.now(),name,rsvp:document.getElementById('gRsvp').value,avatar:AVATARS[guests.length%AVATARS.length],bg:AVATAR_BG[guests.length%AVATAR_BG.length]});
-  sv('pp_guests',guests);
+  sv('guests',guests);
   document.getElementById('gName').value='';
   refreshGuests();refreshOverview();
 }
-function removeGuest(id){guests=guests.filter(g=>g.id!==id);sv('pp_guests',guests);refreshGuests();refreshOverview();}
-function setRsvp(id,rsvp){const g=guests.find(g=>g.id===id);if(g){g.rsvp=rsvp;sv('pp_guests',guests);refreshGuests();refreshOverview();}}
+function removeGuest(id){guests=guests.filter(g=>g.id!==id);sv('guests',guests);refreshGuests();refreshOverview();}
+function setRsvp(id,rsvp){const g=guests.find(g=>g.id===id);if(g){g.rsvp=rsvp;sv('guests',guests);refreshGuests();refreshOverview();}}
 function refreshGuests(){
   const el=document.getElementById('guestList');
   if(!guests.length){el.innerHTML='<div style="text-align:center;color:#333;padding:24px;font-size:13px;letter-spacing:2px;">No guests yet — add some above!</div>';return;}
@@ -549,11 +656,11 @@ function addExpense(){
   const amt=parseFloat(document.getElementById('bAmt').value)||0;
   if(!name||!amt)return;
   expenses.push({id:Date.now(),name,amt,cat:document.getElementById('bCat').value});
-  sv('pp_expenses',expenses);
+  sv('expenses',expenses);
   document.getElementById('bName').value='';document.getElementById('bAmt').value='';
   refreshBudget();refreshOverview();
 }
-function removeExpense(id){expenses=expenses.filter(e=>e.id!==id);sv('pp_expenses',expenses);refreshBudget();refreshOverview();}
+function removeExpense(id){expenses=expenses.filter(e=>e.id!==id);sv('expenses',expenses);refreshBudget();refreshOverview();}
 function refreshBudget(){
   const spent=expenses.reduce((a,e)=>a+e.amt,0);
   const pct=party.budget?Math.min(spent/party.budget*100,100):0;
@@ -593,9 +700,9 @@ function refreshFood(){
 function toggleFood(i){
   if(foodPicked.includes(i))foodPicked=foodPicked.filter(x=>x!==i);
   else foodPicked.push(i);
-  sv('pp_food',foodPicked);refreshFood();
+  sv('food',foodPicked);refreshFood();
 }
-function clearFood(){foodPicked=[];sv('pp_food',foodPicked);refreshFood();}
+function clearFood(){foodPicked=[];sv('food',foodPicked);refreshFood();}
 
 // ════════════════════════════════
 //  CHECKLIST
@@ -604,12 +711,12 @@ function addTask(){
   const name=document.getElementById('cName').value.trim();
   if(!name)return;
   tasks.push({t:name,cat:document.getElementById('cCat').value,done:false});
-  sv('pp_tasks',tasks);
+  sv('tasks',tasks);
   document.getElementById('cName').value='';
   refreshTasks();refreshOverview();
 }
-function toggleTask(i){tasks[i].done=!tasks[i].done;sv('pp_tasks',tasks);refreshTasks();refreshOverview();}
-function removeTask(i){tasks.splice(i,1);sv('pp_tasks',tasks);refreshTasks();refreshOverview();}
+function toggleTask(i){tasks[i].done=!tasks[i].done;sv('tasks',tasks);refreshTasks();refreshOverview();}
+function removeTask(i){tasks.splice(i,1);sv('tasks',tasks);refreshTasks();refreshOverview();}
 function refreshTasks(){
   const done=tasks.filter(t=>t.done).length;
   document.getElementById('taskProgress').textContent=`${done} / ${tasks.length} TASKS COMPLETE`;
@@ -628,7 +735,6 @@ function refreshTasks(){
 // ════════════════════════════════
 //  SCHEDULE
 // ════════════════════════════════
-let events=ld('pp_events',[]);
 
 function addEvent(){
   const time=document.getElementById('schTime').value;
@@ -636,12 +742,12 @@ function addEvent(){
   if(!time||!name)return;
   events.push({id:Date.now(),time,name,cat:document.getElementById('schCat').value,note:document.getElementById('schNote').value.trim()});
   events.sort((a,b)=>a.time.localeCompare(b.time));
-  sv('pp_events',events);
+  sv('events',events);
   document.getElementById('schName').value='';
   document.getElementById('schNote').value='';
   refreshSchedule();
 }
-function removeEvent(id){events=events.filter(e=>e.id!==id);sv('pp_events',events);refreshSchedule();}
+function removeEvent(id){events=events.filter(e=>e.id!==id);sv('events',events);refreshSchedule();}
 function refreshSchedule(){
   const el=document.getElementById('scheduleList');
   if(!events.length){el.innerHTML='<div style="color:#333;font-size:13px;letter-spacing:2px;text-align:center;padding:24px;">No events yet — add some above!</div>';return;}
@@ -673,7 +779,7 @@ function refreshSchedule(){
 //  NEW PARTY
 // ════════════════════════════════
 function confirmNewParty(){
-  ['pp_party','pp_guests','pp_expenses','pp_tasks','pp_food','pp_events'].forEach(k=>localStorage.removeItem(k));
+  ['party','guests','expenses','tasks','food','events'].forEach(k=>localStorage.removeItem(pfx(k)));
   party={name:'MY PARTY',date:'',time:'',venue:'',budget:500,theme:'🎉 General Party'};
   guests=[];expenses=[];tasks=defaultTasks();foodPicked=[];events=[];
   document.getElementById('confirmModal').classList.remove('show');
@@ -684,11 +790,16 @@ function confirmNewParty(){
 // ════════════════════════════════
 //  INIT
 // ════════════════════════════════
-if(!ld('pp_party',null))openSetup();
-refreshBanner();refreshOverview();refreshGuests();refreshBudget();refreshFood();refreshTasks();refreshSchedule();
-
+let events=[];
 document.getElementById('setupModal').onclick=function(e){if(e.target===this)this.classList.remove('show');};
 document.getElementById('confirmModal').onclick=function(e){if(e.target===this)this.classList.remove('show');};
+
+if(currentUser){
+  document.getElementById('userLabel').textContent=currentUser.toUpperCase();
+  loadUserData();
+} else {
+  document.getElementById('authScreen').classList.add('show');
+}
 </script>
 </body>
 </html>
