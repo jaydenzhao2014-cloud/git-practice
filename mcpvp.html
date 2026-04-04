@@ -50,6 +50,29 @@ body{background:#1a1a1a;font-family:'Courier New',monospace;color:#fff;overflow:
   width:152px;text-transform:uppercase;}
 /* ── STATS ── */
 .stats-box{background:#222;border:2px solid #444;padding:26px;min-width:280px;text-align:center;}
+/* ── EARN WAYS ── */
+.earn-box{background:#222;border:2px solid #444;padding:22px;width:min(520px,94vw);max-height:88vh;overflow-y:auto;}
+.earn-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#2a2a2a;border:2px solid #333;margin-bottom:8px;}
+.earn-ico{font-size:28px;flex-shrink:0;}
+.earn-info{flex:1;}
+.earn-title{font-size:13px;color:#ccc;letter-spacing:1px;font-weight:bold;}
+.earn-desc{font-size:10px;color:#555;letter-spacing:1px;margin-top:2px;}
+.earn-amt{font-size:14px;color:#ffd700;font-weight:bold;letter-spacing:2px;flex-shrink:0;}
+.earn-btn{padding:7px 14px;font-size:11px;font-family:'Courier New',monospace;border:2px solid #55ff55;color:#55ff55;background:transparent;cursor:pointer;letter-spacing:2px;transition:all .12s;}
+.earn-btn:hover{background:#55ff5522;}
+.earn-btn:disabled{border-color:#333;color:#333;cursor:default;}
+/* ── ADMIN ── */
+.admin-box{background:#111;border:2px solid #ff4444;padding:26px;width:min(440px,94vw);}
+.admin-title{font-size:18px;letter-spacing:6px;color:#ff4444;margin-bottom:18px;text-align:center;}
+.admin-input{padding:9px;background:#1a1a1a;border:2px solid #333;color:#fff;font-family:'Courier New',monospace;font-size:14px;width:100%;margin-bottom:10px;}
+.admin-msg{font-size:11px;letter-spacing:2px;text-align:center;min-height:16px;margin-bottom:10px;}
+/* ── POPUP ── */
+.popup{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:50;display:none;align-items:center;justify-content:center;}
+.popup.on{display:flex;}
+.popup-box{background:#1a1a1a;border:2px solid #ffd700;padding:28px;min-width:260px;text-align:center;}
+.popup-ico{font-size:52px;margin-bottom:8px;}
+.popup-title{font-size:20px;letter-spacing:4px;color:#ffd700;margin-bottom:6px;}
+.popup-sub{font-size:12px;color:#888;letter-spacing:2px;margin-bottom:18px;}
 /* ── RESULT ── */
 .res-big{font-size:clamp(36px,6vw,72px);letter-spacing:10px;margin-bottom:8px;}
 .res-earn{font-size:17px;color:#ffd700;margin-bottom:6px;}
@@ -85,7 +108,120 @@ body{background:#1a1a1a;font-family:'Courier New',monospace;color:#fff;overflow:
   <button class="mc-btn btn-g" onclick="startVsAI()">▶ PLAY VS AI</button>
   <button class="mc-btn btn-b" onclick="goArena()">🌐 GLOBAL ARENA</button>
   <button class="mc-btn btn-y" onclick="goShop(false)">⚒ SHOP</button>
+  <button class="mc-btn btn-g" onclick="show('sc-earn')">💰 EARN MONEY</button>
   <button class="mc-btn btn-x" onclick="showStats()">📊 STATS</button>
+  <button class="mc-btn btn-x" onclick="goAdmin()">🔧 ADMIN</button>
+</div>
+
+<!-- EARN MONEY -->
+<div id="sc-earn" class="screen">
+  <div class="earn-box">
+    <div style="font-size:18px;letter-spacing:6px;color:#ffd700;text-align:center;margin-bottom:16px;">💰 EARN MONEY</div>
+    <div class="earn-row">
+      <div class="earn-ico">🌅</div>
+      <div class="earn-info">
+        <div class="earn-title">DAILY REWARD</div>
+        <div class="earn-desc">Log in every day to collect free coins</div>
+      </div>
+      <div class="earn-amt" id="dailyAmt">+$500</div>
+      <button class="earn-btn" id="dailyBtn" onclick="claimDaily()">CLAIM</button>
+    </div>
+    <div class="earn-row">
+      <div class="earn-ico">⚔</div>
+      <div class="earn-info">
+        <div class="earn-title">WIN A MATCH</div>
+        <div class="earn-desc">Beat the AI to earn coins</div>
+      </div>
+      <div class="earn-amt">+$300</div>
+      <button class="earn-btn" onclick="startVsAI()">PLAY</button>
+    </div>
+    <div class="earn-row">
+      <div class="earn-ico">💀</div>
+      <div class="earn-info">
+        <div class="earn-title">GET A KILL</div>
+        <div class="earn-desc">Each kill earns you coins mid-match</div>
+      </div>
+      <div class="earn-amt">+$300</div>
+      <button class="earn-btn" onclick="startVsAI()">PLAY</button>
+    </div>
+    <div class="earn-row">
+      <div class="earn-ico">🔥</div>
+      <div class="earn-info">
+        <div class="earn-title">KILL STREAK ×3</div>
+        <div class="earn-desc">Kill 3 times in a row for a bonus</div>
+      </div>
+      <div class="earn-amt">+$500</div>
+      <div style="font-size:9px;color:#555;letter-spacing:2px;">AUTO</div>
+    </div>
+    <div class="earn-row">
+      <div class="earn-ico">🏆</div>
+      <div class="earn-info">
+        <div class="earn-title">WIN STREAK ×3</div>
+        <div class="earn-desc">Win 3 matches in a row for a bonus</div>
+      </div>
+      <div class="earn-amt">+$1000</div>
+      <div style="font-size:9px;color:#555;letter-spacing:2px;">AUTO</div>
+    </div>
+    <div class="earn-row">
+      <div class="earn-ico">🎁</div>
+      <div class="earn-info">
+        <div class="earn-title">MYSTERY BOX</div>
+        <div class="earn-desc" id="mysteryDesc">Opens every 30 minutes</div>
+      </div>
+      <div class="earn-amt" id="mysteryAmt">+$???</div>
+      <button class="earn-btn" id="mysteryBtn" onclick="claimMystery()">OPEN</button>
+    </div>
+    <div class="earn-row">
+      <div class="earn-ico">🌐</div>
+      <div class="earn-info">
+        <div class="earn-title">ONLINE MATCH WIN</div>
+        <div class="earn-desc">Beat a real player in global arena</div>
+      </div>
+      <div class="earn-amt">+$600</div>
+      <button class="earn-btn" onclick="goArena()">PLAY</button>
+    </div>
+    <div style="text-align:center;margin-top:8px;">
+      <button class="mc-btn btn-x" onclick="show('sc-title')">◀ BACK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="sc-admin" class="screen">
+  <div class="admin-box">
+    <div class="admin-title">🔧 ADMIN PANEL</div>
+    <div id="adminLock">
+      <label style="font-size:10px;letter-spacing:3px;color:#555;display:block;margin-bottom:6px;">PASSWORD</label>
+      <input class="admin-input" id="adminPass" type="password" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')adminUnlock()">
+      <div class="admin-msg" id="adminMsg" style="color:#ff4444;"></div>
+      <button class="mc-btn btn-y" style="width:100%" onclick="adminUnlock()">UNLOCK</button>
+    </div>
+    <div id="adminPanel" style="display:none">
+      <div style="font-size:10px;letter-spacing:3px;color:#55ff55;text-align:center;margin-bottom:16px;">✅ ACCESS GRANTED</div>
+      <label style="font-size:10px;letter-spacing:3px;color:#555;display:block;margin-bottom:6px;">GIVE MONEY ($)</label>
+      <input class="admin-input" id="adminMoney" type="number" placeholder="Amount e.g. 1000">
+      <button class="mc-btn btn-y" style="width:100%;margin-bottom:10px;" onclick="adminGiveMoney()">💰 GIVE MONEY NOW</button>
+      <label style="font-size:10px;letter-spacing:3px;color:#555;display:block;margin-bottom:6px;">SET WINS</label>
+      <input class="admin-input" id="adminWins" type="number" placeholder="Number of wins">
+      <button class="mc-btn btn-g" style="width:100%;margin-bottom:10px;" onclick="adminSetWins()">🏆 SET WINS</button>
+      <label style="font-size:10px;letter-spacing:3px;color:#555;display:block;margin-bottom:6px;">SET KILLS</label>
+      <input class="admin-input" id="adminKills" type="number" placeholder="Number of kills">
+      <button class="mc-btn btn-g" style="width:100%;margin-bottom:10px;" onclick="adminSetKills()">💀 SET KILLS</button>
+      <button class="mc-btn btn-x" style="width:100%;margin-bottom:6px;" onclick="adminReset()">🗑 RESET ALL DATA</button>
+      <div class="admin-msg" id="adminDoneMsg" style="color:#55ff55;"></div>
+    </div>
+    <button class="mc-btn btn-x" style="width:100%;margin-top:8px;" onclick="closeAdmin()">◀ BACK</button>
+  </div>
+</div>
+
+<!-- REWARD POPUP -->
+<div class="popup" id="rewardPopup">
+  <div class="popup-box">
+    <div class="popup-ico" id="popIco">🎁</div>
+    <div class="popup-title" id="popTitle">REWARD!</div>
+    <div class="popup-sub" id="popSub">You earned $500</div>
+    <button class="mc-btn btn-y" onclick="document.getElementById('rewardPopup').classList.remove('on')">✓ NICE!</button>
+  </div>
 </div>
 
 <!-- SHOP -->
@@ -400,7 +536,13 @@ function doSwing(atk){
 }
 function onKill(killer,victim){
   victim.dead=true;boom(victim.x,victim.y);
-  if(killer.human){S.kills++;S.money+=300;sv(S);kfeed(`+$300  💀 ${victim.name}`);updateHUD();}
+  if(killer.human){
+    S.kills++;S.money+=300;
+    S.killStreak=(S.killStreak||0)+1;
+    let bonus='';
+    if(S.killStreak>=3){S.money+=500;S.killStreak=0;bonus=' 🔥 STREAK +$500';}
+    sv(S);kfeed(`+$300  💀 ${victim.name}${bonus}`);updateHUD();
+  }
   if(vsAI){
     if(bots.every(b=>b.dead))setTimeout(()=>endMatch(true),1200);
     if(victim===player)setTimeout(()=>endMatch(false),1200);
@@ -409,11 +551,23 @@ function onKill(killer,victim){
 function endMatch(won){
   stopGame();
   const prev=S.wins;
-  if(won){S.wins++;S.money+=300;sv(S);}
+  let earned=0;
+  if(won){
+    S.wins++; earned+=300; S.money+=300;
+    S.winStreak=(S.winStreak||0)+1;
+    if(S.winStreak>=3){
+      S.money+=1000; earned+=1000;
+      S.winStreak=0;
+      showReward('🏆','WIN STREAK x3!','+$1000 BONUS!');
+    }
+    sv(S);
+  } else {
+    S.winStreak=0; sv(S);
+  }
   const r=getRank(S.wins),rp=getRank(prev);
   document.getElementById('resTtl').textContent=won?'🏆 VICTORY!':'💀 DEFEATED';
   document.getElementById('resTtl').style.color=won?'#55ff55':'#ff4444';
-  document.getElementById('resEarn').textContent=won?`+$300 earned  ·  Total: $${S.money.toLocaleString()}`:`Total: $${S.money.toLocaleString()}`;
+  document.getElementById('resEarn').textContent=won?`+$${earned} earned  ·  Total: $${S.money.toLocaleString()}`:`Total: $${S.money.toLocaleString()}`;
   document.getElementById('resRnk').innerHTML=(won&&r.n!==rp.n?`<span style="color:#55ff55">🎉 RANK UP → </span>`:``)+`<span style="color:${r.c}">★ ${r.n}</span>  ·  ${S.wins} wins`;
   show('sc-result');
 }
@@ -702,6 +856,140 @@ function mpBegin(d,iAm){
   },50);
 }
 function mpLeave(){if(peer){peer.destroy();peer=null;}mpConn=null;show('sc-title');}
+
+// ══════════════════════════════════════
+//  EARN MONEY METHODS
+// ══════════════════════════════════════
+function showReward(ico,title,sub){
+  document.getElementById('popIco').textContent=ico;
+  document.getElementById('popTitle').textContent=title;
+  document.getElementById('popSub').textContent=sub;
+  document.getElementById('rewardPopup').classList.add('on');
+}
+
+// Daily reward
+function claimDaily(){
+  const last=+localStorage.getItem('mcpvp_daily')||0;
+  const now=Date.now();
+  const oneDayMs=24*60*60*1000;
+  if(now-last<oneDayMs){
+    const remaining=Math.ceil((oneDayMs-(now-last))/3600000);
+    document.getElementById('dailyBtn').textContent=remaining+'H';
+    return;
+  }
+  S=ld();S.money+=500;sv(S);
+  localStorage.setItem('mcpvp_daily',now);
+  updateDailyBtn();
+  showReward('🌅','DAILY REWARD!','+$500 coins collected!');
+}
+function updateDailyBtn(){
+  const last=+localStorage.getItem('mcpvp_daily')||0;
+  const now=Date.now();
+  const oneDayMs=24*60*60*1000;
+  const btn=document.getElementById('dailyBtn');
+  if(!btn)return;
+  if(now-last<oneDayMs){
+    const h=Math.ceil((oneDayMs-(now-last))/3600000);
+    btn.textContent=h+'H LEFT';btn.disabled=true;
+  } else {
+    btn.textContent='CLAIM';btn.disabled=false;
+  }
+}
+
+// Mystery box (every 30 min)
+function claimMystery(){
+  const last=+localStorage.getItem('mcpvp_mystery')||0;
+  const now=Date.now();
+  const cooldown=30*60*1000;
+  if(now-last<cooldown)return;
+  const prizes=[100,200,300,500,800,1500];
+  const prize=prizes[Math.floor(Math.random()*prizes.length)];
+  S=ld();S.money+=prize;sv(S);
+  localStorage.setItem('mcpvp_mystery',now);
+  updateMysteryBtn();
+  showReward('🎁','MYSTERY BOX!',`You won $${prize}!`);
+}
+function updateMysteryBtn(){
+  const last=+localStorage.getItem('mcpvp_mystery')||0;
+  const now=Date.now();
+  const cooldown=30*60*1000;
+  const btn=document.getElementById('mysteryBtn');
+  const desc=document.getElementById('mysteryDesc');
+  const amt=document.getElementById('mysteryAmt');
+  if(!btn)return;
+  if(now-last<cooldown){
+    const m=Math.ceil((cooldown-(now-last))/60000);
+    btn.textContent=m+'M';btn.disabled=true;
+    if(desc)desc.textContent='Ready in '+m+' minutes';
+    if(amt)amt.textContent='LOCKED';
+  } else {
+    btn.textContent='OPEN';btn.disabled=false;
+    if(desc)desc.textContent='Ready to open!';
+    if(amt)amt.textContent='+$???';
+  }
+}
+// Update earn screen buttons when shown
+const origShow=show;
+window.show=function(id){
+  origShow(id);
+  if(id==='sc-earn'){updateDailyBtn();updateMysteryBtn();}
+};
+updateDailyBtn();updateMysteryBtn();
+setInterval(()=>{updateDailyBtn();updateMysteryBtn();},60000);
+
+// ══════════════════════════════════════
+//  ADMIN PANEL
+// ══════════════════════════════════════
+const ADMIN_PASS='67';
+function goAdmin(){
+  document.getElementById('adminLock').style.display='block';
+  document.getElementById('adminPanel').style.display='none';
+  document.getElementById('adminPass').value='';
+  document.getElementById('adminMsg').textContent='';
+  document.getElementById('adminDoneMsg').textContent='';
+  show('sc-admin');
+}
+function closeAdmin(){
+  document.getElementById('adminLock').style.display='block';
+  document.getElementById('adminPanel').style.display='none';
+  show('sc-title');
+}
+function adminUnlock(){
+  if(document.getElementById('adminPass').value===ADMIN_PASS){
+    document.getElementById('adminLock').style.display='none';
+    document.getElementById('adminPanel').style.display='block';
+    S=ld();
+    document.getElementById('adminMoney').value='';
+    document.getElementById('adminWins').value=S.wins;
+    document.getElementById('adminKills').value=S.kills;
+  } else {
+    document.getElementById('adminMsg').textContent='❌ Wrong password';
+  }
+}
+function adminGiveMoney(){
+  const amt=parseInt(document.getElementById('adminMoney').value)||0;
+  if(!amt)return;
+  S=ld();S.money+=amt;sv(S);
+  document.getElementById('adminDoneMsg').textContent=`✅ Gave $${amt.toLocaleString()}! Total: $${S.money.toLocaleString()}`;
+  document.getElementById('adminMoney').value='';
+  showReward('💰','ADMIN GIFT!',`+$${amt.toLocaleString()} added!`);
+}
+function adminSetWins(){
+  const w=parseInt(document.getElementById('adminWins').value)||0;
+  S=ld();S.wins=w;sv(S);
+  document.getElementById('adminDoneMsg').textContent=`✅ Wins set to ${w}`;
+}
+function adminSetKills(){
+  const k=parseInt(document.getElementById('adminKills').value)||0;
+  S=ld();S.kills=k;sv(S);
+  document.getElementById('adminDoneMsg').textContent=`✅ Kills set to ${k}`;
+}
+function adminReset(){
+  if(!confirm('Reset ALL data? This cannot be undone.'))return;
+  ['m2','w2','k2','s2','a2','os2','oa2','mcpvp_daily','mcpvp_mystery'].forEach(k=>localStorage.removeItem(k));
+  S=ld();
+  document.getElementById('adminDoneMsg').textContent='✅ All data reset';
+}
 </script>
 </body>
 </html>
