@@ -9,7 +9,7 @@
 body{background:#1a1a1a;font-family:'Courier New',monospace;color:#fff;overflow:hidden;}
 /* ── SCREENS ── */
 .screen{display:none;flex-direction:column;align-items:center;justify-content:center;
-  position:fixed;inset:0;z-index:20;background:#1a1a1a;}
+  position:fixed;inset:0;z-index:20;background:#1a1a1a;overflow-y:auto;padding:20px 0;}
 .screen.on{display:flex;}
 .mc-title{font-size:clamp(36px,6vw,70px);letter-spacing:8px;color:#55ff55;
   text-shadow:4px 4px 0 #1a6a1a;margin-bottom:6px;}
@@ -110,7 +110,7 @@ body{background:#1a1a1a;font-family:'Courier New',monospace;color:#fff;overflow:
   <button class="mc-btn btn-y" onclick="goShop(false)">⚒ SHOP</button>
   <button class="mc-btn btn-g" onclick="show('sc-earn')">💰 EARN MONEY</button>
   <button class="mc-btn btn-x" onclick="showStats()">📊 STATS</button>
-  <button class="mc-btn btn-x" onclick="goAdmin()">🔧 ADMIN</button>
+  <button class="mc-btn" style="border-color:#ff4444;color:#ff4444;" onclick="goAdmin()">🔧 ADMIN PANEL</button>
 </div>
 
 <!-- EARN MONEY -->
