@@ -403,20 +403,9 @@ function onPlayerFinish(){
 // ══════════════════════════════════
 //  DRAW
 // ══════════════════════════════════
+let worldRot=0;
+
 function drawTrack(){
-  // Grass
-  ctx.fillStyle='#2a5a12';
-  ctx.fillRect(0,0,CW,CH);
-  // Grass texture spots
-  for(let i=0;i<80;i++){
-    const gx=(i*173%WW)-camX,gy=(i*97%WH)-camY;
-    if(gx>-10&&gx<CW+10&&gy>-10&&gy<CH+10){
-      ctx.fillStyle='rgba(0,0,0,.07)';
-      ctx.fillRect(gx,gy,30,20);
-    }
-  }
-  ctx.save();
-  ctx.translate(-camX,-camY);
   // Curb (alternating red/white)
   for(let i=0;i<TPL;i++){
     const seg=Math.floor(i/8);
@@ -426,15 +415,14 @@ function drawTrack(){
     ctx.lineTo(TP[(i+1)%TPL][0],TP[(i+1)%TPL][1]);
     ctx.stroke();
   }
-  // Road (single pass for performance)
+  // Road
   ctx.lineWidth=TW;ctx.lineCap='round';ctx.lineJoin='round';
   ctx.strokeStyle='#3a3a3a';
   ctx.beginPath();ctx.moveTo(TP[0][0],TP[0][1]);
   for(const [px,py] of TP)ctx.lineTo(px,py);
   ctx.closePath();ctx.stroke();
   // Road grain
-  ctx.strokeStyle='#454545';
-  ctx.lineWidth=TW-4;
+  ctx.strokeStyle='#454545';ctx.lineWidth=TW-4;
   ctx.beginPath();ctx.moveTo(TP[0][0],TP[0][1]);
   for(const [px,py] of TP)ctx.lineTo(px,py);
   ctx.closePath();ctx.stroke();
@@ -458,17 +446,14 @@ function drawTrack(){
     ctx.fillRect(-8,-3,4,6);ctx.fillRect(4,-3,4,6);
     ctx.restore();
   }
-  ctx.restore();
 }
 
 function rrect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.arcTo(x+w,y,x+w,y+r,r);c.lineTo(x+w,y+h-r);c.arcTo(x+w,y+h,x+w-r,y+h,r);c.lineTo(x+r,y+h);c.arcTo(x,y+h,x,y+h-r,r);c.lineTo(x,y+r);c.arcTo(x,y,x+r,y,r);c.closePath();}
 
 function drawCar(car){
-  const sx=car.x-camX,sy=car.y-camY;
-  if(sx<-60||sx>CW+60||sy<-60||sy>CH+60)return;
   const hl=car.len/2,hw=car.wid/2;
   const wl=10,ww=5;
-  ctx.save();ctx.translate(sx,sy);ctx.rotate(car.angle);
+  ctx.save();ctx.translate(car.x,car.y);ctx.rotate(car.angle);
   // Shadow
   ctx.fillStyle='rgba(0,0,0,.3)';
   ctx.save();ctx.scale(1.05,1.05);
@@ -498,13 +483,13 @@ function drawCar(car){
   ctx.fillStyle='rgba(0,0,0,.15)';
   ctx.fillRect(-hl+12,-hw+3,car.len-24,car.wid-6);
   ctx.restore();
-  // Name tag above car
-  ctx.save();ctx.translate(sx,sy);
+  // Name tag above car (counter-rotate so text stays readable)
+  ctx.save();ctx.translate(car.x,car.y);ctx.rotate(-worldRot);
   const posStr=['','1ST','2ND','3RD','4TH'][Math.min(car.pos,4)];
   ctx.fillStyle='rgba(0,0,0,.65)';ctx.fillRect(-20,-hw-32,40,13);
   ctx.fillStyle=car.isPlayer?'#55ff55':car.col;
   ctx.font='bold 8px Impact';ctx.textAlign='center';
-  ctx.fillText((car.isPlayer?'YOU ':'')+posStr,-0,-hw-22);
+  ctx.fillText((car.isPlayer?'YOU ':'')+posStr,0,-hw-22);
   ctx.restore();
 }
 
@@ -602,21 +587,34 @@ function loop(ts){
   }
   if(raceStarted)updatePositions();
 
-  // Camera
+  // Camera tracks player
   const pl=cars[0];
-  camX+=(pl.x-CW/2-camX)*.12;
-  camY+=(pl.y-CH/2-camY)*.12;
-  camX=Math.max(0,Math.min(WW-CW,camX));
-  camY=Math.max(0,Math.min(WH-CH,camY));
+  // Smoothly rotate world so player always faces UP (north on screen)
+  let targetRot=-pl.angle - Math.PI/2;
+  // Smooth angle interpolation
+  let diff=targetRot-worldRot;
+  while(diff>Math.PI)diff-=2*Math.PI;
+  while(diff<-Math.PI)diff+=2*Math.PI;
+  worldRot+=diff*0.12;
 
   // Skid marks decay
   for(const s of skidmarks)s.life-=.5;
   skidmarks=skidmarks.filter(s=>s.life>0).slice(-120);
 
-  // Render
+  // Render — rotate entire world around player's screen position
   ctx.clearRect(0,0,CW,CH);
+  ctx.fillStyle='#2a5a12';ctx.fillRect(0,0,CW,CH);
+
+  // Apply camera transform: translate to screen center, rotate, then offset by world pos
+  ctx.save();
+  ctx.translate(CW/2, CH*0.58); // player slightly below center feels more natural
+  ctx.rotate(worldRot);
+  ctx.translate(-pl.x, -pl.y);
+
   drawTrack();
   [...cars].sort((a,b)=>a.y-b.y).forEach(drawCar);
+
+  ctx.restore();
 
   // HUD
   hudT+=dt;if(hudT>60){hudT=0;updateHUD(pl);}
