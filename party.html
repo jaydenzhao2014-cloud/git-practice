@@ -304,11 +304,9 @@ label{font-size:11px;letter-spacing:2px;color:#999;margin-bottom:5px;display:blo
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
     <div class="user-badge" id="userBadge">👤 <span id="userLabel">–</span></div>
     <!-- Language switcher -->
-    <div style="position:relative;">
-      <select id="langSelect" onchange="changeLanguage(this.value)" style="background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.5);border-radius:8px;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;max-width:130px;">
-        <option value="en">🌐 EN – English</option>
-      </select>
-    </div>
+    <select id="langSelect" onchange="changeLanguage(this.value)" style="background:#fff;border:none;border-radius:10px;color:#7722cc;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;max-width:160px;box-shadow:0 2px 10px rgba(0,0,0,.2);">
+      <option value="en">🌐 EN – English</option>
+    </select>
     <button onclick="document.getElementById('confirmModal').classList.add('show')" style="padding:7px 14px;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.6);color:#fff;border-radius:8px;cursor:pointer;font-size:11px;letter-spacing:1px;font-weight:700;">🎊 NEW PARTY</button>
     <button class="logout-btn" onclick="doLogout()" style="border-color:rgba(255,255,255,.5);color:#fff;background:rgba(255,255,255,.1);">⏏ LOG OUT</button>
     <a href="https://jaydenzhao2014-cloud.github.io/git-practice/games.html" style="font-size:11px;color:rgba(255,255,255,.8);text-decoration:none;letter-spacing:2px;font-weight:700;">◀ GAMES</a>
