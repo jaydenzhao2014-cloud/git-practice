@@ -1023,28 +1023,27 @@ function closeLangPicker(){document.getElementById('langModal').style.display='n
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLangPicker();});
 
 function renderLangGrid(list){
-  document.getElementById('langGrid').innerHTML=list.map(l=>`
-    <div onclick="pickLang('${l.code}','${l.flag}','${l.name.replace(/'/g,'&#39;')}')"
-      style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;cursor:pointer;border:2px solid ${currentLang===l.code?'#cc44ff':'#eee'};background:${currentLang===l.code?'#f5e8ff':'#fafafa'};transition:all .12s;font-size:13px;font-weight:600;"
-      onmouseover="this.style.background='#f0e8ff';this.style.borderColor='#cc88ff'"
-      onmouseout="this.style.background='${currentLang===l.code?'#f5e8ff':'#fafafa'}';this.style.borderColor='${currentLang===l.code?'#cc44ff':'#eee'}'">
-      <span style="font-size:18px">${l.flag}</span>
-      <div>
-        <div style="color:#333">${l.name}</div>
-        <div style="font-size:10px;color:#bbb;letter-spacing:1px">${l.code.toUpperCase()}</div>
-      </div>
-    </div>`).join('');
+  const grid=document.getElementById('langGrid');
+  grid.innerHTML='';
+  list.forEach(l=>{
+    const d=document.createElement('div');
+    d.style.cssText='display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;cursor:pointer;border:2px solid '+(currentLang===l.code?'#cc44ff':'#eee')+';background:'+(currentLang===l.code?'#f5e8ff':'#fafafa')+';transition:all .12s;font-size:13px;font-weight:600;';
+    d.innerHTML='<span style="font-size:20px">'+l.flag+'</span><div><div style="color:#333">'+l.name+'</div><div style="font-size:10px;color:#bbb;letter-spacing:1px">'+l.code.toUpperCase()+'</div></div>';
+    d.addEventListener('mouseenter',()=>{d.style.background='#f0e8ff';d.style.borderColor='#cc88ff';});
+    d.addEventListener('mouseleave',()=>{d.style.background=currentLang===l.code?'#f5e8ff':'#fafafa';d.style.borderColor=currentLang===l.code?'#cc44ff':'#eee';});
+    d.addEventListener('click',()=>{
+      currentLang=l.code;
+      document.getElementById('langBtn').textContent=l.flag+' '+l.code.toUpperCase()+' – '+l.name;
+      changeLanguage(l.code);
+      closeLangPicker();
+    });
+    grid.appendChild(d);
+  });
 }
 
 function filterLangs(){
   const q=document.getElementById('langSearch').value.toLowerCase();
   renderLangGrid(LANGUAGES.filter(l=>l.name.toLowerCase().includes(q)||l.code.toLowerCase().includes(q)));
-}
-
-function pickLang(code,flag,name){
-  closeLangPicker();
-  document.getElementById('langBtn').textContent=flag+' '+code.toUpperCase()+' – '+name;
-  changeLanguage(code);
 }
 
 function changeLanguage(code){
