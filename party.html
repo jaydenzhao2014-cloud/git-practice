@@ -191,6 +191,18 @@ label{font-size:11px;letter-spacing:2px;color:#999;margin-bottom:5px;display:blo
 </head>
 <body>
 
+<!-- LANGUAGE PICKER MODAL -->
+<div id="langModal" style="display:none;position:fixed;inset:0;background:rgba(180,150,255,.25);backdrop-filter:blur(10px);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:22px;padding:24px;width:min(620px,96vw);max-height:85vh;display:flex;flex-direction:column;box-shadow:0 12px 60px rgba(150,80,255,.3);border:3px solid #ddc8ff;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="font-size:18px;font-weight:900;letter-spacing:3px;background:linear-gradient(90deg,#cc44ff,#ff44aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">🌐 PICK A LANGUAGE</div>
+      <button onclick="closeLangPicker()" style="background:#f5e8ff;border:none;border-radius:8px;padding:6px 12px;font-size:18px;cursor:pointer;color:#aa44ff;font-weight:900;">✕</button>
+    </div>
+    <input id="langSearch" placeholder="🔍 Search language..." oninput="filterLangs()" style="background:#f8f4ff;border:2px solid #ddc8ff;border-radius:10px;color:#333;padding:10px 14px;font-size:14px;width:100%;margin-bottom:14px;">
+    <div id="langGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;overflow-y:auto;max-height:55vh;padding-right:4px;"></div>
+  </div>
+</div>
+
 <!-- SETUP MODAL -->
 <div class="modal" id="setupModal">
   <div class="modal-box">
@@ -304,9 +316,7 @@ label{font-size:11px;letter-spacing:2px;color:#999;margin-bottom:5px;display:blo
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
     <div class="user-badge" id="userBadge">👤 <span id="userLabel">–</span></div>
     <!-- Language switcher -->
-    <select id="langSelect" onchange="changeLanguage(this.value)" style="background:#fff;border:none;border-radius:10px;color:#7722cc;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;max-width:160px;box-shadow:0 2px 10px rgba(0,0,0,.2);">
-      <option value="en">🌐 EN – English</option>
-    </select>
+    <button onclick="openLangPicker()" id="langBtn" style="background:#fff;border:none;border-radius:10px;color:#7722cc;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.2);white-space:nowrap;">🌐 EN – English</button>
     <button onclick="document.getElementById('confirmModal').classList.add('show')" style="padding:7px 14px;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.6);color:#fff;border-radius:8px;cursor:pointer;font-size:11px;letter-spacing:1px;font-weight:700;">🎊 NEW PARTY</button>
     <button class="logout-btn" onclick="doLogout()" style="border-color:rgba(255,255,255,.5);color:#fff;background:rgba(255,255,255,.1);">⏏ LOG OUT</button>
     <a href="https://jaydenzhao2014-cloud.github.io/git-practice/games.html" style="font-size:11px;color:rgba(255,255,255,.8);text-decoration:none;letter-spacing:2px;font-weight:700;">◀ GAMES</a>
@@ -1003,10 +1013,38 @@ const TRANSLATIONS={
 
 let currentLang='en';
 
-function buildLangDropdown(){
-  const sel=document.getElementById('langSelect');
-  sel.innerHTML=LANGUAGES.map(l=>`<option value="${l.code}">${l.flag} ${l.code.toUpperCase()} – ${l.name}</option>`).join('');
-  sel.value='en';
+function openLangPicker(){
+  document.getElementById('langModal').style.display='flex';
+  document.getElementById('langSearch').value='';
+  renderLangGrid(LANGUAGES);
+  setTimeout(()=>document.getElementById('langSearch').focus(),100);
+}
+function closeLangPicker(){document.getElementById('langModal').style.display='none';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLangPicker();});
+
+function renderLangGrid(list){
+  document.getElementById('langGrid').innerHTML=list.map(l=>`
+    <div onclick="pickLang('${l.code}','${l.flag}','${l.name.replace(/'/g,'&#39;')}')"
+      style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;cursor:pointer;border:2px solid ${currentLang===l.code?'#cc44ff':'#eee'};background:${currentLang===l.code?'#f5e8ff':'#fafafa'};transition:all .12s;font-size:13px;font-weight:600;"
+      onmouseover="this.style.background='#f0e8ff';this.style.borderColor='#cc88ff'"
+      onmouseout="this.style.background='${currentLang===l.code?'#f5e8ff':'#fafafa'}';this.style.borderColor='${currentLang===l.code?'#cc44ff':'#eee'}'">
+      <span style="font-size:18px">${l.flag}</span>
+      <div>
+        <div style="color:#333">${l.name}</div>
+        <div style="font-size:10px;color:#bbb;letter-spacing:1px">${l.code.toUpperCase()}</div>
+      </div>
+    </div>`).join('');
+}
+
+function filterLangs(){
+  const q=document.getElementById('langSearch').value.toLowerCase();
+  renderLangGrid(LANGUAGES.filter(l=>l.name.toLowerCase().includes(q)||l.code.toLowerCase().includes(q)));
+}
+
+function pickLang(code,flag,name){
+  closeLangPicker();
+  document.getElementById('langBtn').textContent=flag+' '+code.toUpperCase()+' – '+name;
+  changeLanguage(code);
 }
 
 function changeLanguage(code){
@@ -1026,7 +1064,7 @@ function changeLanguage(code){
   const addGuestBtn=document.getElementById('addGuestBtn');if(addGuestBtn)addGuestBtn.textContent=t.addBtn||'🎉 ADD TO GUEST LIST';
 }
 
-buildLangDropdown();
+
 </script>
 </body>
 </html>
