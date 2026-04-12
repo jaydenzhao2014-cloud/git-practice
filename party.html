@@ -191,19 +191,6 @@ label{font-size:11px;letter-spacing:2px;color:#999;margin-bottom:5px;display:blo
 </head>
 <body>
 
-<!-- LANGUAGE PICKER MODAL -->
-<div id="langModal" style="display:none;position:fixed;inset:0;background:rgba(180,150,255,.3);backdrop-filter:blur(10px);z-index:500;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:22px;padding:24px;width:min(640px,96vw);height:min(600px,90vh);display:flex;flex-direction:column;box-shadow:0 12px 60px rgba(150,80,255,.35);border:3px solid #ddc8ff;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-shrink:0;">
-      <div style="font-size:17px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#cc44ff,#ff44aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">🌐 PICK A LANGUAGE</div>
-      <button id="langCloseBtn" style="background:#f5e8ff;border:none;border-radius:8px;padding:6px 14px;font-size:18px;cursor:pointer;color:#aa44ff;font-weight:900;line-height:1;">✕</button>
-    </div>
-    <input id="langSearch" placeholder="Search language name or code..." style="background:#f8f4ff;border:2px solid #ddc8ff;border-radius:10px;color:#333;padding:10px 14px;font-size:14px;width:100%;margin-bottom:12px;flex-shrink:0;box-sizing:border-box;">
-    <div style="font-size:11px;color:#bbb;letter-spacing:1px;margin-bottom:10px;flex-shrink:0;" id="langCount">197 languages</div>
-    <div id="langGrid" style="flex:1;overflow-y:scroll;display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:8px;align-content:start;padding-right:6px;"></div>
-  </div>
-</div>
-
 <!-- SETUP MODAL -->
 <div class="modal" id="setupModal">
   <div class="modal-box">
@@ -317,7 +304,7 @@ label{font-size:11px;letter-spacing:2px;color:#999;margin-bottom:5px;display:blo
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
     <div class="user-badge" id="userBadge">👤 <span id="userLabel">–</span></div>
     <!-- Language switcher -->
-    <button onclick="openLangPicker()" id="langBtn" style="background:#fff;border:none;border-radius:10px;color:#7722cc;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.2);white-space:nowrap;">🌐 EN – English</button>
+    <select id="langSelect" style="background:#fff;border:none;border-radius:10px;color:#7722cc;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.2);max-width:160px;"></select>
     <button onclick="document.getElementById('confirmModal').classList.add('show')" style="padding:7px 14px;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.6);color:#fff;border-radius:8px;cursor:pointer;font-size:11px;letter-spacing:1px;font-weight:700;">🎊 NEW PARTY</button>
     <button class="logout-btn" onclick="doLogout()" style="border-color:rgba(255,255,255,.5);color:#fff;background:rgba(255,255,255,.1);">⏏ LOG OUT</button>
     <a href="https://jaydenzhao2014-cloud.github.io/git-practice/games.html" style="font-size:11px;color:rgba(255,255,255,.8);text-decoration:none;letter-spacing:2px;font-weight:700;">◀ GAMES</a>
@@ -1014,50 +1001,21 @@ const TRANSLATIONS={
 
 let currentLang='en';
 
-// Wire up lang modal buttons after DOM ready
-window.addEventListener('load',()=>{
-  document.getElementById('langCloseBtn').addEventListener('click',closeLangPicker);
-  document.getElementById('langSearch').addEventListener('input',function(){
-    const q=this.value.toLowerCase().trim();
-    const filtered=q?LANGUAGES.filter(l=>l.name.toLowerCase().includes(q)||l.code.toLowerCase().includes(q)):LANGUAGES;
-    document.getElementById('langCount').textContent=filtered.length+' language'+(filtered.length===1?'':'s');
-    renderLangGrid(filtered);
+// Build the native select with all 197 languages
+(function buildLangSelect(){
+  const sel=document.getElementById('langSelect');
+  LANGUAGES.forEach(l=>{
+    const o=document.createElement('option');
+    o.value=l.code;
+    o.textContent=l.flag+' '+l.name;
+    sel.appendChild(o);
   });
-  document.getElementById('langModal').addEventListener('click',function(e){
-    if(e.target===this)closeLangPicker();
+  sel.value='en';
+  sel.addEventListener('change',function(){
+    const l=LANGUAGES.find(x=>x.code===this.value);
+    if(l)changeLanguage(l.code);
   });
-});
-
-function openLangPicker(){
-  const modal=document.getElementById('langModal');
-  modal.style.display='flex';
-  document.getElementById('langSearch').value='';
-  document.getElementById('langCount').textContent='197 languages';
-  renderLangGrid(LANGUAGES);
-  setTimeout(()=>document.getElementById('langSearch').focus(),80);
-}
-function closeLangPicker(){document.getElementById('langModal').style.display='none';}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLangPicker();});
-
-function renderLangGrid(list){
-  const grid=document.getElementById('langGrid');
-  grid.innerHTML='';
-  list.forEach(l=>{
-    const active=currentLang===l.code;
-    const d=document.createElement('div');
-    d.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;border:2px solid '+(active?'#cc44ff':'#e8e0ff')+';background:'+(active?'#f5e8ff':'#fafafe')+';font-size:13px;font-weight:600;transition:background .1s,border-color .1s;';
-    d.innerHTML='<span style="font-size:22px;flex-shrink:0">'+l.flag+'</span><div style="overflow:hidden"><div style="color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+l.name+'</div><div style="font-size:10px;color:#bbb;font-weight:700">'+l.code.toUpperCase()+'</div></div>';
-    d.addEventListener('mouseenter',()=>{if(!active){d.style.background='#ede8ff';d.style.borderColor='#bb88ff';}});
-    d.addEventListener('mouseleave',()=>{if(!active){d.style.background='#fafafe';d.style.borderColor='#e8e0ff';}});
-    d.addEventListener('click',()=>{
-      currentLang=l.code;
-      document.getElementById('langBtn').textContent=l.flag+' '+l.code.toUpperCase()+' – '+l.name;
-      changeLanguage(l.code);
-      closeLangPicker();
-    });
-    grid.appendChild(d);
-  });
-}
+})();
 
 function changeLanguage(code){
   currentLang=code;
