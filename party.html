@@ -1026,11 +1026,16 @@ function changeLanguage(code){
 <!-- GOOGLE TRANSLATE -->
 <div id="google_translate_element" style="position:fixed;bottom:20px;right:20px;z-index:9999;background:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 6px 28px rgba(150,80,255,.45);border:3px solid #cc44ff;"></div>
 <script>
+// Always reset to English on load
+document.cookie='googtrans=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
+document.cookie='googtrans=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;domain=.'+location.hostname;
+
 function googleTranslateElementInit(){
   new google.translate.TranslateElement({
     pageLanguage:'en',
     includedLanguages:'af,sq,am,ar,hy,az,eu,be,bn,bs,bg,ca,ceb,zh-CN,co,hr,cs,da,nl,en,eo,et,fi,fr,fy,gl,ka,de,el,gu,ht,ha,haw,hi,hmn,hu,is,ig,id,ga,it,ja,jv,kn,kk,km,rw,ko,ku,ky,lo,la,lv,lt,lb,mk,mg,ms,ml,mt,mi,mr,mn,my,ne,no,ny,or,ps,fa,pl,pt,pa,ro,ru,sm,gd,sr,st,sn,sd,si,sk,sl,so,es,su,sw,sv,tl,tg,ta,tt,te,th,tr,tk,uk,ur,ug,uz,vi,cy,xh,yi,yo,zu',
-    layout:google.translate.TranslateElement.InlineLayout.SIMPLE
+    layout:google.translate.TranslateElement.InlineLayout.SIMPLE,
+    autoDisplay:false
   },'google_translate_element');
 }
 </script>
