@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>2D Minecraft</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000;display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;}
+canvas{display:block;}
+#hotbar{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:4px;background:rgba(0,0,0,.5);padding:6px;border-radius:10px;}
+.slot{width:52px;height:52px;background:rgba(120,120,120,.6);border:2px solid #666;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:22px;position:relative;color:#fff;}
+.slot.active{border-color:#fff;background:rgba(200,200,200,.5);}
+.slot-num{position:absolute;bottom:2px;right:4px;font-size:9px;color:#ddd;}
+.slot-count{position:absolute;top:2px;right:4px;font-size:9px;color:#ff0;}
+#debug{position:fixed;top:8px;left:8px;color:#fff;font-size:11px;background:rgba(0,0,0,.6);padding:6px 10px;border-radius:8px;line-height:1.6;}
+#hud{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);display:flex;gap:3px;}
+#tooltip{position:fixed;top:8px;left:50%;transform:translateX(-50%);color:#fff;font-size:13px;font-weight:700;background:rgba(0,0,0,.6);padding:5px 14px;border-radius:8px;pointer-events:none;}
+#controls{position:fixed;top:8px;right:8px;color:#fff;font-size:11px;background:rgba(0,0,0,.6);padding:8px;border-radius:8px;line-height:1.8;}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hotbar"></div>
+<div id="hud"></div>
+<div id="debug"></div>
+<div id="tooltip"></div>
+<div id="controls">
+  WASD / Arrows = Move<br>
+  Space = Jump<br>
+  Left Click = Break<br>
+  Right Click = Place<br>
+  Scroll / 1-9 = Select block
+</div>
+
+<script>
+// ═══ CONSTANTS ═══
+const BS = 32; // block size px
+const WW = 256, WH = 128; // world size
+const GRAV = 0.45, JUMP = -9.5, SPEED = 3.8;
+
+const B = {AIR:0,GRASS:1,DIRT:2,STONE:3,LOG:4,LEAVES:5,SAND:6,WATER:7,
+           COAL:8,IRON:9,GOLD:10,DIAMOND:11,BEDROCK:12,GRAVEL:13,PLANKS:14,GLASS:15,TORCH:16};
+
+const COLORS = {
+  1:'#5a9e3a',2:'#8B5E3C',3:'#888888',4:'#5c3d1a',5:'#2d8a2d',
+  6:'#e8d56e',7:'rgba(50,100,200,0.7)',8:'#666',9:'#aaa',10:'#c8a000',
+  11:'#00cccc',12:'#333',13:'#999',14:'#c8a05a',15:'rgba(180,220,255,0.35)',16:'#ffaa00'
+};
+const EMOJIS = {1:'🟩',2:'🟫',3:'⬜',4:'🪵',5:'🍃',6:'🟨',7:'💧',8:'⚫',9:'⚪',10:'🟡',11:'💎',12:'⬛',13:'🪨',14:'🟧',15:'🔷',16:'🕯️'};
+const NAMES = {1:'Grass',2:'Dirt',3:'Stone',4:'Wood Log',5:'Leaves',6:'Sand',7:'Water',8:'Coal Ore',9:'Iron Ore',10:'Gold Ore',11:'Diamond',12:'Bedrock',13:'Gravel',14:'Planks',15:'Glass',16:'Torch'};
+const HARD = {1:1,2:1,3:4,4:3,5:0.5,6:1,7:0,8:5,9:6,10:7,11:9,12:Infinity,13:1.5,14:2,15:0.5,16:0.2};
+
+// ═══ CANVAS ═══
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+const CW = canvas.width, CH = canvas.height;
+window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
+
+// ═══ WORLD ═══
+const world = new Uint8Array(WW * WH);
+const getB = (x,y) => (x<0||x>=WW||y<0||y>=WH) ? (y>=WH?B.BEDROCK:B.AIR) : world[y*WW+x];
+const setB = (x,y,t) => { if(x>=0&&x<WW&&y>=0&&y<WH) world[y*WW+x]=t; };
+const solid = (x,y) => { const b=getB(x,y); return b!==B.AIR&&b!==B.WATER&&b!==B.GLASS&&b!==B.TORCH&&b!==B.LEAVES; };
+
+function genWorld() {
+  const heights = [];
+  for(let x=0;x<WW;x++) {
+    let h=64 + Math.sin(x*0.05)*7 + Math.sin(x*0.02)*14 + Math.sin(x*0.1)*3 + Math.sin(x*0.008)*18;
+    heights.push(Math.round(h));
+  }
+  for(let x=0;x<WW;x++) {
+    const sy=heights[x];
+    for(let y=0;y<WH;y++) {
+      if(y>=WH-1){setB(x,y,B.BEDROCK);continue;}
+      if(y<sy){setB(x,y,B.AIR);continue;}
+      if(y===sy) { setB(x,y,sy>72?B.SAND:B.GRASS); continue; }
+      if(y<sy+4) { setB(x,y,sy>72?B.SAND:B.DIRT); continue; }
+      const r=Math.random();
+      if(r<0.012)setB(x,y,B.COAL);
+      else if(r<0.018&&y>sy+15)setB(x,y,B.IRON);
+      else if(r<0.021&&y>sy+25)setB(x,y,B.GOLD);
+      else if(r<0.024&&y>sy+38)setB(x,y,B.DIAMOND);
+      else if(r<0.03)setB(x,y,B.GRAVEL);
+      else setB(x,y,B.STONE);
+    }
+  }
+  // Water fill
+  for(let x=0;x<WW;x++) for(let y=72;y<WH-1;y++) if(getB(x,y)===B.AIR) setB(x,y,B.WATER);
+  // Caves
+  for(let i=0;i<80;i++) {
+    let cx=Math.random()*WW, cy=heights[Math.floor(cx)]+8+Math.random()*(WH-30);
+    let dir=Math.random()*Math.PI*2;
+    for(let s=0;s<80+Math.random()*60;s++) {
+      dir+=(Math.random()-.5)*.5;
+      cx+=Math.cos(dir); cy+=Math.sin(dir)*.5;
+      const r=1+Math.random()*2;
+      for(let dx=-r;dx<=r;dx++) for(let dy=-r;dy<=r;dy++) {
+        if(dx*dx+dy*dy<=r*r){const bx=Math.round(cx+dx),by=Math.round(cy+dy);const b=getB(bx,by);if(b&&b!==B.BEDROCK&&b!==B.WATER)setB(bx,by,B.AIR);}
+      }
+    }
+  }
+  // Trees
+  for(let x=5;x<WW-5;x+=Math.floor(5+Math.random()*7)) {
+    const y=heights[x];
+    if(y>70||getB(x,y)!==B.GRASS) continue;
+    const th=4+Math.floor(Math.random()*3);
+    for(let i=1;i<=th;i++) setB(x,y-i,B.LOG);
+    for(let lx=-2;lx<=2;lx++) for(let ly=-2;ly<=1;ly++) {
+      if(Math.abs(lx)+Math.abs(ly)<=3&&getB(x+lx,y-th+ly)===B.AIR) setB(x+lx,y-th+ly,B.LEAVES);
+    }
+  }
+  return heights;
+}
+
+// ═══ PLAYER ═══
+const pl = {x:0,y:0,w:BS*.8,h:BS*1.8,vx:0,vy:0,onGround:false,health:10,reach:5};
+
+function findSpawn(heights) {
+  const sx=Math.floor(WW/2);
+  pl.x=sx*BS+BS/2-pl.w/2;
+  pl.y=(heights[sx]-2)*BS;
+}
+
+// ═══ HOTBAR ═══
+const hotbar=[
+  {type:B.PLANKS},{type:B.DIRT},{type:B.STONE},{type:B.GLASS},
+  {type:B.TORCH},{type:B.SAND},{type:B.LOG},{type:B.LEAVES},{type:B.GRAVEL}
+];
+let selSlot=0;
+const collected={};
+
+function buildHotbar() {
+  const el=document.getElementById('hotbar');
+  el.innerHTML=hotbar.map((s,i)=>`
+    <div class="slot ${i===selSlot?'active':''}" onclick="selSlot=${i};buildHotbar()">
+      ${EMOJIS[s.type]||''}
+      <span class="slot-num">${i+1}</span>
+    </div>`).join('');
+}
+
+// ═══ CAMERA ═══
+let camX=0,camY=0;
+function updateCam() {
+  camX=pl.x+pl.w/2-CW/2;
+  camY=pl.y+pl.h/2-CH*.45;
+  camX=Math.max(0,Math.min(camX,WW*BS-CW));
+  camY=Math.max(0,Math.min(camY,WH*BS-CH));
+}
+
+// ═══ INPUT ═══
+const keys={};
+let mX=0,mY=0,mLeft=false,mRight=false;
+let breakProg=0,breakTgt={x:-1,y:-1};
+
+document.addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();if(e.key>='1'&&e.key<='9'){selSlot=+e.key-1;buildHotbar();}});
+document.addEventListener('keyup',e=>keys[e.code]=false);
+canvas.addEventListener('mousemove',e=>{mX=e.clientX;mY=e.clientY;});
+canvas.addEventListener('mousedown',e=>{if(e.button===0)mLeft=true;if(e.button===2)mRight=true;});
+canvas.addEventListener('mouseup',e=>{if(e.button===0){mLeft=false;breakProg=0;breakTgt={x:-1,y:-1};}if(e.button===2)mRight=false;});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+canvas.addEventListener('wheel',e=>{selSlot=(selSlot+(e.deltaY>0?1:-1)+hotbar.length)%hotbar.length;buildHotbar();});
+
+// ═══ PHYSICS ═══
+function updatePlayer() {
+  if(keys['ArrowLeft']||keys['KeyA'])pl.vx=-SPEED;
+  else if(keys['ArrowRight']||keys['KeyD'])pl.vx=SPEED;
+  else pl.vx*=0.65;
+  if((keys['Space']||keys['ArrowUp']||keys['KeyW'])&&pl.onGround){pl.vy=JUMP;pl.onGround=false;}
+  pl.vy=Math.min(pl.vy+GRAV,22);
+  pl.x+=pl.vx; resolveX();
+  pl.y+=pl.vy; resolveY();
+}
+
+function resolveX() {
+  const l=Math.floor(pl.x/BS),r=Math.floor((pl.x+pl.w-1)/BS);
+  const t=Math.floor(pl.y/BS),b=Math.floor((pl.y+pl.h-1)/BS);
+  for(let y=t;y<=b;y++){
+    if(solid(l,y)){pl.x=(l+1)*BS;pl.vx=0;break;}
+    if(solid(r,y)){pl.x=r*BS-pl.w;pl.vx=0;break;}
+  }
+  pl.x=Math.max(0,Math.min(pl.x,WW*BS-pl.w));
+}
+
+function resolveY() {
+  pl.onGround=false;
+  const l=Math.floor(pl.x/BS),r=Math.floor((pl.x+pl.w-1)/BS);
+  const t=Math.floor(pl.y/BS),b=Math.floor((pl.y+pl.h-1)/BS);
+  for(let x=l;x<=r;x++){
+    if(solid(x,t)){pl.y=(t+1)*BS;pl.vy=0;break;}
+    if(solid(x,b)){pl.y=b*BS-pl.h;pl.vy=0;pl.onGround=true;break;}
+  }
+  if(pl.y<0){pl.y=0;pl.vy=0;}
+}
+
+// ═══ INTERACTION ═══
+function getTarget() {
+  const wx=(mX+camX)/BS, wy=(mY+camY)/BS;
+  const bx=Math.floor(wx),by=Math.floor(wy);
+  const px=(pl.x+pl.w/2)/BS, py=(pl.y+pl.h/2)/BS;
+  if(Math.hypot(bx-px,by-py)>pl.reach) return null;
+  return {x:bx,y:by};
+}
+
+function handleBreak(dt) {
+  if(!mLeft){breakProg=0;breakTgt={x:-1,y:-1};return;}
+  const t=getTarget(); if(!t){breakProg=0;return;}
+  if(t.x!==breakTgt.x||t.y!==breakTgt.y){breakProg=0;breakTgt=t;}
+  const b=getB(t.x,t.y);
+  if(!b||b===B.AIR) return;
+  const h=HARD[b]??1; if(h===Infinity) return;
+  breakProg+=dt/(h*300);
+  if(breakProg>=1){
+    collected[b]=(collected[b]||0)+1;
+    setB(t.x,t.y,B.AIR);
+    breakProg=0;breakTgt={x:-1,y:-1};
+  }
+}
+
+let lastPlace=0;
+function handlePlace() {
+  if(!mRight) return;
+  const now=Date.now(); if(now-lastPlace<220) return;
+  const t=getTarget(); if(!t) return;
+  if(getB(t.x,t.y)!==B.AIR&&getB(t.x,t.y)!==B.WATER) return;
+  // Don't place inside player
+  const px=Math.floor(pl.x/BS),py=Math.floor(pl.y/BS);
+  for(let dx=0;dx<=1;dx++) for(let dy=0;dy<=1;dy++) if(t.x===px+dx&&t.y===py+dy) return;
+  setB(t.x,t.y,hotbar[selSlot].type);
+  lastPlace=now;
+}
+
+// ═══ DRAW ═══
+function drawSky() {
+  const g=ctx.createLinearGradient(0,0,0,CH);
+  g.addColorStop(0,'#5da8e8');g.addColorStop(1,'#c5e8ff');
+  ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
+  // Sun
+  ctx.fillStyle='#FFE566';
+  ctx.beginPath();ctx.arc(CW*.82-camX*.008,CH*.12,26,0,Math.PI*2);ctx.fill();
+  // Clouds
+  [[180,55,90],[480,38,110],[820,65,75]].forEach(([cx,cy,w])=>drawCloud(cx-camX*.04,cy,w));
+}
+
+function drawCloud(x,y,w) {
+  ctx.fillStyle='rgba(255,255,255,0.88)';
+  [[0,0,w/2,18],[-(w/3),6,w/4,13],[w/4,5,w/3,15]].forEach(([dx,dy,rx,ry])=>{
+    ctx.beginPath();ctx.ellipse(x+dx,y+dy,rx,ry,0,0,Math.PI*2);ctx.fill();
+  });
+}
+
+function drawBlock(x,y,type) {
+  const sx=x*BS-camX, sy=y*BS-camY;
+  if(sx+BS<0||sx>CW||sy+BS<0||sy>CH) return;
+  ctx.fillStyle=COLORS[type]||'#f0f';
+  ctx.fillRect(sx,sy,BS,BS);
+  // Grass top stripe
+  if(type===B.GRASS){ctx.fillStyle='#6dbf3a';ctx.fillRect(sx,sy,BS,7);}
+  // Dirt texture dots
+  if(type===B.DIRT){ctx.fillStyle='rgba(0,0,0,.1)';ctx.fillRect(sx+6,sy+6,4,4);ctx.fillRect(sx+18,sy+14,4,4);ctx.fillRect(sx+10,sy+22,4,4);}
+  // Stone cracks
+  if(type===B.STONE){ctx.strokeStyle='rgba(0,0,0,.12)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx+6,sy+4);ctx.lineTo(sx+14,sy+14);ctx.stroke();}
+  // Ore spots
+  if(type===B.COAL){ctx.fillStyle='#1a1a1a';[[6,6],[18,14],[8,21]].forEach(([a,b])=>ctx.fillRect(sx+a,sy+b,6,6));}
+  if(type===B.IRON){ctx.fillStyle='#d4b896';[[6,6,8,8],[18,18,6,6]].forEach(([a,b,c,d])=>ctx.fillRect(sx+a,sy+b,c,d));}
+  if(type===B.GOLD){ctx.fillStyle='#ffe060';[[7,8,8,6],[18,18,6,6]].forEach(([a,b,c,d])=>ctx.fillRect(sx+a,sy+b,c,d));}
+  if(type===B.DIAMOND){ctx.fillStyle='#80ffff';[[8,8,7,7],[18,18,6,6]].forEach(([a,b,c,d])=>ctx.fillRect(sx+a,sy+b,c,d));}
+  // Log rings
+  if(type===B.LOG){ctx.strokeStyle='rgba(0,0,0,.2)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(sx+BS/2,sy+BS/2,BS*.3,0,Math.PI*2);ctx.stroke();}
+  // Torch flame
+  if(type===B.TORCH){
+    ctx.fillStyle='#8B5E1A';ctx.fillRect(sx+14,sy+10,4,18);
+    ctx.fillStyle='#ff6600';ctx.fillRect(sx+13,sy+4,6,10);
+    ctx.fillStyle='#ffee00';ctx.fillRect(sx+15,sy+6,2,6);
+  }
+  // Highlight / shadow
+  if(type!==B.WATER&&type!==B.GLASS&&type!==B.TORCH){
+    ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(sx,sy,BS,3);ctx.fillRect(sx,sy,3,BS);
+    ctx.fillStyle='rgba(0,0,0,.12)';ctx.fillRect(sx,sy+BS-3,BS,3);ctx.fillRect(sx+BS-3,sy,3,BS);
+  }
+  ctx.strokeStyle='rgba(0,0,0,.08)';ctx.lineWidth=.5;ctx.strokeRect(sx,sy,BS,BS);
+}
+
+function drawPlayer() {
+  const sx=pl.x-camX, sy=pl.y-camY;
+  const w=pl.w, h=pl.h;
+  // Shadow
+  ctx.fillStyle='rgba(0,0,0,.2)';ctx.beginPath();ctx.ellipse(sx+w/2,sy+h+2,w/2,4,0,0,Math.PI*2);ctx.fill();
+  // Legs
+  ctx.fillStyle='#2255aa';
+  ctx.fillRect(sx+w*.12,sy+h*.78,w*.32,h*.22);
+  ctx.fillRect(sx+w*.56,sy+h*.78,w*.32,h*.22);
+  // Body
+  ctx.fillStyle='#4a90d9';ctx.fillRect(sx+w*.08,sy+h*.35,w*.84,h*.45);
+  // Arms
+  ctx.fillStyle='#3a80c9';
+  ctx.fillRect(sx-w*.1,sy+h*.36,w*.18,h*.38);
+  ctx.fillRect(sx+w*.92,sy+h*.36,w*.18,h*.38);
+  // Head
+  ctx.fillStyle='#f5c5a0';ctx.fillRect(sx+w*.1,sy,w*.8,h*.36);
+  // Hair
+  ctx.fillStyle='#5a3010';ctx.fillRect(sx+w*.1,sy,w*.8,h*.1);
+  // Eyes
+  ctx.fillStyle='#1a1a1a';
+  ctx.fillRect(sx+w*.22,sy+h*.14,5,5);ctx.fillRect(sx+w*.58,sy+h*.14,5,5);
+  // Smile
+  ctx.strokeStyle='#a0806a';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.arc(sx+w/2,sy+h*.26,5,.2,Math.PI-.2);ctx.stroke();
+}
+
+function drawCursor() {
+  const t=getTarget(); if(!t) return;
+  const sx=t.x*BS-camX, sy=t.y*BS-camY;
+  ctx.strokeStyle='rgba(0,0,0,.8)';ctx.lineWidth=2;ctx.strokeRect(sx,sy,BS,BS);
+  if(breakProg>0&&t.x===breakTgt.x&&t.y===breakTgt.y) {
+    ctx.fillStyle=`rgba(0,0,0,${breakProg*.65})`;ctx.fillRect(sx,sy,BS*breakProg,BS);
+    for(let i=0;i<Math.floor(breakProg*5);i++){
+      ctx.strokeStyle='rgba(255,255,255,.4)';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(sx+6+i*4,sy+3);ctx.lineTo(sx+10+i*4,sy+BS-3);ctx.stroke();
+    }
+  }
+}
+
+// ═══ HUD ═══
+function updateHUD() {
+  document.getElementById('hud').innerHTML=
+    Array.from({length:pl.health},(_,i)=>`<span style="font-size:18px">${i<pl.health?'❤️':'🖤'}</span>`).join('');
+  const t=getTarget();
+  const b=t?getB(t.x,t.y):0;
+  document.getElementById('tooltip').textContent=b&&b!==B.AIR?`${EMOJIS[b]} ${NAMES[b]}`:'';
+  const bx=Math.floor((pl.x+pl.w/2)/BS), by=Math.floor((pl.y+pl.h/2)/BS);
+  const col=Object.entries(collected).map(([k,v])=>`${EMOJIS[k]}×${v}`).join(' ')||'none';
+  document.getElementById('debug').innerHTML=`X:${bx} Y:${by} | Selected: ${NAMES[hotbar[selSlot].type]}<br>Collected: ${col}`;
+}
+
+// ═══ LOOP ═══
+let last=0;
+function loop(ts) {
+  const dt=ts-last; last=ts;
+  updatePlayer();
+  handleBreak(dt);
+  handlePlace();
+  updateCam();
+
+  drawSky();
+  // Render visible blocks
+  const x0=Math.max(0,Math.floor(camX/BS)-1);
+  const x1=Math.min(WW,Math.ceil((camX+CW)/BS)+1);
+  const y0=Math.max(0,Math.floor(camY/BS)-1);
+  const y1=Math.min(WH,Math.ceil((camY+CH)/BS)+1);
+  for(let y=y0;y<y1;y++) for(let x=x0;x<x1;x++) {
+    const b=getB(x,y); if(b) drawBlock(x,y,b);
+  }
+
+  drawPlayer();
+  drawCursor();
+  updateHUD();
+  requestAnimationFrame(loop);
+}
+
+// ═══ INIT ═══
+const heights = genWorld();
+findSpawn(heights);
+buildHotbar();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
