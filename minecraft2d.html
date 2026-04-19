@@ -337,10 +337,10 @@ function genStronghold() {
     if(wall) setB(x,y,B.STONE_BRICK,0);
     else setB(x,y,B.AIR,0);
   }
-  // Portal frame (3x3 ring)
+  // Portal frame (5x5 ring of frames, 3x3 active portal inside)
   for(let dx=0;dx<5;dx++) for(let dy=0;dy<5;dy++){
     if(dx===0||dx===4||dy===0||dy===4) setB(px+4+dx,py-4+dy,B.END_PORTAL_FRAME,0);
-    else setB(px+4+dx,py-4+dy,B.AIR,0);
+    else setB(px+4+dx,py-4+dy,B.END_PORTAL,0);
   }
   // Torch in stronghold
   setB(px+2,py-1,B.TORCH,0);setB(px+11,py-1,B.TORCH,0);
