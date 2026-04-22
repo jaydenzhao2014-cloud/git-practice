@@ -112,7 +112,7 @@ label{font-size:11px;letter-spacing:2px;color:#999;margin-bottom:5px;display:blo
 .food-name{font-size:12px;font-weight:700;letter-spacing:1px;color:#444;}
 .food-qty{font-size:11px;color:#bbb;margin-top:3px;}
 /* FOOD CHECKLIST MODAL */
-#foodModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center;}
+#foodModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;align-items:center;justify-content:center;}
 #foodModal.open{display:flex;}
 .food-modal-box{background:#fff;border-radius:22px;padding:28px 26px 22px;max-width:360px;width:90%;box-shadow:0 12px 40px rgba(150,80,255,.25);position:relative;}
 .food-modal-title{font-size:22px;font-weight:800;color:#6633cc;margin-bottom:4px;text-align:center;}
@@ -809,51 +809,54 @@ function refreshBudget(){
 // ════════════════════════════════
 //  FOOD
 // ════════════════════════════════
-function foodCheckCount(i){const c=foodChecks[i]||[];return c.filter(Boolean).length;}
+function foodCheckCount(i){var c=foodChecks[i]||[];return c.filter(Boolean).length;}
 function refreshFood(){
-  document.getElementById('foodPicker').innerHTML=FOOD_OPTIONS.map((f,i)=>{
-    const done=foodCheckCount(i);
-    const pct=Math.round(done/FOOD_STEPS.length*100);
-    const isPicked=foodPicked.includes(i);
-    const barColor=pct===100?'#44cc88':'#cc88ff';
-    return`<div class="food-card ${isPicked?'picked':''}" onclick="openFoodModal(${i})">
-      <div class="food-emoji">${f.e}</div>
-      <div class="food-name">${f.n}</div>
-      ${isPicked?`<div style="margin-top:8px;height:5px;background:#eee;border-radius:10px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${barColor};border-radius:10px;transition:width .3s;"></div></div><div style="font-size:10px;color:#aaa;margin-top:3px;">${done}/${FOOD_STEPS.length} done</div>`:''}
-    </div>`;
-  }).join('');
-  const picked=FOOD_OPTIONS.filter((_,i)=>foodPicked.includes(i));
-  document.getElementById('foodList').innerHTML=picked.length
-    ?picked.map((_,ii)=>{const i=foodPicked[ii];const f=FOOD_OPTIONS[i];const done=foodCheckCount(i);return`<div class="guest-item" onclick="openFoodModal(${i})" style="cursor:pointer;"><span style="font-size:22px">${f.e}</span><span style="flex:1">${f.n}</span><span style="font-size:11px;color:#aaa;">${done}/${FOOD_STEPS.length} ✅</span></div>`;}).join('')
-    :'<div style="color:#333;font-size:13px;letter-spacing:2px;text-align:center;padding:16px;">Click items above to add to your list</div>';
+  var html='';
+  for(var i=0;i<FOOD_OPTIONS.length;i++){
+    var f=FOOD_OPTIONS[i];
+    var isPicked=foodPicked.includes(i);
+    var done=foodCheckCount(i);
+    var pct=Math.round(done/FOOD_STEPS.length*100);
+    var bar=isPicked?'<div style="margin-top:8px;height:6px;background:#eee;border-radius:10px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+(pct===100?'#44cc88':'#cc88ff')+';border-radius:10px"></div></div><div style="font-size:10px;color:#aaa;margin-top:3px">'+done+'/'+FOOD_STEPS.length+' done</div>':'';
+    html+='<div class="food-card '+(isPicked?'picked':'')+'" onclick="openFoodModal('+i+')"><div class="food-emoji">'+f.e+'</div><div class="food-name">'+f.n+'</div>'+bar+'</div>';
+  }
+  document.getElementById('foodPicker').innerHTML=html;
+  var listHtml='';
+  for(var ii=0;ii<foodPicked.length;ii++){
+    var idx=foodPicked[ii];var fc=FOOD_OPTIONS[idx];var d=foodCheckCount(idx);
+    listHtml+='<div class="guest-item" onclick="openFoodModal('+idx+')" style="cursor:pointer"><span style="font-size:22px">'+fc.e+'</span><span style="flex:1">'+fc.n+'</span><span style="font-size:11px;color:#aaa">'+d+'/'+FOOD_STEPS.length+' \u2705</span></div>';
+  }
+  document.getElementById('foodList').innerHTML=listHtml||'<div style="color:#999;font-size:13px;text-align:center;padding:16px">Click items above to add to your list</div>';
 }
-let _fmIdx=-1;
+var _fmIdx=-1;
 function openFoodModal(i){
   _fmIdx=i;
-  const f=FOOD_OPTIONS[i];
+  var f=FOOD_OPTIONS[i];
   if(!foodPicked.includes(i)){foodPicked.push(i);sv('food',foodPicked);}
-  if(!foodChecks[i]) foodChecks[i]=FOOD_STEPS.map(()=>false);
+  if(!foodChecks[i]){foodChecks[i]=[];for(var j=0;j<FOOD_STEPS.length;j++)foodChecks[i][j]=false;}
   document.getElementById('fmTitle').textContent=f.e+' '+f.n;
   renderFoodModal();
-  document.getElementById('foodModal').classList.add('open');
+  var m=document.getElementById('foodModal');
+  m.style.display='flex';
 }
 function renderFoodModal(){
-  const checks=foodChecks[_fmIdx]||FOOD_STEPS.map(()=>false);
-  const done=checks.filter(Boolean).length;
-  document.getElementById('fmBar').style.width=(done/FOOD_STEPS.length*100)+'%';
-  document.getElementById('fmChecks').innerHTML=FOOD_STEPS.map((s,j)=>`
-    <div class="food-check-item ${checks[j]?'done':''}" onclick="toggleFoodCheck(${j})">
-      <div class="food-check-box">${checks[j]?'✓':''}</div>
-      <div class="food-check-label">${s}</div>
-    </div>`).join('');
+  var checks=foodChecks[_fmIdx]||[];
+  var done=0;for(var j=0;j<checks.length;j++)if(checks[j])done++;
+  document.getElementById('fmBar').style.width=Math.round(done/FOOD_STEPS.length*100)+'%';
+  var html='';
+  for(var j=0;j<FOOD_STEPS.length;j++){
+    var ck=checks[j]?true:false;
+    html+='<div class="food-check-item '+(ck?'done':'')+'" onclick="toggleFoodCheck('+j+')"><div class="food-check-box">'+(ck?'\u2713':'')+'</div><div class="food-check-label">'+FOOD_STEPS[j]+'</div></div>';
+  }
+  document.getElementById('fmChecks').innerHTML=html;
 }
 function toggleFoodCheck(j){
-  if(!foodChecks[_fmIdx]) foodChecks[_fmIdx]=FOOD_STEPS.map(()=>false);
+  if(!foodChecks[_fmIdx]){foodChecks[_fmIdx]=[];for(var k=0;k<FOOD_STEPS.length;k++)foodChecks[_fmIdx][k]=false;}
   foodChecks[_fmIdx][j]=!foodChecks[_fmIdx][j];
   sv('foodChecks',foodChecks);renderFoodModal();refreshFood();
 }
-function closeFoodModal(){document.getElementById('foodModal').classList.remove('open');_fmIdx=-1;}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFoodModal();});
+function closeFoodModal(){var m=document.getElementById('foodModal');if(m)m.style.display='none';_fmIdx=-1;}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeFoodModal();});
 function clearFood(){foodPicked=[];foodChecks={};sv('food',foodPicked);sv('foodChecks',foodChecks);refreshFood();}
 
 // ════════════════════════════════
@@ -1089,7 +1092,7 @@ function googleTranslateElementInit(){
 <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <!-- FOOD CHECKLIST MODAL -->
-<div id="foodModal">
+<div id="foodModal" style="display:none">
   <div class="food-modal-box">
     <span class="food-modal-close" onclick="closeFoodModal()">✕</span>
     <div class="food-modal-title" id="fmTitle"></div>
