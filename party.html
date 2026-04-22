@@ -111,6 +111,22 @@ label{font-size:11px;letter-spacing:2px;color:#999;margin-bottom:5px;display:blo
 .food-emoji{font-size:38px;margin-bottom:8px;display:block;}
 .food-name{font-size:12px;font-weight:700;letter-spacing:1px;color:#444;}
 .food-qty{font-size:11px;color:#bbb;margin-top:3px;}
+/* FOOD CHECKLIST MODAL */
+#foodModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center;}
+#foodModal.open{display:flex;}
+.food-modal-box{background:#fff;border-radius:22px;padding:28px 26px 22px;max-width:360px;width:90%;box-shadow:0 12px 40px rgba(150,80,255,.25);position:relative;}
+.food-modal-title{font-size:22px;font-weight:800;color:#6633cc;margin-bottom:4px;text-align:center;}
+.food-modal-sub{font-size:12px;color:#aaa;text-align:center;letter-spacing:1px;margin-bottom:18px;}
+.food-check-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;margin-bottom:8px;background:#f8f4ff;border:2px solid #e8d8ff;cursor:pointer;transition:all .15s;user-select:none;}
+.food-check-item:hover{border-color:#cc88ff;background:#f0e4ff;}
+.food-check-item.done{background:linear-gradient(135deg,#e8fff4,#eaf8ff);border-color:#44cc88;text-decoration:line-through;color:#aaa;}
+.food-check-box{width:24px;height:24px;border-radius:8px;border:2.5px solid #cc88ff;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:#fff;transition:all .15s;}
+.food-check-item.done .food-check-box{background:#44cc88;border-color:#44cc88;color:#fff;}
+.food-check-label{font-size:13px;font-weight:600;flex:1;}
+.food-progress{height:8px;background:#f0e8ff;border-radius:20px;margin:14px 0 18px;overflow:hidden;}
+.food-progress-bar{height:100%;background:linear-gradient(90deg,#cc88ff,#44cc88);border-radius:20px;transition:width .4s;}
+.food-modal-close{position:absolute;top:12px;right:14px;font-size:22px;cursor:pointer;color:#ccc;line-height:1;}
+.food-modal-close:hover{color:#cc88ff;}
 
 /* THEMES */
 .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px;}
@@ -556,7 +572,8 @@ function pfx(k){return'pp_'+currentUser+'_'+k;}
 function ld(k,d){try{return JSON.parse(localStorage.getItem(pfx(k)))||d;}catch{return d;}}
 function sv(k,v){localStorage.setItem(pfx(k),JSON.stringify(v));}
 
-let party,guests,expenses,tasks,foodPicked;
+let party,guests,expenses,tasks,foodPicked,foodChecks;
+const FOOD_STEPS=['🛒 Buy / Order','🔪 Prep / Cook','🍽 Set Out to Serve','🧹 Clean Up After'];
 
 function loadUserData(){
   party=ld('party',{name:'MY PARTY',date:'',time:'',venue:'',budget:500,theme:'🎉 General Party'});
@@ -564,6 +581,7 @@ function loadUserData(){
   expenses=ld('expenses',[]);
   tasks=ld('tasks',defaultTasks());
   foodPicked=ld('food',[]);
+  foodChecks=ld('foodChecks',{});
   events=ld('events',[]);
   refreshBanner();refreshOverview();refreshGuests();refreshBudget();refreshFood();refreshTasks();refreshSchedule();
   buildAvatarPicker();
@@ -791,23 +809,52 @@ function refreshBudget(){
 // ════════════════════════════════
 //  FOOD
 // ════════════════════════════════
+function foodCheckCount(i){const c=foodChecks[i]||[];return c.filter(Boolean).length;}
 function refreshFood(){
-  document.getElementById('foodPicker').innerHTML=FOOD_OPTIONS.map((f,i)=>`
-    <div class="food-card ${foodPicked.includes(i)?'picked':''}" onclick="toggleFood(${i})">
+  document.getElementById('foodPicker').innerHTML=FOOD_OPTIONS.map((f,i)=>{
+    const done=foodCheckCount(i);
+    const pct=Math.round(done/FOOD_STEPS.length*100);
+    const isPicked=foodPicked.includes(i);
+    const barColor=pct===100?'#44cc88':'#cc88ff';
+    return`<div class="food-card ${isPicked?'picked':''}" onclick="openFoodModal(${i})">
       <div class="food-emoji">${f.e}</div>
       <div class="food-name">${f.n}</div>
-    </div>`).join('');
+      ${isPicked?`<div style="margin-top:8px;height:5px;background:#eee;border-radius:10px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${barColor};border-radius:10px;transition:width .3s;"></div></div><div style="font-size:10px;color:#aaa;margin-top:3px;">${done}/${FOOD_STEPS.length} done</div>`:''}
+    </div>`;
+  }).join('');
   const picked=FOOD_OPTIONS.filter((_,i)=>foodPicked.includes(i));
   document.getElementById('foodList').innerHTML=picked.length
-    ?picked.map((_,ii)=>{const i=foodPicked[ii];const f=FOOD_OPTIONS[i];return`<div class="guest-item"><span style="font-size:22px">${f.e}</span><span style="flex:1">${f.n}</span></div>`;}).join('')
+    ?picked.map((_,ii)=>{const i=foodPicked[ii];const f=FOOD_OPTIONS[i];const done=foodCheckCount(i);return`<div class="guest-item" onclick="openFoodModal(${i})" style="cursor:pointer;"><span style="font-size:22px">${f.e}</span><span style="flex:1">${f.n}</span><span style="font-size:11px;color:#aaa;">${done}/${FOOD_STEPS.length} ✅</span></div>`;}).join('')
     :'<div style="color:#333;font-size:13px;letter-spacing:2px;text-align:center;padding:16px;">Click items above to add to your list</div>';
 }
-function toggleFood(i){
-  if(foodPicked.includes(i))foodPicked=foodPicked.filter(x=>x!==i);
-  else foodPicked.push(i);
-  sv('food',foodPicked);refreshFood();
+let _fmIdx=-1;
+function openFoodModal(i){
+  _fmIdx=i;
+  const f=FOOD_OPTIONS[i];
+  if(!foodPicked.includes(i)){foodPicked.push(i);sv('food',foodPicked);}
+  if(!foodChecks[i]) foodChecks[i]=FOOD_STEPS.map(()=>false);
+  document.getElementById('fmTitle').textContent=f.e+' '+f.n;
+  renderFoodModal();
+  document.getElementById('foodModal').classList.add('open');
 }
-function clearFood(){foodPicked=[];sv('food',foodPicked);refreshFood();}
+function renderFoodModal(){
+  const checks=foodChecks[_fmIdx]||FOOD_STEPS.map(()=>false);
+  const done=checks.filter(Boolean).length;
+  document.getElementById('fmBar').style.width=(done/FOOD_STEPS.length*100)+'%';
+  document.getElementById('fmChecks').innerHTML=FOOD_STEPS.map((s,j)=>`
+    <div class="food-check-item ${checks[j]?'done':''}" onclick="toggleFoodCheck(${j})">
+      <div class="food-check-box">${checks[j]?'✓':''}</div>
+      <div class="food-check-label">${s}</div>
+    </div>`).join('');
+}
+function toggleFoodCheck(j){
+  if(!foodChecks[_fmIdx]) foodChecks[_fmIdx]=FOOD_STEPS.map(()=>false);
+  foodChecks[_fmIdx][j]=!foodChecks[_fmIdx][j];
+  sv('foodChecks',foodChecks);renderFoodModal();refreshFood();
+}
+function closeFoodModal(){document.getElementById('foodModal').classList.remove('open');_fmIdx=-1;}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFoodModal();});
+function clearFood(){foodPicked=[];foodChecks={};sv('food',foodPicked);sv('foodChecks',foodChecks);refreshFood();}
 
 // ════════════════════════════════
 //  CHECKLIST
@@ -884,9 +931,9 @@ function refreshSchedule(){
 //  NEW PARTY
 // ════════════════════════════════
 function confirmNewParty(){
-  ['party','guests','expenses','tasks','food','events'].forEach(k=>localStorage.removeItem(pfx(k)));
+  ['party','guests','expenses','tasks','food','foodChecks','events'].forEach(k=>localStorage.removeItem(pfx(k)));
   party={name:'MY PARTY',date:'',time:'',venue:'',budget:500,theme:'🎉 General Party'};
-  guests=[];expenses=[];tasks=defaultTasks();foodPicked=[];events=[];
+  guests=[];expenses=[];tasks=defaultTasks();foodPicked=[];foodChecks={};events=[];
   document.getElementById('confirmModal').classList.remove('show');
   refreshBanner();refreshOverview();refreshGuests();refreshBudget();refreshFood();refreshTasks();refreshSchedule();
   openSetup();
@@ -1040,5 +1087,17 @@ function googleTranslateElementInit(){
 }
 </script>
 <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<!-- FOOD CHECKLIST MODAL -->
+<div id="foodModal">
+  <div class="food-modal-box">
+    <span class="food-modal-close" onclick="closeFoodModal()">✕</span>
+    <div class="food-modal-title" id="fmTitle"></div>
+    <div class="food-modal-sub">Tap each step to check it off ✨</div>
+    <div class="food-progress"><div class="food-progress-bar" id="fmBar" style="width:0%"></div></div>
+    <div id="fmChecks"></div>
+    <button class="btn btn-purple btn-sm" style="width:100%;margin-top:10px;" onclick="closeFoodModal()">✅ Done</button>
+  </div>
+</div>
 </body>
 </html>
