@@ -734,41 +734,62 @@ function selAvatar(el,a){
 }
 
 function addGuest(){
-  const name=document.getElementById('gName').value.trim();
-  if(!name){document.getElementById('gName').focus();return;}
-  const idx=guests.length;
-  guests.push({id:Date.now(),name,rsvp:document.getElementById('gRsvp').value,avatar:selectedAvatar,bg:AVATAR_BG[idx%AVATAR_BG.length]});
+  if(!guests) guests=[];
+  var nameEl=document.getElementById('gName');
+  var name=nameEl.value.trim();
+  if(!name){nameEl.focus();return;}
+  var rsvp=document.getElementById('gRsvp').value;
+  var idx=guests.length;
+  guests.push({id:Date.now(),name:name,rsvp:rsvp,avatar:selectedAvatar,bg:AVATAR_BG[idx%AVATAR_BG.length]});
   sv('guests',guests);
-  document.getElementById('gName').value='';
+  nameEl.value='';
   document.getElementById('gRsvp').value='pending';
-  // flash feedback
-  const fb=document.getElementById('guestFeedback');
-  fb.textContent='🎉 '+name+' added to the guest list!';
+  var fb=document.getElementById('guestFeedback');
+  fb.textContent='🎉 '+name+' added!';
   fb.style.display='block';
-  setTimeout(()=>fb.style.display='none',2500);
-  refreshGuests();refreshOverview();
+  setTimeout(function(){fb.style.display='none';},2500);
+  refreshGuests();
+  refreshOverview();
 }
-function removeGuest(id){guests=guests.filter(g=>g.id!==id);sv('guests',guests);refreshGuests();refreshOverview();}
-function setRsvp(id,rsvp){const g=guests.find(g=>g.id===id);if(g){g.rsvp=rsvp;sv('guests',guests);refreshGuests();refreshOverview();}}
+function removeGuest(id){
+  guests=guests.filter(function(g){return g.id!==id;});
+  sv('guests',guests);refreshGuests();refreshOverview();
+}
+function setRsvp(id,rsvp){
+  var g=guests.find(function(g){return g.id===id;});
+  if(g){g.rsvp=rsvp;sv('guests',guests);refreshGuests();refreshOverview();}
+}
 function refreshGuests(){
-  const el=document.getElementById('guestList');
-  if(!guests.length){el.innerHTML='<div style="text-align:center;color:#333;padding:24px;font-size:13px;letter-spacing:2px;">No guests yet — add some above!</div>';return;}
-  el.innerHTML=guests.map(g=>{
-    const rs=RSVP_STYLES[g.rsvp]||RSVP_STYLES.pending;
-    return`<div class="guest-item">
-      <div class="guest-avatar" style="background:${g.bg}">${g.avatar}</div>
-      <div class="guest-name">${g.name}</div>
-      <select onchange="setRsvp(${g.id},this.value)" style="width:auto;padding:5px 8px;font-size:11px;background:#1a0030;border:1px solid #3a0070;color:#fff;border-radius:6px;">
-        <option value="pending" ${g.rsvp==='pending'?'selected':''}>Pending ⏳</option>
-        <option value="yes" ${g.rsvp==='yes'?'selected':''}>Coming ✅</option>
-        <option value="no" ${g.rsvp==='no'?'selected':''}>Not Coming ❌</option>
-        <option value="maybe" ${g.rsvp==='maybe'?'selected':''}>Maybe 🤔</option>
-      </select>
-      <button class="del-btn" onclick="removeGuest(${g.id})">✕</button>
-    </div>`;
-  }).join('');
-  const yes=guests.filter(g=>g.rsvp==='yes').length,no=guests.filter(g=>g.rsvp==='no').length,maybe=guests.filter(g=>g.rsvp==='maybe').length,pend=guests.filter(g=>g.rsvp==='pending').length;
-  document.getElementById('guestCount').textContent=`${guests.length} guests  ·  ${yes} coming  ·  ${no} not coming  ·  ${maybe} maybe  ·  ${pend} pending`;
+  var el=document.getElementById('guestList');
+  if(!el) return;
+  if(!guests||!guests.length){
+    el.innerHTML='<div style="text-align:center;color:#aaa;padding:24px;font-size:13px;letter-spacing:2px;">No guests yet — add some above! 👆</div>';
+    document.getElementById('guestCount').textContent='';
+    return;
+  }
+  var html='';
+  for(var i=0;i<guests.length;i++){
+    var g=guests[i];
+    var sel='<select onchange="setRsvp('+g.id+',this.value)" style="width:auto;padding:5px 8px;font-size:11px;border-radius:8px;border:2px solid #ddc8ff;background:#f8f4ff;color:#333;">'
+      +'<option value="pending"'+(g.rsvp==='pending'?' selected':'')+'>Pending ⏳</option>'
+      +'<option value="yes"'+(g.rsvp==='yes'?' selected':'')+'>Coming ✅</option>'
+      +'<option value="no"'+(g.rsvp==='no'?' selected':'')+'>Not Coming ❌</option>'
+      +'<option value="maybe"'+(g.rsvp==='maybe'?' selected':'')+'>Maybe 🤔</option>'
+      +'</select>';
+    html+='<div class="guest-item">'
+      +'<div class="guest-avatar" style="background:'+(g.bg||'#f5e8ff')+'">'+g.avatar+'</div>'
+      +'<div class="guest-name">'+g.name+'</div>'
+      +sel
+      +'<button class="del-btn" onclick="removeGuest('+g.id+')">✕</button>'
+      +'</div>';
+  }
+  el.innerHTML=html;
+  var yes=0,no=0,maybe=0,pend=0;
+  for(var j=0;j<guests.length;j++){
+    var r=guests[j].rsvp;
+    if(r==='yes')yes++;else if(r==='no')no++;else if(r==='maybe')maybe++;else pend++;
+  }
+  document.getElementById('guestCount').textContent=guests.length+' guests  ·  '+yes+' coming  ·  '+no+' not coming  ·  '+maybe+' maybe  ·  '+pend+' pending';
 }
 
 // ════════════════════════════════
