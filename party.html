@@ -243,7 +243,7 @@ label{font-size:11px;letter-spacing:2px;color:#999;margin-bottom:5px;display:blo
 </div>
 
 <!-- AUTH SCREEN (full landing page) -->
-<div class="auth-screen" id="authScreen">
+<div class="auth-screen show" id="authScreen">
   <div class="auth-page">
 
     <!-- Hero -->
@@ -950,10 +950,9 @@ document.getElementById('setupModal').onclick=function(e){if(e.target===this)thi
 document.getElementById('confirmModal').onclick=function(e){if(e.target===this)this.classList.remove('show');};
 
 if(currentUser){
+  document.getElementById('authScreen').classList.remove('show');
   document.getElementById('userLabel').textContent=currentUser.toUpperCase();
   loadUserData();
-} else {
-  document.getElementById('authScreen').classList.add('show');
 }
 
 // ════════════════════════════════
