@@ -572,7 +572,7 @@ function pfx(k){return'pp_'+currentUser+'_'+k;}
 function ld(k,d){try{return JSON.parse(localStorage.getItem(pfx(k)))||d;}catch{return d;}}
 function sv(k,v){localStorage.setItem(pfx(k),JSON.stringify(v));}
 
-let party,guests,expenses,tasks,foodPicked,foodChecks;
+let party,guests,expenses,tasks,foodPicked,foodChecks,events=[];
 const FOOD_STEPS=['🛒 Buy / Order','🔪 Prep / Cook','🍽 Set Out to Serve','🧹 Clean Up After'];
 
 function loadUserData(){
@@ -690,7 +690,7 @@ function refreshOverview(){
 
 // Countdown
 function updateCountdown(){
-  if(!party.date){document.getElementById('cd-d').textContent='--';return;}
+  if(!party||!party.date){document.getElementById('cd-d').textContent='--';return;}
   const target=new Date(party.date+'T'+(party.time||'00:00'));
   const now=new Date();
   const diff=target-now;
@@ -966,7 +966,6 @@ function confirmNewParty(){
 // ════════════════════════════════
 //  INIT
 // ════════════════════════════════
-let events=[];
 document.getElementById('setupModal').onclick=function(e){if(e.target===this)this.classList.remove('show');};
 document.getElementById('confirmModal').onclick=function(e){if(e.target===this)this.classList.remove('show');};
 
