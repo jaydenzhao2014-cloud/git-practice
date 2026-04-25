@@ -74,7 +74,7 @@ main{flex:1;padding:28px 28px 50px;}
     <span class="search-icon">🔍</span>
     <input type="text" id="searchInput" placeholder="Search games..." oninput="filterGames()">
   </div>
-  <div class="header-right">7 GAMES</div>
+  <div class="header-right">9 GAMES</div>
 </header>
 
 <div class="layout">
@@ -111,6 +111,15 @@ main{flex:1;padding:28px 28px 50px;}
 
 <script>
 const GAMES = [
+  {
+    name: "BEDWARS",
+    desc: "2D top-down BedWars! Protect your bed, collect iron & gold, buy weapons and armor, build bridges, and destroy enemy beds. 3 AI opponents.",
+    icon: "🛏️",
+    bg: "linear-gradient(135deg,#1a0a2e,#4a1a6e)",
+    tags: ["pvp","fighting","multiplayer"],
+    tagLabels: [{t:"⭐ NEW",cls:"green"},{t:"PVP",cls:""},{t:"STRATEGY",cls:"cyan"}],
+    url: "https://jaydenzhao2014-cloud.github.io/git-practice/bedwars.html"
+  },
   {
     name: "2D MINECRAFT",
     desc: "Mine blocks, build structures, explore caves and find diamonds! Break blocks with left click, place with right click. Procedurally generated world with ores, trees and caves.",

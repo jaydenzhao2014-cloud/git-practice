@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BedWars 2D</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000;display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;}
+canvas{display:block;image-rendering:pixelated;}
+#ui{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;}
+#hotbar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:4px;}
+.hs{width:52px;height:52px;border:2px solid #666;background:rgba(0,0,0,.75);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px;position:relative;}
+.hs.on{border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.4);}
+.hc{position:absolute;bottom:2px;right:4px;font-size:10px;color:#fff;font-weight:700;text-shadow:0 1px 2px #000;}
+.hl{font-size:9px;color:#aaa;letter-spacing:1px;margin-top:2px;}
+#hpBar{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);display:flex;gap:3px;}
+.heart{font-size:16px;text-shadow:0 1px 3px #000;}
+#resources{position:fixed;top:12px;right:12px;background:rgba(0,0,0,.75);border-radius:10px;padding:10px 14px;color:#fff;font-size:13px;line-height:2;border:1px solid #333;}
+#teamPanel{position:fixed;top:12px;left:12px;display:flex;flex-direction:column;gap:6px;}
+.tbar{background:rgba(0,0,0,.75);border-radius:8px;padding:7px 12px;font-size:12px;color:#fff;display:flex;align-items:center;gap:8px;border:1px solid #333;}
+.tbed{font-size:14px;}
+#shopModal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1228;border:2px solid #6644aa;border-radius:16px;padding:22px;width:380px;display:none;z-index:200;pointer-events:all;max-height:80vh;overflow-y:auto;}
+#shopModal h2{color:#fff;text-align:center;margin-bottom:4px;font-size:18px;}
+#shopModal .sub{text-align:center;color:#888;font-size:11px;letter-spacing:2px;margin-bottom:14px;}
+.stab{display:flex;gap:4px;margin-bottom:12px;justify-content:center;}
+.stabBtn{padding:6px 14px;border-radius:20px;border:2px solid #444;background:none;color:#aaa;font-size:11px;cursor:pointer;letter-spacing:1px;font-weight:700;transition:all .15s;}
+.stabBtn.on{background:#6644aa;border-color:#6644aa;color:#fff;}
+.sitem{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;margin-bottom:6px;background:rgba(255,255,255,.05);cursor:pointer;transition:background .15s;border:1px solid transparent;}
+.sitem:hover{background:rgba(255,255,255,.12);border-color:#6644aa;}
+.sitem-icon{font-size:22px;width:30px;text-align:center;}
+.sitem-name{color:#fff;font-size:13px;font-weight:600;flex:1;}
+.sitem-cost{font-size:12px;color:#aaa;text-align:right;}
+.sitem.owned{opacity:.5;cursor:default;}
+#shopClose{position:absolute;top:10px;right:14px;background:none;border:none;color:#888;font-size:22px;cursor:pointer;pointer-events:all;}
+#shopClose:hover{color:#fff;}
+#killFeed{position:fixed;top:80px;right:12px;display:flex;flex-direction:column;gap:4px;}
+.kfm{background:rgba(0,0,0,.8);color:#fff;font-size:12px;padding:4px 10px;border-radius:6px;animation:kfFade 3.5s forwards;}
+@keyframes kfFade{0%,70%{opacity:1}100%{opacity:0}}
+#deathOverlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:150;}
+#deathOverlay h2{font-size:42px;color:#ff3333;font-weight:900;letter-spacing:4px;}
+#deathOverlay p{color:#ccc;font-size:16px;margin-top:10px;}
+#deathOverlay .rsTimer{color:#fff;font-size:22px;margin-top:8px;font-weight:700;}
+#endScreen{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:300;}
+#endScreen h1{font-size:52px;font-weight:900;letter-spacing:6px;}
+#endScreen p{color:#ccc;font-size:18px;margin-top:12px;}
+#endScreen button{margin-top:24px;padding:13px 32px;font-size:16px;background:linear-gradient(135deg,#5533cc,#aa44ff);color:#fff;border:none;border-radius:12px;cursor:pointer;font-weight:700;letter-spacing:2px;}
+#minimap{position:fixed;bottom:16px;right:12px;border:1px solid #444;border-radius:4px;background:#000;}
+#controls{position:fixed;bottom:16px;left:12px;color:#666;font-size:10px;letter-spacing:1px;line-height:1.8;}
+#centerMsg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:20px;font-weight:700;text-shadow:0 2px 8px #000;pointer-events:none;opacity:0;transition:opacity .3s;text-align:center;}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="ui">
+  <div id="hpBar"></div>
+  <div id="hotbar">
+    <div class="hs on" id="hs0"><span id="hi0">🧱</span><span class="hc" id="hc0">0</span><span class="hl">WOOL</span></div>
+    <div class="hs" id="hs1"><span id="hi1">🪵</span><span class="hc" id="hc1">0</span><span class="hl">WOOD</span></div>
+    <div class="hs" id="hs2"><span id="hi2">🗡️</span><span class="hc" id="hc2"></span><span class="hl">SWORD</span></div>
+    <div class="hs" id="hs3"><span id="hi3">🏹</span><span class="hc" id="hc3"></span><span class="hl">BOW</span></div>
+    <div class="hs" id="hs4"><span id="hi4">💣</span><span class="hc" id="hc4">0</span><span class="hl">TNT</span></div>
+  </div>
+  <div id="resources">
+    <div>⚙️ Iron: <b id="r-iron">0</b></div>
+    <div>🥇 Gold: <b id="r-gold">0</b></div>
+    <div>💎 Diamond: <b id="r-dia">0</b></div>
+    <div>💚 Emerald: <b id="r-emer">0</b></div>
+  </div>
+  <div id="teamPanel"></div>
+  <div id="killFeed"></div>
+  <canvas id="minimap" width="100" height="80"></canvas>
+  <div id="controls">WASD MOVE · CLICK ATTACK · R-CLICK PLACE · E SHOP · 1-5 HOTBAR · HOLD CLICK BREAK</div>
+  <div id="centerMsg"></div>
+</div>
+
+<div id="shopModal">
+  <button id="shopClose" onclick="closeShop()">✕</button>
+  <h2>🏪 ITEM SHOP</h2>
+  <div class="sub">VILLAGER TRADE</div>
+  <div class="stab">
+    <button class="stabBtn on" onclick="shopTab(this,'blocks')">BLOCKS</button>
+    <button class="stabBtn" onclick="shopTab(this,'weapons')">WEAPONS</button>
+    <button class="stabBtn" onclick="shopTab(this,'armor')">ARMOR</button>
+    <button class="stabBtn" onclick="shopTab(this,'utility')">UTILITY</button>
+  </div>
+  <div id="shopItems"></div>
+</div>
+
+<div id="deathOverlay">
+  <h2>💀 YOU DIED</h2>
+  <p id="deathMsg"></p>
+  <div class="rsTimer">Respawning in <span id="rsCount">5</span>s</div>
+</div>
+
+<div id="endScreen">
+  <h1 id="endTitle">GAME OVER</h1>
+  <p id="endSub"></p>
+  <button onclick="location.reload()">PLAY AGAIN</button>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  CONSTANTS
+// ══════════════════════════════════════════
+const CV = document.getElementById('c');
+const CX = CV.getContext('2d');
+CV.width = 800; CV.height = 600;
+
+const TS = 24;    // tile size px
+const MW = 64;    // map width tiles
+const MH = 48;    // map height tiles
+const PS = 18;    // player size px
+const HALF = PS/2;
+
+// Tile IDs
+const VOID=0, BASE=1, WOOL_R=2, WOOL_B=3, WOOL_G=4, WOOL_Y=5;
+const WOOD=6, SAND=7, ENDSTONE=8, OBSIDIAN=9;
+const BED_R=10, BED_B=11, BED_G=12, BED_Y=13;
+const SHOP_T=14, GEN_IRON=15, GEN_GOLD=16, GEN_DIA=17, GEN_EMER=18;
+
+const TEAM_WOOL = [WOOL_R, WOOL_B, WOOL_G, WOOL_Y];
+const TEAM_BED  = [BED_R,  BED_B,  BED_G,  BED_Y];
+const BREAKABLE = new Set([WOOL_R,WOOL_B,WOOL_G,WOOL_Y,WOOD,SAND,ENDSTONE,OBSIDIAN,BED_R,BED_B,BED_G,BED_Y]);
+const PLACED    = new Set([WOOL_R,WOOL_B,WOOL_G,WOOL_Y,WOOD,SAND,ENDSTONE,OBSIDIAN]);
+
+const TCOLOR = ['','#8a8a8a','#ff5555','#5599ff','#55cc55','#ffcc22',
+  '#cc8833','#ddcc88','#aaddaa','#444444',
+  '#ff2222','#2255ff','#22bb22','#ccaa00',
+  '#ffe0a0','#aaaaaa','#ffcc00','#55ddff','#55ff55'];
+
+const TEAM_COLOR = ['#ff5555','#5599ff','#55cc55','#ffcc22'];
+const TEAM_NAME  = ['Red','Blue','Green','Yellow'];
+
+// ══════════════════════════════════════════
+//  MAP
+// ══════════════════════════════════════════
+const map = new Uint8Array(MW * MH);
+const bedHP = {10:4, 11:4, 12:4, 13:4}; // bed health per tile ID
+
+function setT(x,y,t){if(x>=0&&x<MW&&y>=0&&y<MH)map[y*MW+x]=t;}
+function getT(x,y){if(x<0||x>=MW||y<0||y>=MH)return VOID;return map[y*MW+x];}
+function tileXY(px,py){return{x:Math.floor(px/TS),y:Math.floor(py/TS)};}
+
+// Island layout: each team island + specials
+const ISLE = [
+  // Red   (top-left)
+  {tx:2,  ty:2,  tw:12,th:10,
+   bed:[9,7], shop:[4,3], iron:[4,8], gold:[9,3], spawn:[7,6]},
+  // Blue  (top-right)
+  {tx:50, ty:2,  tw:12,th:10,
+   bed:[54,7], shop:[58,3], iron:[58,8], gold:[53,3], spawn:[55,6]},
+  // Green (bottom-left)
+  {tx:2,  ty:36, tw:12,th:10,
+   bed:[9,41], shop:[4,37], iron:[4,44], gold:[9,37], spawn:[7,41]},
+  // Yellow(bottom-right)
+  {tx:50, ty:36, tw:12,th:10,
+   bed:[54,41], shop:[58,37], iron:[58,44], gold:[53,37], spawn:[55,41]},
+];
+
+// Diamond / emerald islands
+const DIA_ISLES = [
+  {tx:28,ty:2, tw:8,th:7, gen:GEN_DIA, gx:31,gy:5},
+  {tx:28,ty:39,tw:8,th:7, gen:GEN_DIA, gx:31,gy:42},
+  {tx:2, ty:20,tw:7,th:8, gen:GEN_DIA, gx:5, gy:23},
+  {tx:55,ty:20,tw:7,th:8, gen:GEN_DIA, gx:58,gy:23},
+];
+const EMER_ISLE = {tx:28,ty:19,tw:8,th:10, g1:[30,22], g2:[33,25]};
+
+function genMap(){
+  map.fill(VOID);
+  function rect(x,y,w,h,t){for(let ty=y;ty<y+h;ty++)for(let tx=x;tx<x+w;tx++)setT(tx,ty,t);}
+
+  // Team islands
+  for(let i=0;i<4;i++){
+    const s=ISLE[i];
+    rect(s.tx,s.ty,s.tw,s.th,BASE);
+    setT(s.bed[0],  s.bed[1],  TEAM_BED[i]);
+    setT(s.shop[0], s.shop[1], SHOP_T);
+    setT(s.iron[0], s.iron[1], GEN_IRON);
+    setT(s.gold[0], s.gold[1], GEN_GOLD);
+  }
+  // Diamond islands
+  for(const d of DIA_ISLES){
+    rect(d.tx,d.ty,d.tw,d.th,BASE);
+    setT(d.gx,d.gy,d.gen);
+  }
+  // Emerald island
+  rect(EMER_ISLE.tx,EMER_ISLE.ty,EMER_ISLE.tw,EMER_ISLE.th,BASE);
+  setT(EMER_ISLE.g1[0],EMER_ISLE.g1[1],GEN_EMER);
+  setT(EMER_ISLE.g2[0],EMER_ISLE.g2[1],GEN_EMER);
+}
+
+// ══════════════════════════════════════════
+//  CAMERA
+// ══════════════════════════════════════════
+let camX=0, camY=0;
+function updateCam(px,py){
+  camX = px - CV.width/2;
+  camY = py - CV.height/2;
+  camX = Math.max(0, Math.min(camX, MW*TS - CV.width));
+  camY = Math.max(0, Math.min(camY, MH*TS - CV.height));
+}
+
+// ══════════════════════════════════════════
+//  RESOURCES (per team)
+// ══════════════════════════════════════════
+const RES = [{iron:0,gold:0,dia:0,emer:0},{iron:0,gold:0,dia:0,emer:0},{iron:0,gold:0,dia:0,emer:0},{iron:0,gold:0,dia:0,emer:0}];
+const genTimers = {}; // key="x,y" → ms until next spawn
+
+// Generator rates (ms)
+const GEN_RATE = {[GEN_IRON]:2000,[GEN_GOLD]:5000,[GEN_DIA]:15000,[GEN_EMER]:30000};
+
+function initGenTimers(){
+  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
+    const t=getT(x,y);
+    if(t===GEN_IRON||t===GEN_GOLD||t===GEN_DIA||t===GEN_EMER)
+      genTimers[x+','+y]=GEN_RATE[t];
+  }
+}
+
+// Spawned resource drops
+const drops = []; // {x,y,type,team,ttl}
+
+function updateGens(dt){
+  for(const key in genTimers){
+    genTimers[key]-=dt;
+    if(genTimers[key]<=0){
+      const [gx,gy]=key.split(',').map(Number);
+      const t=getT(gx,gy);
+      genTimers[key]=GEN_RATE[t];
+      const type = t===GEN_IRON?'iron':t===GEN_GOLD?'gold':t===GEN_DIA?'dia':'emer';
+      // Collect for nearest player on island if they're standing near
+      drops.push({x:gx*TS+TS/2, y:gy*TS+TS/2, type, collected:false, age:0});
+    }
+  }
+  // Update drops
+  for(let i=drops.length-1;i>=0;i--){
+    drops[i].age+=dt;
+    if(drops[i].age>8000) drops.splice(i,1);
+  }
+}
+
+function collectDrops(player){
+  for(let i=drops.length-1;i>=0;i--){
+    const d=drops[i];
+    const dx=player.x-d.x, dy=player.y-d.y;
+    if(dx*dx+dy*dy<(TS*1.5)*(TS*1.5)){
+      RES[player.team][d.type]++;
+      drops.splice(i,1);
+    }
+  }
+}
+
+// AI auto-collect
+function aiCollect(bot){
+  for(let i=drops.length-1;i>=0;i--){
+    const d=drops[i];
+    const dx=bot.x-d.x, dy=bot.y-d.y;
+    if(dx*dx+dy*dy<(TS*2)*(TS*2)){
+      RES[bot.team][d.type]++;
+      drops.splice(i,1);
+    }
+  }
+}
+
+// ══════════════════════════════════════════
+//  PLAYERS & BOTS
+// ══════════════════════════════════════════
+const players = []; // index 0 = human, 1-3 = bots
+
+function makePlayer(team, isBot){
+  const s = ISLE[team];
+  return {
+    x: s.spawn[0]*TS + TS/2,
+    y: s.spawn[1]*TS + TS/2,
+    vx:0, vy:0,
+    team, isBot,
+    hp: 10, maxHp: 10,
+    armor: 0,    // 0=none 1=iron 2=diamond
+    sword: 0,    // 0=wood 1=iron 2=diamond
+    hasBow: false,
+    woolCount: 0, woodCount: 0, tntCount: 0,
+    dead: false, respawnTimer: 0, eliminated: false,
+    attackCd: 0, mineTimer: 0, mineTarget: null,
+    angle: 0,
+    // Bot AI state
+    aiState: 'collect', aiTimer: 0, aiTarget: null, bridgeDir: null,
+    kills: 0,
+  };
+}
+
+// ══════════════════════════════════════════
+//  SHOP
+// ══════════════════════════════════════════
+let shopOpen = false;
+let shopCategory = 'blocks';
+
+const SHOP_ITEMS = {
+  blocks:[
+    {icon:'🧱',name:'Wool x16',cost:{iron:8}, action:(t)=>{t.woolCount+=16;}},
+    {icon:'🪵',name:'Wood x8', cost:{iron:4}, action:(t)=>{t.woodCount+=8;}},
+    {icon:'🧱',name:'Wool x64',cost:{iron:24},action:(t)=>{t.woolCount+=64;}},
+  ],
+  weapons:[
+    {icon:'🗡️',name:'Iron Sword',  cost:{iron:10},  action:(t)=>{if(t.sword<1)t.sword=1;}, owned:(t)=>t.sword>=1},
+    {icon:'⚔️',name:'Diamond Sword',cost:{dia:3},   action:(t)=>{t.sword=2;},             owned:(t)=>t.sword>=2},
+    {icon:'🏹',name:'Bow',         cost:{gold:12},  action:(t)=>{t.hasBow=true;},          owned:(t)=>t.hasBow},
+  ],
+  armor:[
+    {icon:'🦺',name:'Iron Armor',    cost:{gold:6},  action:(t)=>{if(t.armor<1)t.armor=1;}, owned:(t)=>t.armor>=1},
+    {icon:'🛡️',name:'Diamond Armor', cost:{dia:6},   action:(t)=>{t.armor=2;},              owned:(t)=>t.armor>=2},
+  ],
+  utility:[
+    {icon:'💣',name:'TNT',     cost:{gold:4},  action:(t)=>{t.tntCount++;}, owned:()=>false},
+    {icon:'⚡',name:'Speed x30s',cost:{gold:3},action:(t)=>{t.speedBoost=30000;}, owned:()=>false},
+  ],
+};
+
+function shopTab(btn, cat){
+  shopCategory = cat;
+  document.querySelectorAll('.stabBtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderShop();
+}
+function renderShop(){
+  const items = SHOP_ITEMS[shopCategory];
+  const player = players[0];
+  let html = '';
+  for(const item of items){
+    const costStr = Object.entries(item.cost).map(([k,v])=>`${v} ${k}`).join(', ');
+    const canAfford = Object.entries(item.cost).every(([k,v])=>RES[0][k]>=v);
+    const isOwned = item.owned && item.owned(player);
+    html += `<div class="sitem${isOwned?' owned':''}" onclick="${isOwned?'':('buyItem('+JSON.stringify(item.name)+')')}">
+      <span class="sitem-icon">${item.icon}</span>
+      <span class="sitem-name">${item.name}${isOwned?' (owned)':''}</span>
+      <span class="sitem-cost" style="color:${canAfford?'#88ff88':'#ff8888'}">${costStr}</span>
+    </div>`;
+  }
+  document.getElementById('shopItems').innerHTML = html;
+}
+function buyItem(name){
+  const items = Object.values(SHOP_ITEMS).flat();
+  const item = items.find(i=>i.name===name);
+  if(!item) return;
+  const player = players[0];
+  if(!Object.entries(item.cost).every(([k,v])=>RES[0][k]>=v)) return;
+  Object.entries(item.cost).forEach(([k,v])=>RES[0][k]-=v);
+  item.action(player);
+  renderShop();
+  updateHotbarUI();
+}
+function openShop(){
+  shopOpen = true;
+  shopCategory = 'blocks';
+  document.querySelectorAll('.stabBtn').forEach((b,i)=>b.classList.toggle('on',i===0));
+  document.getElementById('shopModal').style.display='block';
+  renderShop();
+}
+function closeShop(){shopOpen=false;document.getElementById('shopModal').style.display='none';}
+
+// AI buying
+function aiBuyItems(bot){
+  const r = RES[bot.team];
+  if(bot.sword===0 && r.iron>=10){r.iron-=10;bot.sword=1;}
+  if(bot.sword===1 && r.dia>=3){r.dia-=3;bot.sword=2;}
+  if(!bot.armor && r.gold>=6){r.gold-=6;bot.armor=1;}
+  if(bot.woolCount<16 && r.iron>=8){r.iron-=8;bot.woolCount+=16;}
+  if(!bot.hasBow && r.gold>=12){r.gold-=12;bot.hasBow=true;}
+}
+
+// ══════════════════════════════════════════
+//  COMBAT
+// ══════════════════════════════════════════
+const SWORD_DMG  = [2, 3, 5]; // wood, iron, diamond
+const ARMOR_DEF  = [0, 2, 4]; // none, iron, diamond
+const ARROW_SPEED = 300;
+
+const projectiles = [];
+
+function attackMelee(attacker, targets){
+  if(attacker.attackCd>0) return;
+  const range = TS*1.6;
+  for(const t of targets){
+    if(t.dead||t.eliminated||t.team===attacker.team) continue;
+    const dx=t.x-attacker.x, dy=t.y-attacker.y;
+    if(dx*dx+dy*dy<range*range){
+      const rawDmg = SWORD_DMG[attacker.sword];
+      const def = ARMOR_DEF[t.armor];
+      const dmg = Math.max(1, rawDmg - def);
+      t.hp -= dmg;
+      // Knockback
+      const dist = Math.sqrt(dx*dx+dy*dy)||1;
+      t.vx += (dx/dist)*200;
+      t.vy += (dy/dist)*200;
+      attacker.attackCd = 600;
+      if(t.hp<=0) killPlayer(t, attacker);
+      return;
+    }
+  }
+  attacker.attackCd = 300; // missed swing
+}
+
+function shootArrow(shooter, tx, ty){
+  if(!shooter.hasBow) return;
+  if(shooter.attackCd>0) return;
+  const dx=tx-shooter.x, dy=ty-shooter.y;
+  const dist=Math.sqrt(dx*dx+dy*dy)||1;
+  projectiles.push({
+    x:shooter.x, y:shooter.y,
+    vx:(dx/dist)*ARROW_SPEED, vy:(dy/dist)*ARROW_SPEED,
+    team:shooter.team, owner:shooter, dmg:3, ttl:2000, type:'arrow'
+  });
+  shooter.attackCd = 800;
+}
+
+function updateProjectiles(dt){
+  for(let i=projectiles.length-1;i>=0;i--){
+    const p=projectiles[i];
+    p.ttl-=dt;
+    p.x+=p.vx*(dt/1000);
+    p.y+=p.vy*(dt/1000);
+    const tx=Math.floor(p.x/TS), ty=Math.floor(p.y/TS);
+    const tile=getT(tx,ty);
+    if(tile!==VOID && tile!==GEN_IRON && tile!==GEN_GOLD && tile!==GEN_DIA && tile!==GEN_EMER && tile!==BASE && BREAKABLE.has(tile)||
+       (tile!==VOID&&tile!==BASE&&tile!==GEN_IRON&&tile!==GEN_GOLD&&tile!==GEN_DIA&&tile!==GEN_EMER&&p.ttl<=0)){
+      projectiles.splice(i,1); continue;
+    }
+    if(p.ttl<=0){projectiles.splice(i,1);continue;}
+    // Hit players
+    for(const t of players){
+      if(t.dead||t.eliminated||t.team===p.team) continue;
+      const dx=t.x-p.x, dy=t.y-p.y;
+      if(dx*dx+dy*dy<(TS)*(TS)){
+        const def=ARMOR_DEF[t.armor];
+        t.hp-=Math.max(1,p.dmg-def);
+        t.vx+=p.vx*0.3; t.vy+=p.vy*0.3;
+        if(t.hp<=0) killPlayer(t, p.owner);
+        projectiles.splice(i,1);
+        break;
+      }
+    }
+  }
+}
+
+function killPlayer(p, killer){
+  p.hp=0;
+  if(killer) killer.kills++;
+  const tname = TEAM_NAME[p.team];
+  const kname = killer?TEAM_NAME[killer.team]:'void';
+  addKillFeed(`${tname} was slain by ${kname}`);
+  if(p.team===0){
+    // Check if bed alive
+    const bedOK = getT(ISLE[0].bed[0],ISLE[0].bed[1])===BED_R;
+    if(!bedOK){
+      p.eliminated=true;
+      p.dead=true;
+      endGame(false);
+      return;
+    }
+    p.dead=true;
+    p.respawnTimer=5000;
+    showDeath(bedOK);
+  } else {
+    const bedOK = getT(ISLE[p.team].bed[0],ISLE[p.team].bed[1])===TEAM_BED[p.team];
+    if(!bedOK){
+      p.eliminated=true;
+      p.dead=true;
+      addKillFeed(`${tname} ELIMINATED!`);
+      checkWin();
+      return;
+    }
+    p.dead=true;
+    p.respawnTimer=5000;
+  }
+}
+
+function breakBed(team){
+  const s=ISLE[team];
+  if(getT(s.bed[0],s.bed[1])!==TEAM_BED[team]) return;
+  const id=TEAM_BED[team];
+  bedHP[id]--;
+  if(bedHP[id]<=0){
+    setT(s.bed[0],s.bed[1],BASE);
+    addKillFeed(`💥 ${TEAM_NAME[team]} BED DESTROYED!`);
+    showCenterMsg(`${TEAM_NAME[team]} bed destroyed!`, TEAM_COLOR[team]);
+    // Kill if they're dead right now
+    const p = players[team];
+    if(p.dead && !p.eliminated){
+      p.eliminated=true;
+      addKillFeed(`${TEAM_NAME[team]} ELIMINATED!`);
+      checkWin();
+    }
+  }
+}
+
+function checkWin(){
+  const alive = players.filter(p=>!p.eliminated);
+  if(alive.length===1){
+    endGame(alive[0].team===0);
+  }
+  // all bots eliminated?
+  const botsAlive = players.slice(1).filter(p=>!p.eliminated);
+  if(botsAlive.length===0) endGame(true);
+}
+
+// ══════════════════════════════════════════
+//  MOVEMENT & COLLISION
+// ══════════════════════════════════════════
+function movePlayer(p, dt){
+  const speed = (p.speedBoost>0?180:120) * (dt/1000);
+  if(p.speedBoost>0) p.speedBoost-=dt;
+
+  // Apply velocity (knockback)
+  p.x += p.vx*(dt/1000);
+  p.y += p.vy*(dt/1000);
+  p.vx *= 0.7;
+  p.vy *= 0.7;
+  if(Math.abs(p.vx)<1) p.vx=0;
+  if(Math.abs(p.vy)<1) p.vy=0;
+
+  // WASD (human only)
+  if(!p.isBot){
+    const spd = speed;
+    if(keys['w']||keys['ArrowUp'])    p.y -= spd;
+    if(keys['s']||keys['ArrowDown'])  p.y += spd;
+    if(keys['a']||keys['ArrowLeft'])  p.x -= spd;
+    if(keys['d']||keys['ArrowRight']) p.x += spd;
+  }
+
+  // Clamp to map
+  p.x = Math.max(HALF, Math.min(p.x, MW*TS-HALF));
+  p.y = Math.max(HALF, Math.min(p.y, MH*TS-HALF));
+
+  // Void check
+  const tx=Math.floor(p.x/TS), ty=Math.floor(p.y/TS);
+  if(getT(tx,ty)===VOID){
+    addKillFeed(`${TEAM_NAME[p.team]} fell into the void`);
+    killPlayer(p, null);
+    // Snap back to spawn
+    if(!p.eliminated){
+      p.x = ISLE[p.team].spawn[0]*TS+TS/2;
+      p.y = ISLE[p.team].spawn[1]*TS+TS/2;
+    }
+  }
+}
+
+// ══════════════════════════════════════════
+//  BLOCK BREAKING (human)
+// ══════════════════════════════════════════
+let breakProgress = 0;
+let breakTarget = null;
+let mouseDown = false;
+let mouseButton = 0;
+let mouseWorldX = 0, mouseWorldY = 0;
+let selectedSlot = 0;
+
+function tryBreakBlock(dt){
+  if(!mouseDown || mouseButton!==0) return;
+  const tx=Math.floor(mouseWorldX/TS), ty=Math.floor(mouseWorldY/TS);
+  const tile=getT(tx,ty);
+  if(!BREAKABLE.has(tile)) return;
+  const player=players[0];
+  const dx=(tx+0.5)*TS-player.x, dy=(ty+0.5)*TS-player.y;
+  if(dx*dx+dy*dy>(TS*3)*(TS*3)) return;
+
+  if(breakTarget && (breakTarget.x!==tx||breakTarget.y!==ty)){
+    breakProgress=0; breakTarget=null;
+  }
+  breakTarget={x:tx,y:ty};
+  const breakTime = (tile===BED_R||tile===BED_B||tile===BED_G||tile===BED_Y)?1200:400;
+  breakProgress+=dt;
+  if(breakProgress>=breakTime){
+    breakProgress=0; breakTarget=null;
+    if(tile===BED_R||tile===BED_B||tile===BED_G||tile===BED_Y){
+      const bedTeam=[BED_R,BED_B,BED_G,BED_Y].indexOf(tile);
+      breakBed(bedTeam);
+    } else {
+      setT(tx,ty,VOID);
+    }
+  }
+}
+
+function tryPlaceBlock(){
+  const tx=Math.floor(mouseWorldX/TS), ty=Math.floor(mouseWorldY/TS);
+  if(getT(tx,ty)!==VOID) return;
+  const player=players[0];
+  const dx=(tx+0.5)*TS-player.x, dy=(ty+0.5)*TS-player.y;
+  if(dx*dx+dy*dy>(TS*4)*(TS*4)) return;
+  // Must be adjacent to non-void tile
+  const adj=[[0,-1],[0,1],[-1,0],[1,0]];
+  const ok=adj.some(([ax,ay])=>getT(tx+ax,ty+ay)!==VOID);
+  if(!ok) return;
+
+  const blockTile = [TEAM_WOOL[0],WOOD,TEAM_WOOL[0],TEAM_WOOL[0],TEAM_WOOL[0]][selectedSlot];
+  if(selectedSlot===0 && player.woolCount>0){setT(tx,ty,TEAM_WOOL[0]);player.woolCount--;}
+  else if(selectedSlot===1 && player.woodCount>0){setT(tx,ty,WOOD);player.woodCount--;}
+  else if(selectedSlot===4 && player.tntCount>0){
+    player.tntCount--;
+    explodeTNT((tx+0.5)*TS,(ty+0.5)*TS);
+  }
+  updateHotbarUI();
+}
+
+function explodeTNT(wx,wy){
+  // Destroy blocks in radius 3
+  const r=3;
+  for(let dy=-r;dy<=r;dy++) for(let dx2=-r;dx2<=r;dx2++){
+    if(dx2*dx2+dy*dy<=r*r){
+      const tx=Math.floor(wx/TS)+dx2, ty=Math.floor(wy/TS)+dy;
+      const t=getT(tx,ty);
+      if(BREAKABLE.has(t)){
+        if(t>=BED_R&&t<=BED_Y) breakBed(t-BED_R);
+        else setT(tx,ty,VOID);
+      }
+    }
+  }
+  // Damage players
+  for(const p of players){
+    if(p.dead||p.eliminated) continue;
+    const dx=p.x-wx, dy2=p.y-wy;
+    if(dx*dx+dy2*dy2<(r*TS)*(r*TS)) p.hp-=6;
+    if(p.hp<=0) killPlayer(p, players[0]);
+  }
+  addKillFeed('💥 TNT exploded!');
+}
+
+// ══════════════════════════════════════════
+//  AI BOTS
+// ══════════════════════════════════════════
+function updateBot(bot, dt){
+  if(bot.dead||bot.eliminated) return;
+  bot.aiTimer-=dt;
+  aiCollect(bot);
+
+  // Try buying
+  if(bot.aiTimer<=0){
+    aiBuyItems(bot);
+    bot.aiTimer=1000+Math.random()*500;
+  }
+
+  // Attack nearby players
+  const nearby=players.filter(p=>!p.dead&&!p.eliminated&&p.team!==bot.team);
+  let closest=null, closestDist=Infinity;
+  for(const p of nearby){
+    const dx=p.x-bot.x, dy=p.y-bot.y;
+    const d=dx*dx+dy*dy;
+    if(d<closestDist){closestDist=d;closest=p;}
+  }
+
+  const attackRange=TS*1.6;
+  if(closest && closestDist<(attackRange*attackRange)){
+    if(bot.attackCd<=0) attackMelee(bot,[closest]);
+  }
+
+  // Bow attack
+  if(closest && bot.hasBow && closestDist<(TS*8)*(TS*8) && bot.attackCd<=0){
+    if(Math.random()<0.3) shootArrow(bot,closest.x,closest.y);
+  }
+
+  // State machine
+  const myBedOk = getT(ISLE[bot.team].bed[0],ISLE[bot.team].bed[1])===TEAM_BED[bot.team];
+
+  // Find target bed
+  const targets = [0,1,2,3].filter(t=>t!==bot.team&&!players[t].eliminated);
+  if(targets.length===0) return;
+
+  // Pick a target to attack
+  if(!bot.aiTarget || players[bot.aiTarget]?.eliminated) bot.aiTarget=targets[0];
+
+  const targetIsle = ISLE[bot.aiTarget];
+  const bedX = targetIsle.bed[0]*TS+TS/2;
+  const bedY = targetIsle.bed[1]*TS+TS/2;
+
+  // Check if on enemy island - try break bed
+  const bx=Math.floor(bot.x/TS), by=Math.floor(bot.y/TS);
+  const onEnemyIsle = (bx>=targetIsle.tx&&bx<targetIsle.tx+targetIsle.tw&&by>=targetIsle.ty&&by<targetIsle.ty+targetIsle.th);
+  if(onEnemyIsle){
+    const bdx=targetIsle.bed[0]-bx, bdy=targetIsle.bed[1]-by;
+    if(Math.abs(bdx)<=1&&Math.abs(bdy)<=1){
+      // Break bed
+      const bedT=getT(targetIsle.bed[0],targetIsle.bed[1]);
+      if(BREAKABLE.has(bedT)){
+        bot.mineTimer=(bot.mineTimer||0)+dt;
+        if(bot.mineTimer>800){
+          bot.mineTimer=0;
+          breakBed(bot.aiTarget);
+        }
+      }
+      return;
+    }
+  }
+
+  // Move toward target bed
+  botMoveTo(bot, bedX, bedY, dt);
+}
+
+function botMoveTo(bot, tx, ty, dt){
+  const dx=tx-bot.x, dy=ty-bot.y;
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  if(dist<4) return;
+  const speed=100*(dt/1000);
+  const nx=dx/dist, ny=dy/dist;
+  const nx2=bot.x+nx*speed, ny2=bot.y+ny*speed;
+
+  // Check if next tile is void → place block
+  const nextTX=Math.floor(nx2/TS), nextTY=Math.floor(ny2/TS);
+  if(getT(nextTX,nextTY)===VOID){
+    if(bot.woolCount>0){
+      setT(nextTX,nextTY,TEAM_WOOL[bot.team]);
+      bot.woolCount--;
+    } else {
+      // Try side-stepping
+      const perp=[[-ny,nx],[ny,-nx]];
+      let moved=false;
+      for(const [px2,py2] of perp){
+        const sx=bot.x+px2*speed, sy=bot.y+py2*speed;
+        if(getT(Math.floor(sx/TS),Math.floor(sy/TS))!==VOID){
+          bot.x=sx; bot.y=sy; moved=true; break;
+        }
+      }
+      return;
+    }
+  }
+
+  bot.x=nx2; bot.y=ny2;
+  bot.angle=Math.atan2(dy,dx);
+}
+
+// ══════════════════════════════════════════
+//  RENDERING
+// ══════════════════════════════════════════
+const VOID_COLORS=['#0a0a1a','#0d0d22','#0a0e1f'];
+let voidAnim=0;
+
+function render(now){
+  CX.clearRect(0,0,CV.width,CV.height);
+
+  // Void background
+  CX.fillStyle='#0a0a1a';
+  CX.fillRect(0,0,CV.width,CV.height);
+
+  // Tile range
+  const x0=Math.floor(camX/TS), y0=Math.floor(camY/TS);
+  const x1=Math.min(MW,x0+Math.ceil(CV.width/TS)+2);
+  const y1=Math.min(MH,y0+Math.ceil(CV.height/TS)+2);
+
+  for(let ty=Math.max(0,y0);ty<y1;ty++){
+    for(let tx=Math.max(0,x0);tx<x1;tx++){
+      const t=getT(tx,ty);
+      if(t===VOID) continue;
+      const sx=tx*TS-camX, sy=ty*TS-camY;
+      // Base fill
+      CX.fillStyle=TCOLOR[t]||'#888';
+      CX.fillRect(sx,sy,TS,TS);
+      // Highlight
+      CX.fillStyle='rgba(255,255,255,0.06)';
+      CX.fillRect(sx,sy,TS,2);
+      CX.fillRect(sx,sy,2,TS);
+      CX.fillStyle='rgba(0,0,0,0.12)';
+      CX.fillRect(sx,sy+TS-2,TS,2);
+      CX.fillRect(sx+TS-2,sy,2,TS);
+
+      // Special tile icons
+      if(t===SHOP_T){
+        CX.font='14px serif'; CX.textAlign='center';
+        CX.fillText('🏪',sx+TS/2,sy+TS/2+5);
+      }
+      if(t===GEN_IRON||t===GEN_GOLD||t===GEN_DIA||t===GEN_EMER){
+        const icons={[GEN_IRON]:'⚙️',[GEN_GOLD]:'🥇',[GEN_DIA]:'💎',[GEN_EMER]:'💚'};
+        CX.font='12px serif'; CX.textAlign='center';
+        CX.fillText(icons[t],sx+TS/2,sy+TS/2+4);
+        // Pulse ring
+        const pulse=(Math.sin(now/400+(tx+ty))+1)/2;
+        CX.strokeStyle=`rgba(255,255,255,${pulse*0.4})`;
+        CX.lineWidth=1.5;
+        CX.strokeRect(sx+1,sy+1,TS-2,TS-2);
+      }
+      if(t>=BED_R&&t<=BED_Y){
+        const col=TEAM_COLOR[t-BED_R];
+        CX.fillStyle=col+'66';
+        CX.fillRect(sx+2,sy+2,TS-4,TS-4);
+        CX.font='13px serif'; CX.textAlign='center';
+        CX.fillText('🛏️',sx+TS/2,sy+TS/2+4);
+        // Health pips
+        const hp=bedHP[t];
+        for(let h=0;h<4;h++){
+          CX.fillStyle=h<hp?col:'#333';
+          CX.fillRect(sx+2+h*5,sy+TS-5,4,3);
+        }
+      }
+    }
+  }
+
+  // Breaking progress
+  if(breakTarget){
+    const sx=breakTarget.x*TS-camX, sy=breakTarget.y*TS-camY;
+    const t = getT(breakTarget.x,breakTarget.y);
+    const breakTime = (t>=BED_R&&t<=BED_Y)?1200:400;
+    const pct=breakProgress/breakTime;
+    CX.fillStyle=`rgba(0,0,0,${pct*0.7})`;
+    CX.fillRect(sx,sy,TS,TS);
+    CX.fillStyle='rgba(255,255,255,0.8)';
+    CX.fillRect(sx,sy+TS-3,TS*pct,3);
+  }
+
+  // Drops
+  for(const d of drops){
+    const sx=d.x-camX, sy=d.y-camY;
+    const bounce=Math.sin(d.age/200)*3;
+    CX.font='14px serif'; CX.textAlign='center';
+    const icon={iron:'⚙️',gold:'🥇',dia:'💎',emer:'💚'}[d.type];
+    CX.fillText(icon,sx,sy+bounce);
+  }
+
+  // Projectiles
+  for(const p of projectiles){
+    const sx=p.x-camX, sy=p.y-camY;
+    CX.save();
+    CX.translate(sx,sy);
+    CX.rotate(Math.atan2(p.vy,p.vx));
+    CX.fillStyle='#ddaa44';
+    CX.fillRect(-6,-2,12,4);
+    CX.restore();
+  }
+
+  // Players
+  for(const p of players){
+    if(p.dead||p.eliminated) continue;
+    const sx=p.x-camX, sy=p.y-camY;
+    const col=TEAM_COLOR[p.team];
+
+    // Shadow
+    CX.fillStyle='rgba(0,0,0,0.3)';
+    CX.beginPath(); CX.ellipse(sx,sy+HALF-2,HALF-1,4,0,0,Math.PI*2); CX.fill();
+
+    // Body
+    CX.fillStyle=col;
+    CX.beginPath(); CX.arc(sx,sy,HALF,0,Math.PI*2); CX.fill();
+
+    // Armor glow
+    if(p.armor===2){CX.strokeStyle='#55ddff';CX.lineWidth=2;CX.beginPath();CX.arc(sx,sy,HALF+2,0,Math.PI*2);CX.stroke();}
+    else if(p.armor===1){CX.strokeStyle='#aaaaaa';CX.lineWidth=1.5;CX.beginPath();CX.arc(sx,sy,HALF+1,0,Math.PI*2);CX.stroke();}
+
+    // Sword
+    if(p.attackCd>400){
+      const swingAng = p.angle + Math.sin(p.attackCd*0.05)*0.8;
+      CX.save(); CX.translate(sx,sy); CX.rotate(swingAng);
+      CX.fillStyle=p.sword===2?'#55ddff':p.sword===1?'#aaaaff':'#cc8833';
+      CX.fillRect(HALF-1,-2,14,4);
+      CX.restore();
+    }
+
+    // Face direction dot
+    CX.fillStyle='rgba(255,255,255,0.7)';
+    CX.beginPath(); CX.arc(sx+Math.cos(p.angle)*6,sy+Math.sin(p.angle)*6,2.5,0,Math.PI*2); CX.fill();
+
+    // Health bar (only show if damaged)
+    if(p.hp<p.maxHp){
+      CX.fillStyle='#333'; CX.fillRect(sx-12,sy-HALF-6,24,4);
+      CX.fillStyle=p.hp>p.maxHp*0.5?'#44ee44':'#ee4444';
+      CX.fillRect(sx-12,sy-HALF-6,24*(p.hp/p.maxHp),4);
+    }
+
+    // Name tag
+    if(!p.isBot) continue;
+    CX.font='bold 10px Arial'; CX.textAlign='center'; CX.fillStyle='#fff';
+    CX.fillText(TEAM_NAME[p.team],sx,sy-HALF-10);
+  }
+
+  // Shop highlight
+  for(let ty=Math.max(0,y0);ty<y1;ty++){
+    for(let tx=Math.max(0,x0);tx<x1;tx++){
+      if(getT(tx,ty)!==SHOP_T) continue;
+      const p=players[0];
+      const dx=(tx+0.5)*TS-p.x, dy=(ty+0.5)*TS-p.y;
+      if(dx*dx+dy*dy<(TS*2)*(TS*2)){
+        CX.strokeStyle='rgba(255,220,100,'+(0.5+Math.sin(voidAnim*3)*0.3)+')';
+        CX.lineWidth=2;
+        CX.strokeRect(tx*TS-camX,ty*TS-camY,TS,TS);
+        CX.font='bold 11px Arial'; CX.textAlign='center'; CX.fillStyle='#ffdd66';
+        CX.fillText('[E] SHOP',tx*TS-camX+TS/2,ty*TS-camY-4);
+      }
+    }
+  }
+
+  // Attack cooldown indicator (on player)
+  if(!shopOpen){
+    const p=players[0];
+    const sx=p.x-camX, sy=p.y-camY;
+    if(p.attackCd>0){
+      CX.strokeStyle='rgba(255,200,50,0.6)';
+      CX.lineWidth=2;
+      CX.beginPath();
+      const ang=-Math.PI/2;
+      CX.arc(sx,sy,HALF+6,ang,ang+Math.PI*2*(1-p.attackCd/800));
+      CX.stroke();
+    }
+  }
+
+  drawMinimap();
+}
+
+// ══════════════════════════════════════════
+//  MINIMAP
+// ══════════════════════════════════════════
+function drawMinimap(){
+  const mc=document.getElementById('minimap');
+  const mx=mc.getContext('2d');
+  const mw=mc.width, mh=mc.height;
+  const scaleX=mw/MW, scaleY=mh/MH;
+  mx.fillStyle='#000'; mx.fillRect(0,0,mw,mh);
+  for(let ty=0;ty<MH;ty++) for(let tx=0;tx<MW;tx++){
+    const t=getT(tx,ty);
+    if(t===VOID) continue;
+    mx.fillStyle=t===BASE?'#555':TCOLOR[t]||'#888';
+    mx.fillRect(tx*scaleX,ty*scaleY,Math.ceil(scaleX),Math.ceil(scaleY));
+  }
+  for(const p of players){
+    if(p.dead||p.eliminated) continue;
+    mx.fillStyle=TEAM_COLOR[p.team];
+    mx.beginPath();
+    mx.arc(p.x/TS*scaleX,p.y/TS*scaleY,2.5,0,Math.PI*2);
+    mx.fill();
+  }
+}
+
+// ══════════════════════════════════════════
+//  UI UPDATES
+// ══════════════════════════════════════════
+function updateUI(){
+  const p=players[0];
+  if(!p) return;
+
+  // Health
+  const hpEl=document.getElementById('hpBar');
+  let hearts='';
+  for(let i=0;i<p.maxHp;i++) hearts+=`<span class="heart">${i<p.hp?'❤️':'🖤'}</span>`;
+  hpEl.innerHTML=hearts;
+
+  // Resources
+  const r=RES[0];
+  document.getElementById('r-iron').textContent=r.iron;
+  document.getElementById('r-gold').textContent=r.gold;
+  document.getElementById('r-dia').textContent=r.dia;
+  document.getElementById('r-emer').textContent=r.emer;
+
+  // Hotbar counts
+  const hItems=[p.woolCount,p.woodCount,null,null,p.tntCount];
+  for(let i=0;i<5;i++){
+    const hs=document.getElementById('hs'+i);
+    hs.classList.toggle('on',selectedSlot===i);
+    const cnt=hItems[i];
+    document.getElementById('hc'+i).textContent=cnt!=null?cnt:'';
+  }
+
+  // Team panel
+  let thtml='';
+  for(let i=0;i<4;i++){
+    const p2=players[i];
+    const bedAlive=getT(ISLE[i].bed[0],ISLE[i].bed[1])===TEAM_BED[i];
+    thtml+=`<div class="tbar" style="border-left:3px solid ${TEAM_COLOR[i]}">
+      <span class="tbed">${p2.eliminated?'☠️':bedAlive?'🛏️':'💔'}</span>
+      <span style="color:${TEAM_COLOR[i]};font-weight:700">${TEAM_NAME[i]}</span>
+      ${p2.eliminated?'<span style="color:#666">ELIM</span>':
+        `<span style="color:#aaa">${p2.hp>0?'♥'.repeat(Math.max(0,p2.hp)):''}</span>`}
+      ${i===0?'<span style="color:#ffdd66;font-size:10px">YOU</span>':''}
+    </div>`;
+  }
+  document.getElementById('teamPanel').innerHTML=thtml;
+}
+
+function updateHotbarUI(){
+  const p=players[0];
+  const hItems=[p.woolCount,p.woodCount,null,null,p.tntCount];
+  for(let i=0;i<5;i++){
+    const cnt=hItems[i];
+    document.getElementById('hc'+i).textContent=cnt!=null?cnt:'';
+  }
+}
+
+function addKillFeed(msg){
+  const el=document.createElement('div');
+  el.className='kfm'; el.textContent=msg;
+  document.getElementById('killFeed').appendChild(el);
+  setTimeout(()=>el.remove(),3500);
+}
+
+function showCenterMsg(msg, color){
+  const el=document.getElementById('centerMsg');
+  el.textContent=msg;
+  el.style.color=color||'#fff';
+  el.style.opacity='1';
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.style.opacity='0',2500);
+}
+
+function showDeath(canRespawn){
+  const el=document.getElementById('deathOverlay');
+  el.style.display='flex';
+  document.getElementById('deathMsg').textContent=canRespawn?'Your bed is intact — you will respawn!':'Your bed was destroyed — GAME OVER!';
+  if(!canRespawn){endGame(false);return;}
+  let t=5;
+  document.getElementById('rsCount').textContent=t;
+  const iv=setInterval(()=>{
+    t--;
+    document.getElementById('rsCount').textContent=t;
+    if(t<=0){clearInterval(iv);el.style.display='none';}
+  },1000);
+}
+
+function endGame(win){
+  document.getElementById('endScreen').style.display='flex';
+  const title=document.getElementById('endTitle');
+  const sub=document.getElementById('endSub');
+  if(win){
+    title.textContent='🏆 VICTORY!';
+    title.style.color='#ffdd44';
+    sub.textContent='You destroyed all enemy beds and won BedWars!';
+  } else {
+    title.textContent='💀 DEFEAT';
+    title.style.color='#ff4444';
+    sub.textContent='Your team was eliminated. Better luck next time!';
+  }
+  gameOver=true;
+}
+
+// ══════════════════════════════════════════
+//  RESPAWN
+// ══════════════════════════════════════════
+function updateRespawn(dt){
+  for(const p of players){
+    if(!p.dead||p.eliminated) continue;
+    p.respawnTimer-=dt;
+    if(p.respawnTimer<=0){
+      p.dead=false;
+      p.hp=p.maxHp;
+      p.x=ISLE[p.team].spawn[0]*TS+TS/2;
+      p.y=ISLE[p.team].spawn[1]*TS+TS/2;
+      p.vx=0; p.vy=0;
+      if(p.team===0) document.getElementById('deathOverlay').style.display='none';
+    }
+  }
+}
+
+// ══════════════════════════════════════════
+//  INPUT
+// ══════════════════════════════════════════
+const keys={};
+document.addEventListener('keydown',e=>{
+  keys[e.key]=true;
+  if(e.key>='1'&&e.key<='5') selectedSlot=parseInt(e.key)-1;
+  if(e.key==='e'||e.key==='E'){
+    if(shopOpen){closeShop();return;}
+    // Check near shop
+    const p=players[0];
+    const tx=Math.floor(p.x/TS), ty=Math.floor(p.y/TS);
+    for(let dy=-2;dy<=2;dy++) for(let dx=-2;dx<=2;dx++){
+      if(getT(tx+dx,ty+dy)===SHOP_T){openShop();return;}
+    }
+  }
+});
+document.addEventListener('keyup',e=>{keys[e.key]=false;});
+
+CV.addEventListener('mousedown',e=>{
+  if(shopOpen) return;
+  mouseDown=true; mouseButton=e.button;
+  if(e.button===2) tryPlaceBlock();
+  e.preventDefault();
+});
+CV.addEventListener('mouseup',e=>{
+  mouseDown=false; breakTarget=null; breakProgress=0;
+});
+CV.addEventListener('mousemove',e=>{
+  const rect=CV.getBoundingClientRect();
+  mouseWorldX=e.clientX-rect.left+camX;
+  mouseWorldY=e.clientY-rect.top+camY;
+  const p=players[0];
+  if(p&&!p.dead){
+    p.angle=Math.atan2(mouseWorldY-p.y,mouseWorldX-p.x);
+  }
+});
+CV.addEventListener('contextmenu',e=>{e.preventDefault();mouseDown=true;mouseButton=2;tryPlaceBlock();setTimeout(()=>{mouseDown=false;},100);});
+document.addEventListener('wheel',e=>{
+  selectedSlot=(selectedSlot+(e.deltaY>0?1:-1)+5)%5;
+  updateHotbarUI();
+});
+
+// ══════════════════════════════════════════
+//  GAME LOOP
+// ══════════════════════════════════════════
+let lastTime=0, gameOver=false;
+voidAnim=0;
+
+function gameLoop(now){
+  if(gameOver){requestAnimationFrame(gameLoop);return;}
+  const dt=Math.min(now-lastTime,100);
+  lastTime=now;
+  voidAnim+=dt/1000;
+
+  const player=players[0];
+  if(!player.dead&&!player.eliminated){
+    movePlayer(player,dt);
+    collectDrops(player);
+    if(mouseDown&&mouseButton===0&&!shopOpen){
+      // Melee attack if close to enemy
+      const nearEnemy=players.slice(1).filter(p=>!p.dead&&!p.eliminated);
+      const inRange=nearEnemy.some(p=>{const dx=p.x-player.x,dy=p.y-player.y;return dx*dx+dy*dy<(TS*2)*(TS*2);});
+      if(inRange) attackMelee(player, nearEnemy);
+      else tryBreakBlock(dt);
+    }
+    updateCam(player.x, player.y);
+    if(player.attackCd>0) player.attackCd-=dt;
+  }
+
+  // Update bots
+  for(const bot of players.slice(1)){
+    if(bot.dead||bot.eliminated) continue;
+    movePlayer(bot,dt);
+    updateBot(bot,dt);
+    if(bot.attackCd>0) bot.attackCd-=dt;
+  }
+
+  updateGens(dt);
+  updateProjectiles(dt);
+  updateRespawn(dt);
+  updateUI();
+  render(now);
+
+  requestAnimationFrame(gameLoop);
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+genMap();
+initGenTimers();
+
+for(let i=0;i<4;i++) players.push(makePlayer(i, i!==0));
+
+updateCam(players[0].x, players[0].y);
+addKillFeed('🎮 BedWars started! Protect your bed!');
+showCenterMsg('Protect your 🛏️ bed!','#ffdd44');
+
+requestAnimationFrame(t=>{lastTime=t;requestAnimationFrame(gameLoop);});
+</script>
+</body>
+</html>
