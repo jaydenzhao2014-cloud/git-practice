@@ -35,6 +35,7 @@ body{background:linear-gradient(160deg,#f0e8ff 0%,#e8f4ff 50%,#fff0f8 100%);font
 .tab:nth-child(4).active{color:#0099ff;border-color:#0099ff;background:rgba(0,153,255,.08);}
 .tab:nth-child(5).active{color:#ffaa00;border-color:#ffaa00;background:rgba(255,170,0,.08);}
 .tab:nth-child(6).active{color:#ff44aa;border-color:#ff44aa;background:rgba(255,68,170,.08);}
+.tab:nth-child(7).active{color:#22bbaa;border-color:#22bbaa;background:rgba(34,187,170,.08);}
 .tab.active{border-bottom-width:3px;}
 
 /* CONTENT */
@@ -347,6 +348,7 @@ label{font-size:11px;letter-spacing:2px;color:#999;margin-bottom:5px;display:blo
   <div class="tab" onclick="switchTab('food',this)">🍔 FOOD</div>
   <div class="tab" onclick="switchTab('checklist',this)">✅ CHECKLIST</div>
   <div class="tab" onclick="switchTab('schedule',this)">📅 SCHEDULE</div>
+  <div class="tab" onclick="switchTab('notes',this)">📝 NOTES</div>
 </div>
 
 <!-- CONTENT -->
@@ -508,6 +510,17 @@ label{font-size:11px;letter-spacing:2px;color:#999;margin-bottom:5px;display:blo
     </div>
   </div>
 
+  <!-- NOTES -->
+  <div class="section" id="sec-notes">
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(180,130,255,.2);background:linear-gradient(90deg,#f8f0ff,#f0f8ff);">
+        <div class="card-title" style="margin-bottom:0;">📝 MY NOTES</div>
+        <span id="notesSaved" style="font-size:11px;color:#bbb;letter-spacing:1px;transition:opacity .3s;opacity:0;">SAVED</span>
+      </div>
+      <textarea id="notePad" placeholder="Write anything here — ideas, reminders, shopping lists, to-dos..." oninput="onNoteInput()" style="width:100%;min-height:420px;border:none;outline:none;padding:20px;font-size:15px;line-height:1.8;color:#333;font-family:'Segoe UI',Arial,sans-serif;resize:vertical;background:#fff;"></textarea>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -665,6 +678,7 @@ function switchTab(id,el){
   if(id==='food')refreshFood();
   if(id==='checklist')refreshTasks();
   if(id==='schedule')refreshSchedule();
+  if(id==='notes')loadNotes();
 }
 
 // ════════════════════════════════
@@ -949,6 +963,26 @@ function refreshSchedule(){
       </div>
     </div>`;
   }).join('');
+}
+
+// ════════════════════════════════
+//  NOTES
+// ════════════════════════════════
+var _noteTimer;
+function loadNotes(){
+  var el=document.getElementById('notePad');
+  if(!el) return;
+  el.value=ld('notes','');
+}
+function onNoteInput(){
+  clearTimeout(_noteTimer);
+  _noteTimer=setTimeout(function(){
+    sv('notes',document.getElementById('notePad').value);
+    var s=document.getElementById('notesSaved');
+    s.style.opacity='1';
+    clearTimeout(s._t);
+    s._t=setTimeout(function(){s.style.opacity='0';},1800);
+  },600);
 }
 
 // ════════════════════════════════
