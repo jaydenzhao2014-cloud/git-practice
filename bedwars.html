@@ -827,10 +827,10 @@ document.getElementById('lockScreen').addEventListener('click',()=>{
 });
 document.addEventListener('pointerlockchange',()=>{
   locked=document.pointerLockElement===renderer.domElement;
-  document.getElementById('lockScreen').style.display=locked?'none':'flex';
-  document.getElementById('hud').style.display=locked?'block':'none';
+  const showLock=!locked&&!shopOpen&&!gameOver;
+  document.getElementById('lockScreen').style.display=showLock?'flex':'none';
+  document.getElementById('hud').style.display=(locked||shopOpen)?'block':'none';
   document.getElementById('crosshair').style.display=locked?'block':'none';
-  if(!locked&&!shopOpen&&!gameOver) document.getElementById('lockScreen').style.display='flex';
 });
 document.addEventListener('mousemove',e=>{
   if(!locked||shopOpen) return;
@@ -845,7 +845,7 @@ document.addEventListener('keydown',e=>{
   if(e.code==='Digit3')selectedSlot=2;
   if(e.code==='Digit4')selectedSlot=3;
   if(e.code==='Digit5')selectedSlot=4;
-  if(e.code==='KeyE'&&locked&&!shopOpen) checkShopOpen();
+  if(e.code==='KeyE'&&!shopOpen&&!gameOver) checkShopOpen();
   if(e.code==='Escape'&&shopOpen) closeShop();
   if((e.code==='Space')&&player.onGround&&!player.dead){player.vy=8;player.onGround=false;}
   document.querySelectorAll('.hs').forEach((h,i)=>h.classList.toggle('on',i===selectedSlot));
@@ -882,11 +882,8 @@ renderer.domElement.addEventListener('mouseup',e=>{
 renderer.domElement.addEventListener('contextmenu',e=>e.preventDefault());
 
 function checkShopOpen(){
-  // Check near shop
-  for(const s of ISLE){
-    const dx=player.x-s.shop.x,dz=player.z-s.shop.z;
-    if(dx*dx+dz*dz<6){openShop();return;}
-  }
+  // Open shop if on own island (or anywhere — press E anytime)
+  openShop();
 }
 
 // ══════════════════════════════════════════
@@ -924,7 +921,9 @@ function openShop(){
 function closeShop(){
   shopOpen=false;
   document.getElementById('shopModal').style.display='none';
-  renderer.domElement.requestPointerLock();
+  document.getElementById('hud').style.display='none';
+  document.getElementById('crosshair').style.display='none';
+  if(!gameOver) document.getElementById('lockScreen').style.display='flex';
 }
 function shopTab(btn,cat){
   shopCat=cat;
@@ -975,10 +974,7 @@ function updateUI(){
   // Hotbar counts
   const hItems=[player.woolCount,player.woodCount,null,null,player.tntCount];
   for(let i=0;i<5;i++) document.getElementById('hc'+i).textContent=hItems[i]!=null?hItems[i]:'';
-  // Shop hint
-  let nearShop=false;
-  for(const s of ISLE){const dx=player.x-s.shop.x,dz=player.z-s.shop.z;if(dx*dx+dz*dz<8)nearShop=true;}
-  document.getElementById('shopHint').style.display=nearShop&&!shopOpen?'block':'none';
+  document.getElementById('shopHint').style.display=!shopOpen?'block':'none';
   // Team panel
   let thtml='';
   for(let i=0;i<4;i++){
