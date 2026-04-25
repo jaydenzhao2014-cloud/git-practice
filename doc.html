@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Doc</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#f7f7f5;--paper:#ffffff;--text:#37352f;--placeholder:#c1bdb7;--toolbar:#ffffff;--border:#e9e9e7;--accent:#2eaadc;--shadow:0 1px 3px rgba(0,0,0,.08);}
+body.dark{--bg:#191919;--paper:#202020;--text:#e6e6e4;--placeholder:#4a4a4a;--toolbar:#252525;--border:#2e2e2e;--shadow:0 1px 3px rgba(0,0,0,.4);}
+body{background:var(--bg);min-height:100vh;font-family:'Georgia',serif;transition:background .2s,color .2s;}
+
+/* TOOLBAR */
+#toolbar{position:fixed;top:0;left:0;right:0;height:48px;background:var(--toolbar);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:2px;padding:0 16px;z-index:100;box-shadow:var(--shadow);}
+.tb-group{display:flex;align-items:center;gap:1px;}
+.tb-sep{width:1px;height:22px;background:var(--border);margin:0 6px;}
+.tb-btn{width:32px;height:32px;border:none;background:none;border-radius:6px;cursor:pointer;font-size:14px;color:var(--text);display:flex;align-items:center;justify-content:center;transition:background .12s;}
+.tb-btn:hover{background:rgba(127,127,127,.12);}
+.tb-btn.on{background:rgba(46,170,220,.18);color:var(--accent);}
+.tb-btn[title="Bold"]{font-weight:800;font-family:Georgia,serif;}
+.tb-btn[title="Italic"]{font-style:italic;font-family:Georgia,serif;}
+.tb-btn[title="Underline"]{text-decoration:underline;}
+select.tb-select{border:none;background:none;color:var(--text);font-size:13px;cursor:pointer;padding:4px 6px;border-radius:6px;outline:none;}
+select.tb-select:hover{background:rgba(127,127,127,.12);}
+#wordCount{margin-left:auto;font-size:12px;color:var(--placeholder);font-family:'Segoe UI',sans-serif;letter-spacing:.5px;}
+#saveStatus{font-size:11px;color:var(--placeholder);font-family:'Segoe UI',sans-serif;margin-left:12px;transition:opacity .3s;}
+
+/* PAGE */
+#page{max-width:760px;margin:72px auto 80px;background:var(--paper);border-radius:4px;box-shadow:0 2px 16px rgba(0,0,0,.06);min-height:calc(100vh - 140px);padding:56px 72px 80px;}
+@media(max-width:600px){#page{margin:60px 0 0;border-radius:0;padding:32px 24px 60px;}}
+
+/* TITLE */
+#docTitle{width:100%;border:none;outline:none;background:none;font-size:38px;font-weight:700;color:var(--text);font-family:'Georgia',serif;margin-bottom:6px;line-height:1.2;resize:none;overflow:hidden;}
+#docTitle::placeholder{color:var(--placeholder);}
+#dateLine{font-size:13px;color:var(--placeholder);margin-bottom:36px;font-family:'Segoe UI',sans-serif;border:none;outline:none;background:none;width:100%;}
+
+/* EDITOR */
+#editor{outline:none;min-height:400px;font-size:17px;line-height:1.75;color:var(--text);caret-color:var(--accent);}
+#editor:empty::before{content:attr(data-placeholder);color:var(--placeholder);pointer-events:none;}
+#editor p{margin-bottom:8px;}
+#editor h1{font-size:28px;font-weight:700;margin:24px 0 10px;color:var(--text);}
+#editor h2{font-size:22px;font-weight:700;margin:20px 0 8px;color:var(--text);}
+#editor h3{font-size:18px;font-weight:700;margin:16px 0 6px;color:var(--text);}
+#editor ul,#editor ol{padding-left:24px;margin-bottom:8px;}
+#editor li{margin-bottom:4px;}
+#editor blockquote{border-left:3px solid var(--accent);padding-left:16px;color:var(--placeholder);margin:12px 0;}
+#editor a{color:var(--accent);text-decoration:underline;}
+#editor hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
+#editor code{background:rgba(127,127,127,.12);border-radius:4px;padding:2px 5px;font-family:'Courier New',monospace;font-size:14px;}
+#editor pre{background:rgba(127,127,127,.1);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:'Courier New',monospace;font-size:14px;margin:12px 0;}
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <div class="tb-group">
+    <select class="tb-select" id="styleSelect" onchange="applyStyle(this.value)">
+      <option value="p">Paragraph</option>
+      <option value="h1">Heading 1</option>
+      <option value="h2">Heading 2</option>
+      <option value="h3">Heading 3</option>
+      <option value="pre">Code Block</option>
+    </select>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <button class="tb-btn" title="Bold" onclick="fmt('bold')"><b>B</b></button>
+    <button class="tb-btn" title="Italic" onclick="fmt('italic')"><i>I</i></button>
+    <button class="tb-btn" title="Underline" onclick="fmt('underline')">U</button>
+    <button class="tb-btn" title="Strikethrough" onclick="fmt('strikeThrough')"><s>S</s></button>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <button class="tb-btn" title="Bullet list" onclick="fmt('insertUnorderedList')">☰</button>
+    <button class="tb-btn" title="Numbered list" onclick="fmt('insertOrderedList')">≡</button>
+    <button class="tb-btn" title="Quote" onclick="applyStyle('blockquote')">❝</button>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <button class="tb-btn" title="Undo" onclick="document.execCommand('undo')">↩</button>
+    <button class="tb-btn" title="Redo" onclick="document.execCommand('redo')">↪</button>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <button class="tb-btn" title="Dark mode" id="darkBtn" onclick="toggleDark()">🌙</button>
+    <button class="tb-btn" title="Download" onclick="download()">⬇</button>
+  </div>
+  <span id="wordCount">0 words</span>
+  <span id="saveStatus">Saved</span>
+</div>
+
+<div id="page">
+  <textarea id="docTitle" placeholder="Untitled" rows="1" oninput="autoResize(this);save()"></textarea>
+  <div id="dateLine" contenteditable="true" spellcheck="false" onfocus="this.style.display='block'" onblur="save()"></div>
+  <div id="editor" contenteditable="true" data-placeholder="Start writing..." oninput="onEdit()" onkeydown="handleKey(event)"></div>
+</div>
+
+<script>
+const SAVE_KEY='jayden_doc_v1';
+
+function load(){
+  const d=JSON.parse(localStorage.getItem(SAVE_KEY)||'{}');
+  if(d.title) document.getElementById('docTitle').value=d.title;
+  if(d.date) document.getElementById('dateLine').textContent=d.date;
+  else document.getElementById('dateLine').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  if(d.body) document.getElementById('editor').innerHTML=d.body;
+  if(d.dark) document.body.classList.add('dark');
+  autoResize(document.getElementById('docTitle'));
+  updateWordCount();
+}
+
+function save(){
+  const data={
+    title:document.getElementById('docTitle').value,
+    date:document.getElementById('dateLine').textContent,
+    body:document.getElementById('editor').innerHTML,
+    dark:document.body.classList.contains('dark'),
+  };
+  localStorage.setItem(SAVE_KEY,JSON.stringify(data));
+  showSaved();
+}
+
+let saveTimer;
+function onEdit(){
+  updateWordCount();
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(save,600);
+}
+
+function showSaved(){
+  const el=document.getElementById('saveStatus');
+  el.textContent='Saved';
+  el.style.opacity='1';
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.style.opacity='0',2000);
+}
+
+function updateWordCount(){
+  const text=document.getElementById('editor').innerText||'';
+  const words=text.trim().split(/\s+/).filter(w=>w.length>0).length;
+  document.getElementById('wordCount').textContent=words+' word'+(words===1?'':'s');
+}
+
+function fmt(cmd){
+  document.getElementById('editor').focus();
+  document.execCommand(cmd,false,null);
+  updateActiveButtons();
+}
+
+function applyStyle(tag){
+  document.getElementById('editor').focus();
+  if(tag==='blockquote'){
+    document.execCommand('formatBlock',false,'blockquote');
+  } else {
+    document.execCommand('formatBlock',false,tag);
+  }
+  document.getElementById('styleSelect').value='p';
+}
+
+function updateActiveButtons(){
+  document.querySelector('[title="Bold"]').classList.toggle('on',document.queryCommandState('bold'));
+  document.querySelector('[title="Italic"]').classList.toggle('on',document.queryCommandState('italic'));
+  document.querySelector('[title="Underline"]').classList.toggle('on',document.queryCommandState('underline'));
+}
+
+document.getElementById('editor').addEventListener('keyup',updateActiveButtons);
+document.getElementById('editor').addEventListener('mouseup',updateActiveButtons);
+
+function handleKey(e){
+  if(e.key==='Tab'){
+    e.preventDefault();
+    document.execCommand('insertHTML',false,'&nbsp;&nbsp;&nbsp;&nbsp;');
+  }
+}
+
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=el.scrollHeight+'px';
+}
+
+function toggleDark(){
+  document.body.classList.toggle('dark');
+  document.getElementById('darkBtn').textContent=document.body.classList.contains('dark')?'☀️':'🌙';
+  save();
+}
+
+function download(){
+  const title=document.getElementById('docTitle').value||'Untitled';
+  const date=document.getElementById('dateLine').textContent;
+  const body=document.getElementById('editor').innerText||'';
+  const txt=title+'\n'+date+'\n\n'+body;
+  const a=document.createElement('a');
+  a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(txt);
+  a.download=(title||'doc')+'.txt';
+  a.click();
+}
+
+// Ctrl+B/I/U shortcuts
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();save();showSaved();}
+});
+
+load();
+</script>
+</body>
+</html>
