@@ -8,62 +8,85 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#000;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;}
 canvas{display:block;}
-#lockScreen{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;cursor:pointer;}
-#lockScreen h1{font-size:56px;font-weight:900;letter-spacing:8px;background:linear-gradient(135deg,#ff5555,#5599ff,#55cc55,#ffcc22);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:14px;}
-#lockScreen p{color:#aaa;font-size:16px;letter-spacing:3px;margin-bottom:8px;}
-#lockScreen .hint{color:#555;font-size:12px;letter-spacing:2px;}
-#crosshair{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;display:none;}
-#crosshair::before,#crosshair::after{content:'';position:absolute;background:rgba(255,255,255,.85);border-radius:2px;}
-#crosshair::before{width:2px;height:16px;left:-1px;top:-8px;}
-#crosshair::after{width:16px;height:2px;top:-1px;left:-8px;}
+
+/* LOCK SCREEN */
+#lockScreen{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 40%,#160a30 0%,#05050f 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;cursor:pointer;}
+#lockTitle{font-size:clamp(44px,10vw,92px);font-weight:900;letter-spacing:8px;background:linear-gradient(135deg,#ff5555,#ff9944,#5599ff,#55cc55,#ffcc22);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:300%;animation:gradShift 4s ease infinite;filter:drop-shadow(0 0 50px rgba(130,80,255,.5));line-height:1;margin-bottom:6px;}
+#lockSub{color:rgba(255,255,255,.3);font-size:13px;letter-spacing:8px;margin-bottom:30px;}
+#lockTeams{display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap;justify-content:center;}
+.lt{padding:7px 18px;border-radius:24px;font-weight:800;font-size:12px;letter-spacing:2px;box-shadow:0 2px 12px rgba(0,0,0,.4);}
+#lockPlay{padding:14px 44px;background:linear-gradient(135deg,#8833ff,#4466ff);border-radius:32px;color:#fff;font-size:17px;font-weight:800;letter-spacing:4px;box-shadow:0 4px 24px rgba(120,60,255,.5);margin-bottom:20px;transition:transform .15s;}
+#lockPlay:hover{transform:scale(1.05);}
+#lockHint{color:#333;font-size:11px;letter-spacing:2px;}
+@keyframes gradShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+/* CROSSHAIR */
+#crosshair{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;display:none;width:20px;height:20px;}
+#crosshair::before,#crosshair::after{content:'';position:absolute;background:rgba(255,255,255,.9);border-radius:2px;box-shadow:0 0 3px rgba(0,0,0,.8);}
+#crosshair::before{width:2px;height:20px;left:9px;top:0;}
+#crosshair::after{width:20px;height:2px;top:9px;left:0;}
+
+/* HUD */
 #hud{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;display:none;}
-#hotbar{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:4px;}
-.hs{width:52px;height:52px;border:2px solid #666;background:rgba(0,0,0,.8);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px;position:relative;}
-.hs.on{border-color:#fff;box-shadow:0 0 12px rgba(255,255,255,.35);}
-.hc{position:absolute;bottom:2px;right:4px;font-size:10px;color:#fff;font-weight:700;text-shadow:0 1px 2px #000;}
-.hl{font-size:8px;color:#888;letter-spacing:1px;margin-top:2px;}
-#hpWrap{position:fixed;bottom:75px;left:50%;transform:translateX(-50%);display:flex;gap:3px;}
-.heart{font-size:16px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.8));}
-#resources{position:fixed;top:12px;right:12px;background:rgba(0,0,0,.75);border-radius:10px;padding:10px 14px;color:#fff;font-size:13px;line-height:2;border:1px solid #333;}
+#hotbar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:3px;background:rgba(0,0,0,.65);border-radius:14px;padding:5px;border:1px solid rgba(255,255,255,.12);}
+.hs{width:56px;height:56px;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:24px;position:relative;transition:all .1s;}
+.hs.on{border-color:#fff;background:rgba(255,255,255,.18);box-shadow:0 0 16px rgba(255,255,255,.3),inset 0 1px 0 rgba(255,255,255,.15);}
+.hc{position:absolute;bottom:2px;right:4px;font-size:10px;color:#fff;font-weight:700;text-shadow:0 1px 3px #000;}
+.hl{font-size:7px;color:#aaa;letter-spacing:1px;margin-top:1px;text-transform:uppercase;}
+#hpWrap{position:fixed;bottom:82px;left:50%;transform:translateX(-50%);display:flex;gap:2px;filter:drop-shadow(0 1px 4px rgba(0,0,0,.9));}
+.heart{font-size:15px;}
+#resources{position:fixed;top:12px;right:12px;background:rgba(0,0,0,.8);border-radius:12px;padding:10px 16px;color:#fff;font-size:13px;line-height:2.1;border:1px solid rgba(255,255,255,.1);min-width:130px;}
+#resources b{font-size:14px;}
 #teamPanel{position:fixed;top:12px;left:12px;display:flex;flex-direction:column;gap:5px;}
-.tbar{background:rgba(0,0,0,.75);border-radius:8px;padding:6px 12px;font-size:12px;color:#fff;display:flex;align-items:center;gap:8px;border:1px solid #333;min-width:140px;}
-#killFeed{position:fixed;top:90px;right:12px;display:flex;flex-direction:column;gap:3px;}
-.kfm{background:rgba(0,0,0,.8);color:#fff;font-size:12px;padding:4px 10px;border-radius:6px;animation:kfFade 3.5s forwards;}
-@keyframes kfFade{0%,70%{opacity:1}100%{opacity:0}}
-#shopModal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1228;border:2px solid #6644aa;border-radius:16px;padding:22px;width:380px;display:none;z-index:200;pointer-events:all;max-height:80vh;overflow-y:auto;}
-#shopModal h2{color:#fff;text-align:center;margin-bottom:4px;font-size:18px;}
-.stab{display:flex;gap:4px;margin-bottom:12px;justify-content:center;flex-wrap:wrap;}
-.stabBtn{padding:6px 12px;border-radius:20px;border:2px solid #444;background:none;color:#aaa;font-size:11px;cursor:pointer;letter-spacing:1px;font-weight:700;transition:all .15s;pointer-events:all;}
-.stabBtn.on{background:#6644aa;border-color:#6644aa;color:#fff;}
-.sitem{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;margin-bottom:6px;background:rgba(255,255,255,.05);cursor:pointer;transition:background .15s;border:1px solid transparent;pointer-events:all;}
-.sitem:hover{background:rgba(255,255,255,.12);border-color:#6644aa;}
-.sitem-icon{font-size:22px;width:30px;text-align:center;}
+.tbar{background:rgba(0,0,0,.82);border-radius:9px;padding:6px 12px;font-size:12px;color:#fff;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.08);min-width:150px;backdrop-filter:blur(4px);}
+#killFeed{position:fixed;top:90px;right:12px;display:flex;flex-direction:column;gap:4px;}
+.kfm{background:rgba(0,0,0,.85);color:#fff;font-size:12px;padding:5px 12px;border-radius:8px;animation:kfFade 3.5s forwards;border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(4px);}
+@keyframes kfFade{0%,70%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(10px)}}
+
+/* SHOP */
+#shopModal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(160deg,#140e24,#1a1030);border:1px solid rgba(150,100,255,.4);border-radius:18px;padding:24px;width:400px;display:none;z-index:200;pointer-events:all;max-height:82vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.7);}
+#shopModal h2{color:#fff;text-align:center;margin-bottom:4px;font-size:20px;font-weight:800;letter-spacing:2px;}
+.stab{display:flex;gap:4px;margin-bottom:14px;justify-content:center;flex-wrap:wrap;}
+.stabBtn{padding:6px 14px;border-radius:20px;border:1px solid #444;background:rgba(255,255,255,.05);color:#888;font-size:11px;cursor:pointer;letter-spacing:1px;font-weight:700;transition:all .15s;pointer-events:all;}
+.stabBtn.on{background:linear-gradient(135deg,#6644aa,#4466cc);border-color:transparent;color:#fff;}
+.sitem{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;margin-bottom:6px;background:rgba(255,255,255,.04);cursor:pointer;transition:all .15s;border:1px solid transparent;pointer-events:all;}
+.sitem:hover{background:rgba(255,255,255,.1);border-color:rgba(150,100,255,.4);transform:translateX(2px);}
+.sitem-icon{font-size:24px;width:32px;text-align:center;}
 .sitem-name{color:#fff;font-size:13px;font-weight:600;flex:1;}
 .sitem-cost{font-size:12px;text-align:right;}
-.sitem.owned{opacity:.5;cursor:default;}
-#shopClose{position:absolute;top:10px;right:14px;background:none;border:none;color:#888;font-size:22px;cursor:pointer;pointer-events:all;}
-#shopClose:hover{color:#fff;}
-#shopHint{position:fixed;top:55%;left:50%;transform:translateX(-50%);color:#ffdd66;font-size:13px;background:rgba(0,0,0,.7);padding:5px 14px;border-radius:8px;pointer-events:none;display:none;letter-spacing:1px;}
-#deathScreen{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:150;}
-#deathScreen h2{font-size:42px;color:#ff3333;font-weight:900;letter-spacing:4px;}
-#deathScreen p{color:#ccc;font-size:16px;margin-top:10px;}
-#deathScreen .rct{color:#fff;font-size:22px;margin-top:8px;font-weight:700;}
-#endScreen{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:300;}
-#endScreen h1{font-size:52px;font-weight:900;letter-spacing:6px;}
-#endScreen p{color:#ccc;font-size:18px;margin-top:12px;}
-#endScreen button{margin-top:24px;padding:13px 32px;font-size:16px;background:linear-gradient(135deg,#5533cc,#aa44ff);color:#fff;border:none;border-radius:12px;cursor:pointer;font-weight:700;letter-spacing:2px;pointer-events:all;}
-#controls{position:fixed;bottom:14px;left:12px;color:#555;font-size:10px;letter-spacing:1px;line-height:1.9;}
-#breakBar{position:fixed;top:55%;left:50%;transform:translateX(-50%);width:180px;height:6px;background:rgba(255,255,255,.2);border-radius:10px;display:none;}
-#breakFill{height:100%;background:#ffdd44;border-radius:10px;width:0%;}
+.sitem.owned{opacity:.45;cursor:default;}
+#shopClose{position:absolute;top:12px;right:16px;background:rgba(255,255,255,.08);border:none;color:#aaa;font-size:18px;cursor:pointer;pointer-events:all;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+#shopClose:hover{background:rgba(255,255,255,.2);color:#fff;}
+#shopHint{position:fixed;bottom:82px;left:50%;transform:translateX(-50%);color:#ffdd66;font-size:12px;background:rgba(0,0,0,.75);padding:5px 16px;border-radius:20px;pointer-events:none;display:none;letter-spacing:1px;border:1px solid rgba(255,220,80,.3);}
+
+/* DEATH / END */
+#deathScreen{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:150;}
+#deathScreen h2{font-size:48px;color:#ff4444;font-weight:900;letter-spacing:6px;text-shadow:0 0 30px rgba(255,50,50,.6);}
+#deathScreen p{color:#bbb;font-size:16px;margin-top:12px;letter-spacing:2px;}
+#deathScreen .rct{color:#fff;font-size:24px;margin-top:10px;font-weight:700;}
+#endScreen{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:300;}
+#endScreen h1{font-size:clamp(40px,8vw,64px);font-weight:900;letter-spacing:6px;}
+#endScreen p{color:#aaa;font-size:18px;margin-top:14px;letter-spacing:2px;}
+#endScreen button{margin-top:28px;padding:14px 36px;font-size:16px;background:linear-gradient(135deg,#5533cc,#aa44ff);color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:800;letter-spacing:3px;pointer-events:all;box-shadow:0 4px 20px rgba(120,60,255,.5);}
+#controls{position:fixed;bottom:16px;left:14px;color:#3a3a3a;font-size:10px;letter-spacing:1px;line-height:2;}
+#breakBar{position:fixed;top:56%;left:50%;transform:translateX(-50%);width:200px;height:7px;background:rgba(255,255,255,.15);border-radius:10px;display:none;border:1px solid rgba(255,255,255,.1);}
+#breakFill{height:100%;background:linear-gradient(90deg,#ffdd44,#ffaa00);border-radius:10px;width:0%;transition:width .05s;}
 #dmgFlash{position:fixed;inset:0;pointer-events:none;background:rgba(255,0,0,0);transition:background .1s;}
 </style>
 </head>
 <body>
 
 <div id="lockScreen">
-  <h1>🛏️ BEDWARS 3D</h1>
-  <p>CLICK TO PLAY</p>
-  <div class="hint">WASD MOVE · SPACE JUMP · LEFT CLICK ATTACK/BREAK · RIGHT CLICK PLACE · E SHOP · 1-5 HOTBAR</div>
+  <div id="lockTitle">🛏️ BEDWARS</div>
+  <div id="lockSub">— 3 D —</div>
+  <div id="lockTeams">
+    <div class="lt" style="background:#ff5555;color:#fff;">🔴 RED</div>
+    <div class="lt" style="background:#3377ee;color:#fff;">🔵 BLUE</div>
+    <div class="lt" style="background:#33aa44;color:#fff;">🟢 GREEN</div>
+    <div class="lt" style="background:#ffcc22;color:#000;">🟡 YELLOW</div>
+  </div>
+  <div id="lockPlay">▶ CLICK TO PLAY</div>
+  <div id="lockHint">WASD · SPACE · LEFT CLICK BREAK · RIGHT CLICK PLACE · E SHOP</div>
 </div>
 
 <canvas id="c"></canvas>
@@ -126,8 +149,8 @@ const canvas=document.getElementById('c');
 canvas.width=W; canvas.height=H;
 
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x07071a);
-scene.fog=new THREE.FogExp2(0x07071a,0.025);
+scene.background=new THREE.Color(0x08091e);
+scene.fog=new THREE.FogExp2(0x080a20,0.018);
 
 const camera=new THREE.PerspectiveCamera(75,W/H,0.05,300);
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
@@ -143,29 +166,54 @@ window.addEventListener('resize',()=>{
 });
 
 // Lighting
-const ambient=new THREE.AmbientLight(0x334466,1.2);
-scene.add(ambient);
-const sun=new THREE.DirectionalLight(0xffffff,1.0);
-sun.position.set(20,40,20);
-sun.castShadow=true;
-sun.shadow.mapSize.width=2048;
-sun.shadow.mapSize.height=2048;
-sun.shadow.camera.near=0.1;
-sun.shadow.camera.far=200;
-sun.shadow.camera.left=-80;
-sun.shadow.camera.right=80;
-sun.shadow.camera.top=80;
-sun.shadow.camera.bottom=-80;
-scene.add(sun);
+const hemi=new THREE.HemisphereLight(0x2244aa,0x110a22,0.9);
+scene.add(hemi);
+const moon=new THREE.DirectionalLight(0xbbccff,0.85);
+moon.position.set(-30,60,10);
+moon.castShadow=true;
+moon.shadow.mapSize.width=2048;
+moon.shadow.mapSize.height=2048;
+moon.shadow.camera.near=0.1;
+moon.shadow.camera.far=200;
+moon.shadow.camera.left=-80;
+moon.shadow.camera.right=80;
+moon.shadow.camera.top=80;
+moon.shadow.camera.bottom=-80;
+scene.add(moon);
+// Rim/fill from opposite side
+const fill=new THREE.DirectionalLight(0x442266,0.3);
+fill.position.set(30,20,-30);
+scene.add(fill);
 
-// Stars
+// Stars — multi-color
 const starGeo=new THREE.BufferGeometry();
-const starVerts=[];
-for(let i=0;i<2000;i++){
-  starVerts.push((Math.random()-0.5)*300,(Math.random()*80+20),(Math.random()-0.5)*300);
+const starVerts=[],starColors=[];
+const starPalette=[1,1,1, 0.9,0.9,1, 1,0.9,0.8, 0.7,0.8,1, 1,1,0.85];
+for(let i=0;i<3000;i++){
+  starVerts.push((Math.random()-0.5)*350,(Math.random()*90+15),(Math.random()-0.5)*350);
+  const p=starPalette.slice(Math.floor(Math.random()*5)*3,Math.floor(Math.random()*5)*3+3);
+  starColors.push(p[0]||1,p[1]||1,p[2]||1);
 }
 starGeo.setAttribute('position',new THREE.Float32BufferAttribute(starVerts,3));
-scene.add(new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xffffff,size:0.15})));
+starGeo.setAttribute('color',new THREE.Float32BufferAttribute(starColors,3));
+scene.add(new THREE.Points(starGeo,new THREE.PointsMaterial({size:0.18,vertexColors:true,transparent:true,opacity:0.9})));
+
+// Moon sphere
+const moonMesh=new THREE.Mesh(new THREE.SphereGeometry(3,16,16),new THREE.MeshBasicMaterial({color:0xeeeeff}));
+moonMesh.position.set(-80,90,40);
+scene.add(moonMesh);
+const moonGlow=new THREE.PointLight(0xaabbff,0.4,200);
+moonGlow.position.copy(moonMesh.position);
+scene.add(moonGlow);
+
+// Void — glowing abyss below islands
+const voidPlane=new THREE.Mesh(new THREE.PlaneGeometry(500,500),new THREE.MeshBasicMaterial({color:0x0a0018,transparent:true,opacity:0.98}));
+voidPlane.rotation.x=-Math.PI/2;
+voidPlane.position.y=-22;
+scene.add(voidPlane);
+const voidGlow=new THREE.PointLight(0x330066,3.0,35);
+voidGlow.position.set(0,-6,0);
+scene.add(voidGlow);
 
 // ══════════════════════════════════════════
 //  BLOCK WORLD
@@ -214,19 +262,29 @@ const ISLE=[
 const bedHP=[4,4,4,4];
 const bedMeshes=[];
 
-function addIslandPlatform(cx,cz,w,d,color){
-  // Visual mesh
-  const geo=new THREE.BoxGeometry(w,0.5,d);
-  const mat=new THREE.MeshLambertMaterial({color});
-  const mesh=new THREE.Mesh(geo,mat);
-  mesh.position.set(cx,-0.25,cz);
-  mesh.receiveShadow=true;
-  mesh.castShadow=true;
-  scene.add(mesh);
-  // Edge highlight
-  const edgeGeo=new THREE.EdgesGeometry(geo);
-  const edgeMat=new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:0.15});
-  mesh.add(new THREE.LineSegments(edgeGeo,edgeMat));
+function addIslandPlatform(cx,cz,w,d,topColor){
+  // Stone body (hangs below, slightly wider for overhang feel)
+  const stoneMat=new THREE.MeshLambertMaterial({color:0x555566});
+  const stoneGeo=new THREE.BoxGeometry(w+1.4,2.0,d+1.4);
+  const stoneMesh=new THREE.Mesh(stoneGeo,stoneMat);
+  stoneMesh.position.set(cx,-1.0,cz);
+  stoneMesh.receiveShadow=true;stoneMesh.castShadow=true;
+  scene.add(stoneMesh);
+  // Bottom trim (darker, slightly wider ledge)
+  const trimMat=new THREE.MeshLambertMaterial({color:0x333344});
+  const trimGeo=new THREE.BoxGeometry(w+2.0,0.3,d+2.0);
+  const trimMesh=new THREE.Mesh(trimGeo,trimMat);
+  trimMesh.position.set(cx,-2.15,cz);
+  scene.add(trimMesh);
+  // Colored top grass layer
+  const grassMat=new THREE.MeshLambertMaterial({color:topColor});
+  const grassGeo=new THREE.BoxGeometry(w,0.35,d);
+  const grassMesh=new THREE.Mesh(grassGeo,grassMat);
+  grassMesh.position.set(cx,0.175,cz);
+  grassMesh.receiveShadow=true;grassMesh.castShadow=true;
+  scene.add(grassMesh);
+  // Subtle edge on grass
+  grassMesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(grassGeo),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:0.12})));
   // Collision blocks
   for(let bx=cx-Math.floor(w/2);bx<=cx+Math.floor(w/2);bx++){
     for(let bz=cz-Math.floor(d/2);bz<=cz+Math.floor(d/2);bz++){
@@ -237,48 +295,97 @@ function addIslandPlatform(cx,cz,w,d,color){
 
 function addBed(team){
   const s=ISLE[team];
-  const geo=new THREE.BoxGeometry(1.8,0.5,0.9);
-  const mat=new THREE.MeshLambertMaterial({color:TEAM_COLOR_HEX[team]});
-  const mesh=new THREE.Mesh(geo,mat);
-  mesh.position.set(s.bed.x,0.25,s.bed.z);
-  mesh.castShadow=true;
-  scene.add(mesh);
-  // Posts
-  for(const [dx,dz] of [[-0.7,0],[0.7,0]]){
-    const p=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.7,0.15),mat);
-    p.position.set(s.bed.x+dx,0.6,s.bed.z);
-    scene.add(p);
+  const col=TEAM_COLOR_HEX[team];
+  const grp=new THREE.Group();
+  grp.position.set(s.bed.x,0,s.bed.z);
+  // Wood frame
+  const wood=new THREE.MeshLambertMaterial({color:0x4a2e10});
+  const frame=new THREE.Mesh(new THREE.BoxGeometry(2.0,0.2,1.0),wood);
+  frame.position.y=0.1;grp.add(frame);
+  // Legs
+  for(const [lx,lz] of [[-0.85,-0.4],[-0.85,0.4],[0.85,-0.4],[0.85,0.4]]){
+    const leg=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.25,0.1),wood);
+    leg.position.set(lx,-0.12,lz);grp.add(leg);
   }
-  bedMeshes[team]=mesh;
-  blockMap.set(bk(s.bed.x,0,s.bed.z),BTYPE.BED); // collision marker
+  // Mattress
+  const mattMat=new THREE.MeshLambertMaterial({color:0xf5ecd5});
+  const matt=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.2,0.9),mattMat);
+  matt.position.y=0.3;grp.add(matt);
+  // Blanket (team colour, covers foot half)
+  const blanketMat=new THREE.MeshLambertMaterial({color:col});
+  const blanket=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.12,0.88),blanketMat);
+  blanket.position.set(0.35,0.42,0);grp.add(blanket);
+  // Pillow
+  const pillowMat=new THREE.MeshLambertMaterial({color:0xffffff});
+  const pillow=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.1,0.62),pillowMat);
+  pillow.position.set(-0.6,0.42,0);grp.add(pillow);
+  // Headboard
+  const hbMat=new THREE.MeshLambertMaterial({color:col});
+  const hb=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.85,1.0),hbMat);
+  hb.position.set(-0.92,0.42,0);grp.add(hb);
+  // Footboard (shorter)
+  const fb=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.42,1.0),hbMat);
+  fb.position.set(0.92,0.21,0);grp.add(fb);
+  grp.castShadow=true;
+  scene.add(grp);
+  // Soft glow under bed
+  const glow=new THREE.PointLight(col,1.5,4.5);
+  glow.position.set(s.bed.x,0.3,s.bed.z);
+  scene.add(glow);
+  grp._glow=glow;
+  bedMeshes[team]=grp;
+  blockMap.set(bk(s.bed.x,0,s.bed.z),BTYPE.BED);
 }
 
 function addShop(x,z){
-  const mat=new THREE.MeshLambertMaterial({color:0xffee99});
-  const body=new THREE.Mesh(new THREE.BoxGeometry(0.8,1.5,0.5),mat);
-  body.position.set(x,0.75,z);
-  scene.add(body);
-  const head=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.7,0.7),new THREE.MeshLambertMaterial({color:0xffddaa}));
-  head.position.set(x,1.85,z);
-  scene.add(head);
-  // Sign
-  const sign=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.5,0.1),new THREE.MeshLambertMaterial({color:0xaa8833}));
-  sign.position.set(x,2.5,z-0.3);
-  scene.add(sign);
+  // Villager robe
+  const robeMat=new THREE.MeshLambertMaterial({color:0x3d6e3d});
+  const robe=new THREE.Mesh(new THREE.BoxGeometry(0.72,1.1,0.5),robeMat);
+  robe.position.set(x,0.55,z);robe.castShadow=true;scene.add(robe);
+  // Apron
+  const apron=new THREE.Mesh(new THREE.BoxGeometry(0.65,0.6,0.52),new THREE.MeshLambertMaterial({color:0x8b5e2a}));
+  apron.position.set(x,0.3,z);scene.add(apron);
+  // Skin
+  const skinMat=new THREE.MeshLambertMaterial({color:0xf5cfa0});
+  // Head
+  const head=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.62,0.62),skinMat);
+  head.position.set(x,1.41,z);head.castShadow=true;scene.add(head);
+  // Nose
+  const nose=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.14,0.18),skinMat);
+  nose.position.set(x,1.38,z-0.36);scene.add(nose);
+  // Hat
+  const hatMat=new THREE.MeshLambertMaterial({color:0x222233});
+  const hat=new THREE.Mesh(new THREE.BoxGeometry(0.68,0.22,0.68),hatMat);
+  hat.position.set(x,1.83,z);scene.add(hat);
+  // Sign post
+  const postMat=new THREE.MeshLambertMaterial({color:0x5c3a1e});
+  const post=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,1.6,6),postMat);
+  post.position.set(x,2.5,z-0.35);scene.add(post);
+  // Sign board
+  const signMat=new THREE.MeshLambertMaterial({color:0xddaa33,emissive:0xddaa33,emissiveIntensity:0.25});
+  const sign=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.55,0.1),signMat);
+  sign.position.set(x,3.3,z-0.35);scene.add(sign);
+  // Sign glow
+  const sLight=new THREE.PointLight(0xffdd66,0.6,3.5);
+  sLight.position.set(x,3.3,z-0.5);scene.add(sLight);
 }
 
 function addGenerator(x,z,type){
-  const colors={iron:0xaaaaaa,gold:0xffcc00,dia:0x44ccff,emer:0x44ff88};
-  const col=colors[type]||0xaaaaaa;
-  // Pad
-  const pad=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.1,8),new THREE.MeshLambertMaterial({color:col,emissive:col,emissiveIntensity:0.5}));
-  pad.position.set(x,0.05,z);
-  scene.add(pad);
+  const colors={iron:0xbbbbbb,gold:0xffcc00,dia:0x44ccff,emer:0x44ff88};
+  const col=colors[type]||0xbbbbbb;
+  // Base pad
+  const pad=new THREE.Mesh(new THREE.CylinderGeometry(0.58,0.58,0.12,12),new THREE.MeshLambertMaterial({color:col,emissive:col,emissiveIntensity:0.4}));
+  pad.position.set(x,0.06,z);scene.add(pad);
+  // Outer ring
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(0.62,0.05,8,24),new THREE.MeshBasicMaterial({color:col}));
+  ring.rotation.x=Math.PI/2;ring.position.set(x,0.1,z);scene.add(ring);
+  // Spinning crystal (octahedron)
+  const crystal=new THREE.Mesh(new THREE.OctahedronGeometry(0.22),new THREE.MeshLambertMaterial({color:col,emissive:col,emissiveIntensity:1.0,transparent:true,opacity:0.92}));
+  crystal.position.set(x,0.7,z);scene.add(crystal);
   // Point light
-  const light=new THREE.PointLight(col,0.8,4);
-  light.position.set(x,0.5,z);
-  scene.add(light);
-  generators.push({x,z,type,light,timer:0,pad});
+  const light=new THREE.PointLight(col,1.2,5);
+  light.position.set(x,0.6,z);scene.add(light);
+  generators.push({x,z,type,light,timer:0,pad,crystal,ring});
 }
 
 const generators=[];
@@ -287,7 +394,7 @@ function buildMap(){
   // Team islands
   for(let i=0;i<4;i++){
     const s=ISLE[i];
-    addIslandPlatform(s.cx,s.cz,s.size*2+1,s.size*2+1,TEAM_COLOR_HEX[i]*(0.5)+0x111111);
+    addIslandPlatform(s.cx,s.cz,s.size*2+1,s.size*2+1,TEAM_COLOR_HEX[i]);
     addBed(i);
     addShop(s.shop.x,s.shop.z);
     addGenerator(s.iron.x,s.iron.z,'iron');
@@ -296,11 +403,11 @@ function buildMap(){
   // Diamond islands
   const diaIsles=[{cx:0,cz:-16},{cx:0,cz:16},{cx:-24,cz:0},{cx:24,cz:0}];
   for(const d of diaIsles){
-    addIslandPlatform(d.cx,d.cz,7,5,0x334455);
+    addIslandPlatform(d.cx,d.cz,7,5,0x1a4466);
     addGenerator(d.cx,d.cz,'dia');
   }
   // Center (emerald)
-  addIslandPlatform(0,0,9,9,0x224433);
+  addIslandPlatform(0,0,9,9,0x1a5533);
   addGenerator(-1,0,'emer');
   addGenerator(1,0,'emer');
 }
@@ -332,9 +439,12 @@ function updateGens(dt){
       g.timer=0;
       spawnOrb(g.x,g.z,g.type);
     }
-    // Pulse emissive
-    g.pad.material.emissiveIntensity=0.3+Math.sin(Date.now()/400)*0.3;
-    g.light.intensity=0.5+Math.sin(Date.now()/300)*0.3;
+    // Pulse + spin
+    const pulse=0.5+Math.sin(Date.now()/500)*0.4;
+    g.pad.material.emissiveIntensity=pulse*0.6;
+    g.light.intensity=0.7+Math.sin(Date.now()/300)*0.5;
+    if(g.crystal){g.crystal.rotation.y+=0.04;g.crystal.rotation.x+=0.02;g.crystal.position.y=0.65+Math.sin(Date.now()/700)*0.1;}
+    if(g.ring){g.ring.rotation.z+=0.01;}
   }
   // Update orbs
   for(let i=orbs.length-1;i>=0;i--){
@@ -601,7 +711,7 @@ function damage床(team,attacker){
   bedHP[team]--;
   addKillFeed(TEAM_NAME[attacker.team]+' damaged '+TEAM_NAME[team]+'\'s bed! ('+bedHP[team]+' HP)');
   if(bedHP[team]<=0){
-    if(bedMeshes[team]){scene.remove(bedMeshes[team]);bedMeshes[team]=null;}
+    if(bedMeshes[team]){if(bedMeshes[team]._glow)scene.remove(bedMeshes[team]._glow);scene.remove(bedMeshes[team]);bedMeshes[team]=null;}
     blockMap.delete(bk(ISLE[team].bed.x,0,ISLE[team].bed.z));
     addKillFeed('💥 '+TEAM_NAME[team]+' BED DESTROYED!');
     const p2=players[team];
