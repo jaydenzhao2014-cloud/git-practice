@@ -549,7 +549,38 @@
             width: 100%;
             height: 100%;
             display: block;
+            transition: transform 0.6s cubic-bezier(0.34,1.56,0.64,1);
+            transform-origin: 50% 60%;
         }
+
+        #game {
+            perspective: 900px;
+            perspective-origin: 50% 30%;
+        }
+
+        #game.mode-25d #gameCanvas {
+            transform: rotateX(22deg) scale(1.12);
+        }
+
+        #perspective-btn {
+            position: fixed;
+            top: 12px;
+            right: 160px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            color: white;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(124,58,237,0.5);
+            transition: all 0.2s;
+            display: none;
+        }
+        #perspective-btn:hover { opacity: 0.88; transform: scale(1.05); }
+        #perspective-btn.on { background: linear-gradient(135deg, #10b981, #0891b2); box-shadow: 0 4px 14px rgba(16,185,129,0.5); }
 
         /* SOCIAL LOBBY */
         .btn-social {
@@ -1791,6 +1822,7 @@
         <canvas id="gameCanvas"></canvas>
         <div class="controls-hint">WASD to move | 1-9 to switch guns | Click to shoot | B to build | TAB for leaderboard | Wipe out all enemies to win a set! Most sets out of 10 wins!</div>
     </div>
+    <button id="perspective-btn" onclick="toggle25D()" title="Toggle 2.5D perspective view">🎮 2.5D VIEW</button>
 
     <!-- VICTORY SCREEN -->
     <div id="victory" class="screen">
@@ -9096,6 +9128,30 @@
             const btn = document.getElementById('muteBtn');
             if (btn) btn.textContent = musicMuted ? '🔇' : '🎵';
         });
+        // ── 2.5D Perspective Toggle ──
+        let _25dOn = false;
+        function toggle25D() {
+            _25dOn = !_25dOn;
+            const gameEl = document.getElementById('game');
+            const btn = document.getElementById('perspective-btn');
+            if (_25dOn) {
+                gameEl.classList.add('mode-25d');
+                btn.textContent = '🎮 NORMAL VIEW';
+                btn.classList.add('on');
+            } else {
+                gameEl.classList.remove('mode-25d');
+                btn.textContent = '🎮 2.5D VIEW';
+                btn.classList.remove('on');
+            }
+        }
+
+        // Show the 2.5D button whenever the game screen is active
+        const _gameScreen = document.getElementById('game');
+        const _25dBtn = document.getElementById('perspective-btn');
+        const _screenObserver = new MutationObserver(() => {
+            _25dBtn.style.display = _gameScreen.classList.contains('active') ? 'block' : 'none';
+        });
+        _screenObserver.observe(_gameScreen, { attributes: true, attributeFilter: ['class'] });
     </script>
 
     <!-- Ad Overlay -->
